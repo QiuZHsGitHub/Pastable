@@ -1,0 +1,65 @@
+/* 
+  Localizable.strings
+  Pastable
+*/
+
+// Category
+"category.all" = "全部";
+"category.text" = "文本";
+"category.code" = "代码片段";
+"category.links" = "链接";
+"category.link" = "链接";
+"category.image" = "图片";
+"category.file" = "文件";
+"category.color" = "颜色";
+"category.others" = "其他";
+
+// Search
+"search.placeholder" = "搜索";
+
+// Menu
+"menu.clear_history" = "清空历史";
+"menu.settings" = "偏好设置";
+"menu.about" = "关于";
+"menu.quit" = "退出";
+
+// Settings - General
+"settings.general.title" = "常规";
+"settings.general.launch_at_login" = "登录时启动";
+"settings.general.check_updates" = "检查更新";
+"settings.general.behavior" = "行为";
+"settings.general.auto_paste" = "自动粘贴";
+"settings.general.remove_formatting" = "移除格式";
+"settings.general.play_sounds" = "播放音效";
+"settings.general.shortcuts" = "快捷键";
+"settings.shortcuts.title" = "快捷键";
+"settings.general.popup_window" = "弹出窗口";
+"settings.general.search_mode" = "搜索模式";
+"settings.general.search_mode.exact" = "精确搜索";
+"settings.general.search_mode.fuzzy" = "模糊搜索";
+
+// Settings - Storage
+"settings.storage.title" = "存储";
+"settings.storage.types" = "存储类型";
+"settings.storage.save_text" = "保存文本";
+"settings.storage.save_images" = "保存图片";
+"settings.storage.save_files" = "保存文件";
+"settings.storage.capacity" = "容量";
+"settings.storage.history_count" = "历史记录最大数量";
+"settings.storage.clear_all" = "清空所有历史记录";
+"settings.storage.retention" = "保留时间";
+
+// Settings - Storage - Retention Options
+"24 hours" = "24 小时";
+"7 days" = "7 天";
+"1 month" = "1 个月";
+"3 months" = "3 个月";
+"6 months" = "6 个月";
+"1 year" = "1 年";
+"Unlimited" = "无限制";
+
+// Settings - About
+"settings.about.title" = "关于";
+"settings.about.description" = "macOS 剪贴板管理工具。";
+
+"settings.about.copyright" = "版权所有 © 2026 NullPointer";

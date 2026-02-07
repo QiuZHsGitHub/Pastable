@@ -1,0 +1,61 @@
+/* 
+  Localizable.strings
+  Pastable
+*/
+
+// Category
+"category.all" = "全部";
+"category.text" = "文字";
+"category.code" = "程式碼片段";
+"category.links" = "連結";
+"category.others" = "其他";
+
+// Search
+"search.placeholder" = "搜尋";
+
+// Menu
+"menu.clear_history" = "清除紀錄";
+"menu.settings" = "設定";
+"menu.about" = "關於";
+"menu.quit" = "退出";
+
+// Settings - General
+"settings.general.title" = "一般";
+"settings.general.launch_at_login" = "登入時啟動";
+"settings.general.check_updates" = "檢查更新";
+"settings.general.behavior" = "行為";
+"settings.general.auto_paste" = "自動貼上";
+"settings.general.remove_formatting" = "移除格式";
+"settings.general.play_sounds" = "播放音效";
+"settings.general.shortcuts" = "快速鍵";
+"settings.shortcuts.title" = "快速鍵";
+"settings.general.popup_window" = "彈出視窗";
+"settings.general.search_mode" = "搜尋模式";
+"settings.general.search_mode.exact" = "精確搜尋";
+"settings.general.search_mode.fuzzy" = "模糊搜尋";
+
+// Settings - Storage
+"settings.storage.title" = "儲存";
+"settings.storage.types" = "儲存類型";
+"settings.storage.save_text" = "儲存文字";
+"settings.storage.save_images" = "儲存圖片";
+"settings.storage.save_files" = "儲存檔案";
+"settings.storage.capacity" = "容量";
+"settings.storage.history_count" = "紀錄最大數量";
+"settings.storage.clear_all" = "清除所有紀錄";
+"settings.storage.retention" = "保留時間";
+
+// Settings - Storage - Retention Options
+"24 hours" = "24 小時";
+"7 days" = "7 天";
+"1 month" = "1 個月";
+"3 months" = "3 個月";
+"6 months" = "6 個月";
+"1 year" = "1 年";
+"Unlimited" = "無限制";
+
+// Settings - About
+"settings.about.title" = "關於";
+"settings.about.description" = "macOS 剪貼簿管理工具。";
+
+"settings.about.copyright" = "版權所有 © 2026 NullPointer";

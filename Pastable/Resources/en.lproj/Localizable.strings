@@ -1,0 +1,65 @@
+/* 
+  Localizable.strings
+  Pastable
+*/
+
+// Category
+"category.all" = "All";
+"category.text" = "Text";
+"category.code" = "Code Snippets";
+"category.links" = "Links";
+"category.link" = "Link";
+"category.image" = "Images";
+"category.file" = "Files";
+"category.color" = "Colors";
+"category.others" = "Others";
+
+// Search
+"search.placeholder" = "Search";
+
+// Menu
+"menu.clear_history" = "Clear History";
+"menu.settings" = "Settings";
+"menu.about" = "About";
+"menu.quit" = "Quit";
+
+// Settings - General
+"settings.general.title" = "General";
+"settings.general.launch_at_login" = "Launch at Login";
+"settings.general.check_updates" = "Check for Updates";
+"settings.general.behavior" = "Behavior";
+"settings.general.auto_paste" = "Auto Paste";
+"settings.general.remove_formatting" = "Remove Formatting";
+"settings.general.play_sounds" = "Play Sounds";
+"settings.general.shortcuts" = "Shortcuts";
+"settings.shortcuts.title" = "Shortcuts";
+"settings.general.popup_window" = "Popup Window";
+"settings.general.search_mode" = "Search Mode";
+"settings.general.search_mode.exact" = "Exact Match";
+"settings.general.search_mode.fuzzy" = "Fuzzy Match";
+
+// Settings - Storage
+"settings.storage.title" = "Storage";
+"settings.storage.types" = "Types";
+"settings.storage.save_text" = "Save Text";
+"settings.storage.save_images" = "Save Images";
+"settings.storage.save_files" = "Save Files";
+"settings.storage.capacity" = "Capacity";
+"settings.storage.history_count" = "Max History Items";
+"settings.storage.clear_all" = "Clear All History";
+"settings.storage.retention" = "Retention";
+
+// Settings - Storage - Retention Options
+"24 hours" = "24 Hours";
+"7 days" = "7 Days";
+"1 month" = "1 Month";
+"3 months" = "3 Months";
+"6 months" = "6 Months";
+"1 year" = "1 Year";
+"Unlimited" = "Unlimited";
+
+// Settings - About
+"settings.about.title" = "About";
+"settings.about.description" = "macOS Clipboard Manager";
+
+"settings.about.copyright" = "Copyright © 2026 NullPointer";

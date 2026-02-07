@@ -1,17 +1,14 @@
-//
-//  PastableApp.swift
-//  Pastable
-//
-//  Created by qzh on 2025/12/29.
-//
-
 import SwiftUI
 
 @main
 struct PastableApp: App {
-    var body: some Scene {
-        WindowGroup {
-            ContentView()
-        }
+  @NSApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
+  
+  var body: some Scene {
+    Settings {
+      SettingsView()
+        .modelContainer(Storage.shared.container)
+        .preferredColorScheme(.dark)
     }
+  }
 }

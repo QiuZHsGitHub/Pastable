@@ -6,6 +6,13 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		2FA3317A2F084076006CF86C /* Defaults in Frameworks */ = {isa = PBXBuildFile; productRef = 2FA331792F084076006CF86C /* Defaults */; };
+		2FA3317C2F084076006CF86C /* DefaultsMacros in Frameworks */ = {isa = PBXBuildFile; productRef = 2FA3317B2F084076006CF86C /* DefaultsMacros */; };
+		2FA3317F2F08408B006CF86C /* Sauce in Frameworks */ = {isa = PBXBuildFile; productRef = 2FA3317E2F08408B006CF86C /* Sauce */; };
+		2FA331822F084099006CF86C /* KeyboardShortcuts in Frameworks */ = {isa = PBXBuildFile; productRef = 2FA331812F084099006CF86C /* KeyboardShortcuts */; };
+/* End PBXBuildFile section */
+
 /* Begin PBXFileReference section */
 		2F281D9D2F02CF6300D0A090 /* Pastable.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Pastable.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
@@ -23,6 +30,10 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				2FA3317F2F08408B006CF86C /* Sauce in Frameworks */,
+				2FA331822F084099006CF86C /* KeyboardShortcuts in Frameworks */,
+				2FA3317A2F084076006CF86C /* Defaults in Frameworks */,
+				2FA3317C2F084076006CF86C /* DefaultsMacros in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -65,6 +76,10 @@
 			);
 			name = Pastable;
 			packageProductDependencies = (
+				2FA331792F084076006CF86C /* Defaults */,
+				2FA3317B2F084076006CF86C /* DefaultsMacros */,
+				2FA3317E2F08408B006CF86C /* Sauce */,
+				2FA331812F084099006CF86C /* KeyboardShortcuts */,
 			);
 			productName = Pastable;
 			productReference = 2F281D9D2F02CF6300D0A090 /* Pastable.app */;
@@ -91,9 +106,16 @@
 			knownRegions = (
 				en,
 				Base,
+				"zh-Hans",
+				"zh-Hant",
 			);
 			mainGroup = 2F281D942F02CF6300D0A090;
 			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				2FA331782F084076006CF86C /* XCRemoteSwiftPackageReference "Defaults" */,
+				2FA3317D2F08408B006CF86C /* XCRemoteSwiftPackageReference "Sauce" */,
+				2FA331802F084099006CF86C /* XCRemoteSwiftPackageReference "KeyboardShortcuts" */,
+			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 2F281D9E2F02CF6300D0A090 /* Products */;
 			projectDirPath = "";
@@ -321,6 +343,56 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		2FA331782F084076006CF86C /* XCRemoteSwiftPackageReference "Defaults" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/sindresorhus/Defaults";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 9.0.6;
+			};
+		};
+		2FA3317D2F08408B006CF86C /* XCRemoteSwiftPackageReference "Sauce" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/Clipy/Sauce";
+			requirement = {
+				branch = master;
+				kind = branch;
+			};
+		};
+		2FA331802F084099006CF86C /* XCRemoteSwiftPackageReference "KeyboardShortcuts" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/sindresorhus/KeyboardShortcuts";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 2.4.0;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		2FA331792F084076006CF86C /* Defaults */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 2FA331782F084076006CF86C /* XCRemoteSwiftPackageReference "Defaults" */;
+			productName = Defaults;
+		};
+		2FA3317B2F084076006CF86C /* DefaultsMacros */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 2FA331782F084076006CF86C /* XCRemoteSwiftPackageReference "Defaults" */;
+			productName = DefaultsMacros;
+		};
+		2FA3317E2F08408B006CF86C /* Sauce */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 2FA3317D2F08408B006CF86C /* XCRemoteSwiftPackageReference "Sauce" */;
+			productName = Sauce;
+		};
+		2FA331812F084099006CF86C /* KeyboardShortcuts */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 2FA331802F084099006CF86C /* XCRemoteSwiftPackageReference "KeyboardShortcuts" */;
+			productName = KeyboardShortcuts;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = 2F281D952F02CF6300D0A090 /* Project object */;
 }
