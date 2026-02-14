@@ -57,5 +57,6 @@
 // Settings - About
 "settings.about.title" = "關於";
 "settings.about.description" = "macOS 剪貼簿管理工具。";
+"settings.about.contact" = "聯絡信箱";
 
 "settings.about.copyright" = "版權所有 © 2026 NullPointer";

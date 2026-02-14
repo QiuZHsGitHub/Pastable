@@ -184,7 +184,7 @@ struct CardCell: View {
       // 1. Load File Thumbnail
       if isImageFile, let url = fileURL {
         Task.detached(priority: .userInitiated) {
-          let thumb = self.imageCache.thumbnail(forURL: url) { HistoryItem.loadThumbnail(for: $0) }
+            let thumb = await self.imageCache.thumbnail(forURL: url) { HistoryItem.loadThumbnail(for: $0) }
           await MainActor.run {
             guard item.persistentModelID == itemId else { return }
             fileThumbnail = thumb
@@ -196,7 +196,7 @@ struct CardCell: View {
       if let bundleId = appBundleId,
          let path = NSWorkspace.shared.urlForApplication(withBundleIdentifier: bundleId)?.path {
         Task.detached(priority: .userInitiated) {
-          let icon = self.imageCache.appIcon(forBundleId: bundleId, path: path)
+            let icon = await self.imageCache.appIcon(forBundleId: bundleId, path: path)
           var adaptive: Color? = nil
           var adaptiveHexToCache: String? = nil
           

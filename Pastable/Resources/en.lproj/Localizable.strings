@@ -61,5 +61,6 @@
 // Settings - About
 "settings.about.title" = "About";
 "settings.about.description" = "macOS Clipboard Manager";
+"settings.about.contact" = "Contact";
 
 "settings.about.copyright" = "Copyright © 2026 NullPointer";

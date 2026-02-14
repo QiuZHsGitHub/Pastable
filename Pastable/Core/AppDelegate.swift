@@ -108,8 +108,17 @@ class AppDelegate: NSObject, NSApplicationDelegate {
   @MainActor private func handleOutsideClick() {
     guard panel.isVisible else { return }
     let mouseLocation = NSEvent.mouseLocation
-    if !panel.frame.contains(mouseLocation) {
+    if !panel.frame.contains(mouseLocation) && !isPointInAnyAppWindow(mouseLocation) {
       closePanel()
     }
+  }
+  
+  private func isPointInAnyAppWindow(_ point: NSPoint) -> Bool {
+    for window in NSApp.windows where window.isVisible {
+      if window.frame.contains(point) {
+        return true
+      }
+    }
+    return false
   }
 }
