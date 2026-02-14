@@ -4,6 +4,7 @@ struct SearchBar: View {
   @Binding var text: String
   var hasHistory: Bool = false
   var onClearHistory: (() -> Void)?
+  @Environment(\.openSettings) private var openSettings
   
   @State private var showMoreMenu = false
   @FocusState private var isTextFieldFocused: Bool
@@ -60,13 +61,10 @@ struct SearchBar: View {
         MoreMenuView(
           onClearHistory: hasHistory ? onClearHistory : nil,
           onSettings: {
-            NSApp.activate(ignoringOtherApps: true)
-            NSApp.sendAction(Selector(("showSettingsWindow:")), to: nil, from: nil)
+            openSettingsWindow(targetTab: nil)
           },
           onAbout: {
-            AppState.shared.settingsTab = .about
-            NSApp.activate(ignoringOtherApps: true)
-            NSApp.sendAction(Selector(("showSettingsWindow:")), to: nil, from: nil)
+            openSettingsWindow(targetTab: .about)
           },
           onQuit: {
             NSApp.terminate(nil)
@@ -97,6 +95,23 @@ struct SearchBar: View {
         DispatchQueue.main.async {
           AppState.shared.searchFocusRequest = .none
         }
+      }
+    }
+  }
+
+  private func openSettingsWindow(targetTab: AppState.SettingsTab?) {
+    if let targetTab {
+      AppState.shared.settingsTab = targetTab
+    }
+    NSApp.activate(ignoringOtherApps: true)
+    if #available(macOS 14.0, *) {
+      openSettings()
+    } else {
+      NSApp.sendAction(Selector(("showSettingsWindow:")), to: nil, from: nil)
+    }
+    if let targetTab {
+      DispatchQueue.main.async {
+        AppState.shared.settingsTab = targetTab
       }
     }
   }

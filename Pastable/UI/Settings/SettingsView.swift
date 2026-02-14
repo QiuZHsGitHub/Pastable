@@ -1,22 +1,27 @@
 import SwiftUI
 
 struct SettingsView: View {
+  @ObservedObject private var appState = AppState.shared
+
   var body: some View {
-    TabView {
+    TabView(selection: $appState.settingsTab) {
       GeneralSettingsView()
         .tabItem {
           Label("settings.general.title", systemImage: "gear")
         }
+        .tag(AppState.SettingsTab.general)
       
       StorageSettingsView()
         .tabItem {
           Label("settings.storage.title", systemImage: "externaldrive")
         }
+        .tag(AppState.SettingsTab.storage)
       
       ShortcutsSettingsView()
         .tabItem {
           Label("settings.shortcuts.title", systemImage: "command")
         }
+        .tag(AppState.SettingsTab.shortcuts)
       
 
 
@@ -24,6 +29,7 @@ struct SettingsView: View {
         .tabItem {
           Label("settings.about.title", systemImage: "info.circle")
         }
+        .tag(AppState.SettingsTab.about)
     }
     .frame(width: 450, height: 300)
     .background(VisualEffectView(material: .sidebar, blendingMode: .behindWindow))
