@@ -101,4 +101,4 @@ Pastable/
 
 ## 许可证
 
-待补充。
+本项目基于 [MIT License](./LICENSE) 开源。

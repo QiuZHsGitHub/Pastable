@@ -101,4 +101,4 @@ Pastable/
 
 ## License
 
-TBD.
+This project is open-sourced under the [MIT License](./LICENSE).
