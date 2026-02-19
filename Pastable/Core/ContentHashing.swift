@@ -14,7 +14,7 @@ final class ContentHashing {
         
         // For RTF content
         if let rtf = item.rtfData {
-            return "rtf:\(hashData(rtf))
+            return "rtf:\(hashData(rtf))"
         }
         
         // For images, use MD5 for better collision resistance
@@ -22,14 +22,14 @@ final class ContentHashing {
             return "image:\(hashData(imageData))"
         }
         
-        // For URLs/links
-        if let url = item.url {
-            return "url:\(hashText(url.absoluteString))"
+        // For files
+        if !item.fileURLs.isEmpty {
+            return "file:\(hashFileURLs(item.fileURLs))"
         }
         
-        // For files
-        if let fileURL = item.fileURL {
-            return "file:\(hashText(fileURL.path))"
+        // For links (detected from previewableText)
+        if item.isLink {
+            return "link:\(hashText(item.previewableText))"
         }
         
         // Fallback: hash the first non-empty content
@@ -57,7 +57,7 @@ final class ContentHashing {
         
         for byte in data {
             hash ^= UInt64(byte)
-            hash &=* fnvPrime
+            hash = hash &* fnvPrime
         }
         
         return String(format: "%016llx", hash)
@@ -76,20 +76,20 @@ final class ContentHashing {
     /// For performance, we hash the first 4096 bytes and the last 4096 bytes
     static func hashImageData(_ data: Data) -> String {
         let sampleSize = min(4096, data.count)
-        var hashData = Data()
+        var hashSample = Data()
         
         // First 4KB
         if data.count > 0 {
-            hashData.append(data[0..<min(sampleSize, data.count)])
+            hashSample.append(data[0..<min(sampleSize, data.count)])
         }
         
         // Last 4KB
         if data.count > sampleSize {
             let start = max(0, data.count - sampleSize)
-            hashData.append(data[start..<data.count])
+            hashSample.append(data[start..<data.count])
         }
         
-        return hashData(hashData)
+        return hashData(hashSample)
     }
     
     /// Hash file URLs (for file items)

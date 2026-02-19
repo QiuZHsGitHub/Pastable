@@ -1,5 +1,26 @@
 import Foundation
 
+/// Storage-specific errors
+enum StorageError: LocalizedError {
+    case containerInitializationFailed(underlying: Error)
+    case fetchFailed(underlying: Error)
+    case cleanupFailed(underlying: Error)
+    case initializationFailed(underlying: Error)
+    
+    var errorDescription: String? {
+        switch self {
+        case .containerInitializationFailed(let error):
+            return "无法初始化数据库：\(error.localizedDescription)"
+        case .fetchFailed(let error):
+            return "获取数据失败：\(error.localizedDescription)"
+        case .cleanupFailed(let error):
+            return "清理数据失败：\(error.localizedDescription)"
+        case .initializationFailed(let error):
+            return "初始化失败：\(error.localizedDescription)"
+        }
+    }
+}
+
 /// Application-specific errors with user-friendly descriptions
 enum AppError: LocalizedError {
     case storageInitializationFailed(underlying: Error)
@@ -61,6 +82,7 @@ enum ClipboardError: LocalizedError {
     case pasteboardUnavailable
     case invalidContentType
     case dataExtractionFailed(reason: String)
+    case noPlainTextToPaste
     
     var errorDescription: String? {
         switch self {
@@ -70,6 +92,8 @@ enum ClipboardError: LocalizedError {
             return "不支持的内容类型。"
         case .dataExtractionFailed(let reason):
             return "提取数据失败：\(reason)"
+        case .noPlainTextToPaste:
+            return "无法获取纯文本用于粘贴。"
         }
     }
     
@@ -81,6 +105,8 @@ enum ClipboardError: LocalizedError {
             return "复制文本、图片或链接。"
         case .dataExtractionFailed:
             return "尝试复制不同的内容。"
+        case .noPlainTextToPaste:
+            return "复制文本内容后再试。"
         }
     }
 }

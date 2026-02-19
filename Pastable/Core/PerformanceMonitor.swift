@@ -8,7 +8,7 @@ final class PerformanceMonitor {
     private var startTime: CFAbsoluteTime?
     
     /// Log threshold in milliseconds (operations slower than this will be logged)
-    private let logThresholdMs: Double = 40.0
+    private let logThresholdMs: Double
     
     /// Warning threshold in milliseconds (operations slower than this will be logged as warning)
     private let warningThresholdMs: Double = 100.0

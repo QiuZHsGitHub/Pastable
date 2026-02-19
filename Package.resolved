@@ -1,0 +1,86 @@
+{
+  "pins" : [
+    {
+      "identity" : "defaults",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/sindresorhus/Defaults.git",
+      "state" : {
+        "revision" : "8192b0986611e105355a9433e99bf5c79469fbbd",
+        "version" : "9.0.6"
+      }
+    },
+    {
+      "identity" : "fuse-swift",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/krisk/fuse-swift.git",
+      "state" : {
+        "revision" : "26ba868691b2d8b7bf2b1322951eb591be70ccca",
+        "version" : "1.4.0"
+      }
+    },
+    {
+      "identity" : "keyboardshortcuts",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/sindresorhus/KeyboardShortcuts.git",
+      "state" : {
+        "revision" : "1aef85578fdd4f9eaeeb8d53b7b4fc31bf08fe27",
+        "version" : "2.4.0"
+      }
+    },
+    {
+      "identity" : "sauce",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/Clipy/Sauce.git",
+      "state" : {
+        "branch" : "master",
+        "revision" : "9c0de6c233f29d892e86dda68c2dd791aa10670c"
+      }
+    },
+    {
+      "identity" : "settings",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/sindresorhus/Settings.git",
+      "state" : {
+        "revision" : "f41475771f65379ca10852c95119a7f53f0de5a5",
+        "version" : "3.1.2"
+      }
+    },
+    {
+      "identity" : "sparkle",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/sparkle-project/Sparkle.git",
+      "state" : {
+        "revision" : "5581748cef2bae787496fe6d61139aebe0a451f6",
+        "version" : "2.8.1"
+      }
+    },
+    {
+      "identity" : "swift-log",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/apple/swift-log.git",
+      "state" : {
+        "revision" : "bbd81b6725ae874c69e9b8c8804d462356b55523",
+        "version" : "1.10.1"
+      }
+    },
+    {
+      "identity" : "swift-syntax",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/swiftlang/swift-syntax",
+      "state" : {
+        "revision" : "4799286537280063c85a32f09884cfbca301b1a1",
+        "version" : "602.0.0"
+      }
+    },
+    {
+      "identity" : "swifthexcolors",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/thii/SwiftHEXColors.git",
+      "state" : {
+        "revision" : "1f886cb20fedda14a5ac75efd09bc99c95b43a18",
+        "version" : "1.4.1"
+      }
+    }
+  ],
+  "version" : 2
+}
