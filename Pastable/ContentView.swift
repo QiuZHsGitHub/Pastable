@@ -55,12 +55,24 @@ struct ContentView: View {
     
     // 2. Move item to top (update timestamp)
     item.firstCopiedAt = Date()
+    item.lastCopiedAt = Date()
+    item.numberOfCopies += 1
+    
+    // Save the update to SwiftData
+    do {
+      try modelContext.save()
+    } catch {
+      print("Failed to save paste timestamp: \(error.localizedDescription)")
+    }
     
     // 3. Copy item to clipboard
     Clipboard.shared.copy(item)
     
-    // 3. Trigger paste action
-    Clipboard.shared.paste()
+    // 4. Wait a bit for clipboard to update, then paste
+    // This ensures the clipboard content is fully written before triggering paste
+    DispatchQueue.main.asyncAfter(deadline: .now() + 0.08) {
+      Clipboard.shared.paste()
+    }
   }
   
   private func setupKeyboardMonitor() {
