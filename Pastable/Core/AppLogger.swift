@@ -128,7 +128,7 @@ extension AppLogger {
 }
 
 // Global AppLog namespace for compatibility with existing code
-enum AppLog {
+struct AppLog {
     static let app = AppLogger.logger(for: .app)
     static let clipboard = AppLogger.logger(for: .clipboard)
     static let search = AppLogger.logger(for: .search)
