@@ -27,6 +27,10 @@ struct AppTheme {
   let panelBottom: Color
   let panelBorder: Color
 
+  // Accent (mode-aware: light vermilion on dark, deep cinnabar on light)
+  let accent: Color
+  let accentGlow: Double
+
   // Cards
   let cardBaseHex: String
   let cardBase: Color
@@ -83,55 +87,58 @@ struct AppTheme {
     self.scheme = scheme
     self.isDark = scheme == .dark
 
-    panelTop = Color(hex: isDark ? "#2B2C31" : "#EDF0F4")
-    panelMid = Color(hex: isDark ? "#26272C" : "#E4E8EE")
-    panelBottom = Color(hex: isDark ? "#151619" : "#D7DCE4")
-    panelBorder = Color(hex: isDark ? "#363941" : "#C9D1DB")
+    accent = Color(hex: isDark ? AppPalette.accentDark : AppPalette.accentLight)
+    accentGlow = isDark ? 0.24 : 0.16
 
-    cardBaseHex = isDark ? "#111214" : "#FFFFFF"
+    panelTop = Color(hex: isDark ? "#2C2A29" : "#F5F0E9")
+    panelMid = Color(hex: isDark ? "#252322" : "#EBE4DA")
+    panelBottom = Color(hex: isDark ? "#141211" : "#DDD2C4")
+    panelBorder = Color(hex: isDark ? "#3A3634" : "#CFC4B5")
+
+    cardBaseHex = isDark ? "#131110" : "#FFFDFB"
     cardBase = Color(hex: cardBaseHex)
-    cardBorder = Color(hex: isDark ? "#2D3036" : "#D8DEE7")
-    imageBorder = Color(hex: isDark ? "#34373D" : "#D3DAE3")
+    cardBorder = Color(hex: isDark ? "#302C2A" : "#DED5C8")
+    imageBorder = Color(hex: isDark ? "#383330" : "#D8CEC0")
     cardTintNormal = isDark ? 0.18 : 0.12
     cardTintSelected = isDark ? 0.24 : 0.20
 
-    textPrimary = Color(hex: isDark ? "#F3F4F6" : "#101216")
-    textBody = Color(hex: isDark ? "#D9DCE1" : "#2B3037")
-    textSecondary = Color(hex: isDark ? "#A8ADB6" : "#414750")
-    textTertiary = Color(hex: isDark ? "#8B9099" : "#515861")
-    textPlaceholder = Color(hex: isDark ? "#7E838C" : "#656D78")
+    textPrimary = Color(hex: isDark ? "#F6F1EA" : "#1B1816")
+    textBody = Color(hex: isDark ? "#DCD5CC" : "#35302B")
+    textSecondary = Color(hex: isDark ? "#ACA49B" : "#4A443D")
+    textTertiary = Color(hex: isDark ? "#8E867D" : "#5C554C")
+    textPlaceholder = Color(hex: isDark ? "#80786F" : "#6E665B")
 
-    searchBackground = Color(hex: isDark ? "#1A1C21" : "#FFFFFF")
-    searchBorder = Color(hex: isDark ? "#30333A" : "#C9D1DB")
-    searchDivider = Color(hex: isDark ? "#34373D" : "#DCE1E8")
+    searchBackground = Color(hex: isDark ? "#1B1918" : "#FFFDFB")
+    searchBorder = Color(hex: isDark ? "#332F2D" : "#CFC4B5")
+    searchDivider = Color(hex: isDark ? "#3A3532" : "#E2D9CC")
 
-    tabBackground = Color(hex: isDark ? "#1D1F24" : "#FFFFFF")
-    tabBorder = Color(hex: isDark ? "#2C2F36" : "#D3DAE3")
-    tabHoverBackground = Color(hex: isDark ? "#24262C" : "#F0F3F7")
-    tabSelectedBackground = Color(hex: isDark ? "#3A2418" : "#FFE8D6")
-    tabText = Color(hex: isDark ? "#B9BDC4" : "#3C424B")
-    tabTextSelected = Color(hex: isDark ? "#F3F4F6" : "#17191D")
+    tabBackground = Color(hex: isDark ? "#1E1B1A" : "#FFFDFB")
+    tabBorder = Color(hex: isDark ? "#2F2B29" : "#D8CEC0")
+    tabHoverBackground = Color(hex: isDark ? "#262221" : "#F3EDE5")
+    tabSelectedBackground = Color(hex: isDark ? "#3B201B" : "#FBE3DC")
+    tabText = Color(hex: isDark ? "#BDB5AC" : "#433D36")
+    tabTextSelected = Color(hex: isDark ? "#F6F1EA" : "#1B1816")
 
-    typePillBackground = Color(hex: isDark ? "#23252A" : "#EDF0F4")
-    typePillText = Color(hex: isDark ? "#C9CDD3" : "#3C424B")
+    typePillBackground = Color(hex: isDark ? "#242120" : "#F1EBE2")
+    typePillText = Color(hex: isDark ? "#CCC4BB" : "#433D36")
 
-    emptyTileBackground = Color(hex: isDark ? "#1F2126" : "#FFFFFF")
-    emptyTileBorder = Color(hex: isDark ? "#2B2E35" : "#D3DAE3")
-    emptyIcon = Color(hex: isDark ? "#8B9099" : "#555C66")
-    emptyTitle = Color(hex: isDark ? "#C9CDD3" : "#17191D")
-    emptySubtitle = Color(hex: isDark ? "#8B9099" : "#515861")
-    keycapBackground = Color(hex: isDark ? "#24262B" : "#FFFFFF")
-    keycapBorder = Color(hex: isDark ? "#34373D" : "#D3DAE3")
-    keycapText = Color(hex: isDark ? "#A8ADB6" : "#4B515B")
-    keycapLabel = Color(hex: isDark ? "#8B9099" : "#515861")
+    emptyTileBackground = Color(hex: isDark ? "#201D1C" : "#FFFDFB")
+    emptyTileBorder = Color(hex: isDark ? "#2D2927" : "#D8CEC0")
+    emptyIcon = Color(hex: isDark ? "#8E867D" : "#5C554C")
+    emptyTitle = Color(hex: isDark ? "#CCC4BB" : "#1B1816")
+    emptySubtitle = Color(hex: isDark ? "#8E867D" : "#5C554C")
+    keycapBackground = Color(hex: isDark ? "#252221" : "#FFFDFB")
+    keycapBorder = Color(hex: isDark ? "#383330" : "#D8CEC0")
+    keycapText = Color(hex: isDark ? "#ACA49B" : "#4E473F")
+    keycapLabel = Color(hex: isDark ? "#8E867D" : "#5C554C")
 
-    menuBackground = Color(hex: isDark ? "#1F2126" : "#FFFFFF")
-    menuBorder = Color(hex: isDark ? "#34373D" : "#D3DAE3")
-    menuText = Color(hex: isDark ? "#F3F4F6" : "#17191D")
-    menuIcon = Color(hex: isDark ? "#C9CDD3" : "#4B515B")
-    menuShortcut = Color(hex: isDark ? "#8B9099" : "#515861")
-    menuHover = Color(hex: isDark ? "#2A2C32" : "#F0F3F7")
-    menuSeparator = Color(hex: isDark ? "#34373D" : "#DCE1E8")
+    menuBackground = Color(hex: isDark ? "#201D1C" : "#FFFDFB")
+    menuBorder = Color(hex: isDark ? "#383330" : "#D8CEC0")
+    menuText = Color(hex: isDark ? "#F6F1EA" : "#1B1816")
+    menuIcon = Color(hex: isDark ? "#CCC4BB" : "#4E473F")
+    menuShortcut = Color(hex: isDark ? "#8E867D" : "#5C554C")
+    menuHover = Color(hex: isDark ? "#2B2725" : "#F3EDE5")
+    menuSeparator = Color(hex: isDark ? "#3A3532" : "#E2D9CC")
   }
 
   // Helpers
@@ -149,8 +156,8 @@ struct AppTheme {
   /// Solid chip behind the hex value on a color card.
   func contrastChip(on hex: String) -> Color {
     Self.luminance(hex) > 0.68
-      ? Color(hex: "#FFFFFF")
-      : Color(hex: "#111214")
+      ? Color(hex: "#FFFDFB")
+      : Color(hex: "#14110F")
   }
 
   /// Mixed tint colors are requested on every card render; memoize them.

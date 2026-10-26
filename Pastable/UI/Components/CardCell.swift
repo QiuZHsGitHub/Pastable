@@ -184,11 +184,11 @@ struct CardCell: View {
     .overlay(
       RoundedRectangle(cornerRadius: 14)
         .strokeBorder(
-          isSelected ? Color.pastableOrange : theme.cardBorder,
+          isSelected ? theme.accent : theme.cardBorder,
           lineWidth: isSelected ? 1.5 : 1
         )
     )
-    .shadow(color: isSelected ? Color.pastableOrange.opacity(theme.isDark ? 0.24 : 0.16) : .clear, radius: 10)
+    .shadow(color: isSelected ? theme.accent.opacity(theme.accentGlow) : .clear, radius: 10)
     .shadow(color: Color.black.opacity(theme.isDark ? (isHovered ? 0.36 : 0.26) : (isHovered ? 0.14 : 0.09)), radius: 18, x: 0, y: 10)
     .shadow(color: Color.black.opacity(theme.isDark ? 0.14 : 0.05), radius: 6, x: 0, y: 4)
     .scaleEffect(isHovered ? 1.02 : 1.0)
@@ -317,10 +317,10 @@ struct CardCell: View {
   /// actual hex value, everything else uses the type color.
   private var tintHex: String {
     if let hex = item.hexColor { return hex }
-    if item.isCode { return "#3B82F6" }
-    if item.isLink { return "#A855F7" }
-    if item.isImage || item.isFile { return "#EC4899" }
-    return "#9CA3AF"
+    if item.isCode { return AppPalette.categoryCode }
+    if item.isLink { return AppPalette.categoryLink }
+    if item.isImage || item.isFile { return AppPalette.categoryMedia }
+    return AppPalette.categoryAll
   }
 
   private var categoryIndicatorColor: Color {

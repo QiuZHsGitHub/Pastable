@@ -17,7 +17,7 @@
 </div>
 
 <p align="center">
-  <img src="./docs/assets/pastable-preview.png" alt="Pastable Preview" width="100%" />
+  <img src="./design/theme-cinnabar/preview/figma-panel-dark.png" alt="Pastable Cinnabar Preview" width="100%" />
 </p>
 
 ## Table of Contents
@@ -38,22 +38,24 @@
 - Dark design space: [Pastable / UI 2026](https://www.figma.com/design/4lqk62cQU0WffNMgUXkGez/Paste?node-id=2006-6)
 - Light design space: [Pastable / UI 2026 · Light](https://www.figma.com/design/4lqk62cQU0WffNMgUXkGez/Paste?node-id=2011-11)
 - Tokens and handoff: [docs/figma.md](docs/figma.md) · [docs/theme.md](docs/theme.md)
+- China Trend theme (implemented): [Figma](https://www.figma.com/design/4lqk62cQU0WffNMgUXkGez/Paste?node-id=2026-2) · [Design notes](design/theme-cinnabar/README.md)
 - Panel frame: [Dark](https://www.figma.com/design/4lqk62cQU0WffNMgUXkGez/Paste?node-id=2006-15) · [Light](https://www.figma.com/design/4lqk62cQU0WffNMgUXkGez/Paste?node-id=2011-24)
 
 ## Themes
 
-Follows the **macOS system Light / Dark appearance** by default. No forced dark mode and no extra theme picker. The panel is opaque layered glass; all text uses solid tokens instead of white/black alpha:
+Follows the **macOS system Light / Dark appearance** by default. Since 2026-10 the theme is **China Trend · Cinnabar**: opaque layered surfaces, all text uses solid tokens instead of white/black alpha, and cinnabar is reserved for emphasis:
 
-- Dark: panel `#2B2C31 → #151619`, text `#F3F4F6 / #A8ADB6 / #8B9099`
-- Light: panel `#EDF0F4 → #D7DCE4`, cards `#FFFFFF`, text `#101216 / #414750 / #515861`
+- Dark: panel `#2C2A29 → #141211`, text `#F6F1EA / #ACA49B / #8E867D`, accent `#E0523B`
+- Light: panel `#F5F0E9 → #DDD2C4`, cards `#FFFDFB`, text `#1B1816 / #4A443D / #5C554C`, accent `#C8402E`
 - Cards: category tint over the card base, Dark 18%/24%, Light 12%/20%
+- Category colors: Text `#4E8F7C`, Code `#4A7DB2`, Link `#9A72A8`, Media `#C46F88`, Color `#D9824B`
 
 <p align="center">
-  <img src="./docs/assets/pastable-panel-2026.png" alt="Pastable Dark" width="49%" />
-  <img src="./docs/assets/pastable-panel-light-2026.png" alt="Pastable Light" width="49%" />
+  <img src="./design/theme-cinnabar/preview/figma-panel-dark.png" alt="Pastable Cinnabar Dark" width="49%" />
+  <img src="./design/theme-cinnabar/preview/figma-panel-light.png" alt="Pastable Cinnabar Light" width="49%" />
 </p>
 
-See [docs/theme.md](docs/theme.md) for the full token and Figma mapping.
+See [docs/theme.md](docs/theme.md) for the full token and Figma mapping, and [design/theme-cinnabar](design/theme-cinnabar/README.md) for the design generator.
 
 ## Highlights
 
@@ -67,7 +69,7 @@ See [docs/theme.md](docs/theme.md) for the full token and Figma mapping.
 - **Custom shortcuts**: configurable global hotkey for panel toggle
 
 <p align="center">
-  <img src="./docs/assets/pastable-panel-2026.png" alt="Pastable panel (2026-10)" width="100%" />
+  <img src="./design/theme-cinnabar/preview/figma-panel-dark.png" alt="Pastable Cinnabar panel (2026-10)" width="100%" />
 </p>
 
 ## Quick Start

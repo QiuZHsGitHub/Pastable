@@ -2,6 +2,9 @@ import SwiftUI
 
 struct SettingsView: View {
   @ObservedObject private var appState = AppState.shared
+  @Environment(\.colorScheme) private var colorScheme
+
+  private var theme: AppTheme { AppTheme.theme(for: colorScheme) }
 
   var body: some View {
     TabView(selection: $appState.settingsTab) {
@@ -32,6 +35,7 @@ struct SettingsView: View {
         .tag(AppState.SettingsTab.about)
     }
     .frame(width: 500, height: 380)
+    .tint(theme.accent)
     .background(VisualEffectView(material: .sidebar, blendingMode: .behindWindow))
     .background(WindowAccessor { window in
       window.level = .modalPanel

@@ -1,0 +1,11 @@
+{
+  "name": "Pastable · 中国潮色",
+  "id": "1542083726154803721",
+  "api": "1.0.0",
+  "main": "code.js",
+  "editorType": ["figma"],
+  "documentAccess": "dynamic-page",
+  "networkAccess": {
+    "allowedDomains": ["none"]
+  }
+}

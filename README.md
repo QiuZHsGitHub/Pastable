@@ -17,7 +17,7 @@
 </div>
 
 <p align="center">
-  <img src="./docs/assets/pastable-preview.png" alt="Pastable Preview" width="100%" />
+  <img src="./design/theme-cinnabar/preview/figma-panel-dark.png" alt="Pastable 朱砂 Preview" width="100%" />
 </p>
 
 ## 目录
@@ -38,22 +38,24 @@
 - Dark 设计空间：[Pastable / UI 2026](https://www.figma.com/design/4lqk62cQU0WffNMgUXkGez/Paste?node-id=2006-6)
 - Light 设计空间：[Pastable / UI 2026 · Light](https://www.figma.com/design/4lqk62cQU0WffNMgUXkGez/Paste?node-id=2011-11)
 - 说明与 Token 对照：[docs/figma.md](docs/figma.md) · [docs/theme.md](docs/theme.md)
+- 中国潮色主题（已实现）：[Figma](https://www.figma.com/design/4lqk62cQU0WffNMgUXkGez/Paste?node-id=2026-2) · [说明](design/theme-cinnabar/README.md)
 - 面板单帧：[Dark](https://www.figma.com/design/4lqk62cQU0WffNMgUXkGez/Paste?node-id=2006-15) · [Light](https://www.figma.com/design/4lqk62cQU0WffNMgUXkGez/Paste?node-id=2011-24)
 
 ## 主题
 
-默认跟随 **macOS 系统 Light / Dark**，不强制深色，也没有额外的主题选择器。面板为不透明分层玻璃质感，文字全部使用实色 Token（不再用白色/黑色 alpha）：
+默认跟随 **macOS 系统 Light / Dark**，不强制深色，也没有额外的主题选择器。2026-10 起切换为「中国潮色 · 朱砂」：面板为不透明分层，文字全部使用实色 Token（不再用白色/黑色 alpha），朱砂只做强调色：
 
-- 深色：面板 `#2B2C31 → #151619`，文字 `#F3F4F6 / #A8ADB6 / #8B9099`
-- 浅色：面板 `#EDF0F4 → #D7DCE4`，卡片 `#FFFFFF`，文字 `#101216 / #414750 / #515861`
+- 深色：面板 `#2C2A29 → #141211`，文字 `#F6F1EA / #ACA49B / #8E867D`，主色 `#E0523B`
+- 浅色：面板 `#F5F0E9 → #DDD2C4`，卡片 `#FFFDFB`，文字 `#1B1816 / #4A443D / #5C554C`，主色 `#C8402E`
 - 卡片：分类色与卡片底色混合，Dark 18%/24%，Light 12%/20%
+- 分类色：晓山青 `#4E8F7C`、青花蓝 `#4A7DB2`、木槿紫 `#9A72A8`、黛子粉 `#C46F88`、落暖橘 `#D9824B`
 
 <p align="center">
-  <img src="./docs/assets/pastable-panel-2026.png" alt="Pastable Dark" width="49%" />
-  <img src="./docs/assets/pastable-panel-light-2026.png" alt="Pastable Light" width="49%" />
+  <img src="./design/theme-cinnabar/preview/figma-panel-dark.png" alt="Pastable 朱砂 Dark" width="49%" />
+  <img src="./design/theme-cinnabar/preview/figma-panel-light.png" alt="Pastable 朱砂 Light" width="49%" />
 </p>
 
-完整 Token 与 Figma 对照见 [docs/theme.md](docs/theme.md)。
+完整 Token 与 Figma 对照见 [docs/theme.md](docs/theme.md)，主题稿与生成器见 [design/theme-cinnabar](design/theme-cinnabar/README.md)。
 
 ## 功能亮点
 
@@ -67,7 +69,7 @@
 - **快捷键体系**：支持自定义全局唤起快捷键
 
 <p align="center">
-  <img src="./docs/assets/pastable-panel-2026.png" alt="Pastable 面板（2026-10）" width="100%" />
+  <img src="./design/theme-cinnabar/preview/figma-panel-dark.png" alt="Pastable 朱砂面板（2026-10）" width="100%" />
 </p>
 
 ## 快速开始

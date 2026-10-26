@@ -33,7 +33,7 @@ struct CategoryFilter: View {
     }) {
       HStack(spacing: 6) {
         Circle()
-          .fill(isSelected ? Color.pastableOrange : color(for: category))
+          .fill(isSelected ? theme.accent : color(for: category))
           .frame(width: 5, height: 5)
 
         Text(title)
@@ -58,7 +58,7 @@ struct CategoryFilter: View {
       .overlay(
         RoundedRectangle(cornerRadius: 9)
           .strokeBorder(
-            isSelected ? Color.pastableOrange : theme.tabBorder,
+            isSelected ? theme.accent : theme.tabBorder,
             lineWidth: 1
           )
       )
@@ -72,11 +72,11 @@ struct CategoryFilter: View {
 
   private func color(for category: String) -> Color {
     switch category {
-    case "All": return Color(hex: "#9CA3AF")    // Gray-400
-    case "Text": return Color(hex: "#10B981")   // Emerald-500
-    case "Code": return Color(hex: "#3B82F6")   // Blue-500
-    case "Links": return Color(hex: "#A855F7")  // Purple-500
-    case "Others": return Color(hex: "#EC4899") // Pink-500
+    case "All": return Color.categoryAll
+    case "Text": return Color.categoryText
+    case "Code": return Color.categoryCode
+    case "Links": return Color.categoryLink
+    case "Others": return Color.categoryMedia
     default: return .gray
     }
   }

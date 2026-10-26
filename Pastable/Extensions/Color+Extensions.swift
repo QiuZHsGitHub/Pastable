@@ -1,5 +1,18 @@
 import SwiftUI
 
+/// Brand and category hex values that do not change with appearance.
+/// Surface/text tokens that do change live in `AppTheme`.
+enum AppPalette {
+  static let accentLight = "#C8402E"
+  static let accentDark = "#E0523B"
+  static let categoryAll = "#9AA0A6"
+  static let categoryText = "#4E8F7C"
+  static let categoryCode = "#4A7DB2"
+  static let categoryLink = "#9A72A8"
+  static let categoryMedia = "#C46F88"
+  static let categoryColor = "#D9824B"
+}
+
 extension Color {
   /// Memoized: views re-parse the same handful of hex tokens on every render,
   /// which showed up as measurable cost in card-heavy lists.
@@ -34,19 +47,15 @@ extension Color {
     )
   }
 
-  static let pastableOrange = Color(hex: "#F56300")
-  static let pastableDarkBlue = Color(hex: "#1C2533")
+  static let pastableAccent = Color(hex: AppPalette.accentLight)
   static let pastableBackground = Color(hex: "#2C2C2E")
-  
-  // 渐变色
-  static let pastableOrangeGradientStart = Color(hex: "#FF6900")
-  static let pastableOrangeGradientEnd = Color(hex: "#F54900")
-  // Theme Colors (Semantic - Deep Elegant Dark Mode)
-  static let themeText = Color(hex: "#334155")       // Slate-700 (Calm Blue-Grey)
-  static let themeCode = Color(hex: "#4C1D95")       // Violet-900 (Deep Purple)
-  static let themeLink = Color(hex: "#1E40AF")       // Blue-800 (Deep Ocean)
-  static let themeOther = Color(hex: "#BE123C")      // Rose-700 (Deep Pink/Red)
-  static let themeAll = Color(hex: "#1F2937")        // Gray-800 (Charcoal)
+
+  static let categoryAll = Color(hex: AppPalette.categoryAll)
+  static let categoryText = Color(hex: AppPalette.categoryText)
+  static let categoryCode = Color(hex: AppPalette.categoryCode)
+  static let categoryLink = Color(hex: AppPalette.categoryLink)
+  static let categoryMedia = Color(hex: AppPalette.categoryMedia)
+  static let categoryColor = Color(hex: AppPalette.categoryColor)
   
   func toHex() -> String? {
     // Convert to sRGB color space if possible to ensure components exist

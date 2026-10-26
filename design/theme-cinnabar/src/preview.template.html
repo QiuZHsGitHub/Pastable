@@ -1,0 +1,369 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<title>Pastable · 中国潮色 · 朱砂</title>
+<style>
+  :root {
+    --font-ui: "PingFang SC", "SF Pro Text", -apple-system, BlinkMacSystemFont, sans-serif;
+    --font-mono: "SF Mono", "Menlo", "Monaco", monospace;
+  }
+  * { box-sizing: border-box; }
+  html, body {
+    margin: 0;
+    width: 1512px;
+    height: 325px;
+    overflow: hidden;
+    background: transparent;
+  }
+  body {
+    font-family: var(--font-ui);
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+  .panel {
+    position: relative;
+    width: 1512px;
+    height: 325px;
+    border: 1px solid;
+    border-radius: 24px 24px 0 0;
+    overflow: hidden;
+  }
+  .header {
+    position: absolute;
+    left: 24px;
+    right: 24px;
+    top: 16px;
+    height: 36px;
+  }
+  .tabs {
+    position: absolute;
+    left: 0;
+    top: 2px;
+    display: flex;
+    gap: 8px;
+  }
+  .tab {
+    height: 32px;
+    padding: 0 13px;
+    border: 1px solid;
+    border-radius: 9px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 13.5px;
+    line-height: 1;
+    white-space: nowrap;
+  }
+  .tab i {
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    display: block;
+  }
+  .search {
+    position: absolute;
+    right: 0;
+    top: 0;
+    width: 800px;
+    height: 36px;
+    border: 1px solid;
+    border-radius: 10px;
+  }
+  .search-icon { position: absolute; left: 14px; top: 11px; }
+  .placeholder {
+    position: absolute;
+    left: 40px;
+    top: 10px;
+    font-size: 13px;
+    line-height: 16px;
+  }
+  .caret {
+    position: absolute;
+    left: 68px;
+    top: 11px;
+    width: 1px;
+    height: 15px;
+  }
+  .shortcut {
+    position: absolute;
+    right: 58px;
+    top: 13px;
+    font-family: var(--font-mono);
+    font-size: 10px;
+    font-weight: 500;
+    line-height: 12px;
+  }
+  .divider {
+    position: absolute;
+    right: 50px;
+    top: 9px;
+    width: 1px;
+    height: 18px;
+  }
+  .more {
+    position: absolute;
+    right: 10px;
+    top: 6px;
+    width: 32px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    font-weight: 500;
+  }
+  .cards {
+    position: absolute;
+    left: 24px;
+    top: 68px;
+    display: flex;
+    gap: 16px;
+  }
+  .card {
+    position: relative;
+    width: 260px;
+    height: 241px;
+    flex: 0 0 auto;
+    border-radius: 14px;
+    border: 1px solid;
+  }
+  .content {
+    position: absolute;
+    left: 12px;
+    top: 12px;
+    width: 236px;
+    height: 185px;
+    overflow: hidden;
+    border-radius: 6px;
+  }
+  .footer {
+    position: absolute;
+    left: 12px;
+    right: 12px;
+    bottom: 12px;
+    height: 22px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .appicon {
+    width: 16px;
+    height: 16px;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 9px;
+    font-weight: 700;
+    color: #FFFDFB;
+    background: linear-gradient(135deg, #E0523B 0%, #8C281C 100%);
+    box-shadow: inset 0 0 0 1px rgba(255, 253, 251, .14);
+  }
+  .time { font-size: 11.5px; line-height: 1; }
+  .detail { margin-left: auto; font-size: 11.5px; line-height: 1; }
+  .pill {
+    height: 22px;
+    padding: 0 8px;
+    border-radius: 999px;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 11px;
+    font-weight: 500;
+    line-height: 1;
+    white-space: nowrap;
+  }
+  .pill i { width: 6px; height: 6px; border-radius: 50%; display: block; }
+  .photo {
+    position: absolute;
+    inset: 0;
+    overflow: hidden;
+    border: 1px solid;
+    border-radius: 6px;
+  }
+  .photo svg { position: absolute; inset: 0; width: 100%; height: 100%; }
+  .swatch {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 6px;
+  }
+  .chip {
+    background: #14110F;
+    color: #FFFDFB;
+    font-family: var(--font-mono);
+    font-size: 16px;
+    font-weight: 600;
+    letter-spacing: .01em;
+    padding: 7px 11px;
+    border-radius: 8px;
+  }
+  .bodytext {
+    font-size: 13px;
+    line-height: 18px;
+    white-space: pre-wrap;
+    word-break: break-word;
+  }
+  .code {
+    font-family: var(--font-mono);
+    font-size: 13px;
+    line-height: 18px;
+    white-space: pre-wrap;
+    word-break: break-word;
+  }
+  .mono-tag {
+    position: absolute;
+    left: 10px;
+    bottom: 8px;
+    font-size: 9px;
+    letter-spacing: .08em;
+    font-family: var(--font-mono);
+    color: rgba(255, 253, 251, .55);
+  }
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script>
+  const TOKENS = /*__TOKENS__*/;
+  const params = new URLSearchParams(location.search);
+  const mode = params.get('mode') === 'light' ? 'light' : 'dark';
+  const t = TOKENS.themes[mode];
+  const cat = TOKENS.global.color.category;
+
+  const v = (x) => (x && typeof x === 'object' && '$value' in x) ? x.$value : x;
+  const hex = (value) => String(v(value)).replace('#', '');
+  const rgb = (value) => {
+    const h = hex(value);
+    return [parseInt(h.slice(0, 2), 16), parseInt(h.slice(2, 4), 16), parseInt(h.slice(4, 6), 16)];
+  };
+  const rgba = (value, alpha) => {
+    const [r, g, b] = rgb(value);
+    return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+  };
+  const mix = (a, b, ratio) => {
+    const A = rgb(a); const B = rgb(b);
+    const c = A.map((x, i) => Math.round(x * ratio + B[i] * (1 - ratio)));
+    return '#' + c.map((x) => x.toString(16).padStart(2, '0')).join('').toUpperCase();
+  };
+
+  const accent = v(t.accent.base);
+  const panelTop = v(t.surface.panel.top);
+  const panelMid = v(t.surface.panel.mid);
+  const panelBottom = v(t.surface.panel.bottom);
+  const panelBorder = v(t.surface.panel.border);
+
+  const tabs = [
+    { label: '全部', dot: accent, selected: true },
+    { label: '文本', dot: v(cat.text) },
+    { label: '代码', dot: v(cat.code) },
+    { label: '链接', dot: v(cat.link) },
+    { label: '媒体', dot: v(cat.media) }
+  ];
+
+  const pills = {
+    image: v(cat.media),
+    code: v(cat.code),
+    color: v(cat.color),
+    link: v(cat.link),
+    text: v(cat.text)
+  };
+
+  const cards = [
+    { kind: 'image', tint: pills.image, label: '图片', detail: '8 KB', selected: true },
+    { kind: 'code', tint: pills.code, label: '代码', detail: '73 字' },
+    { kind: 'color', tint: pills.color, label: '颜色', detail: '7 字' },
+    { kind: 'link', tint: pills.link, label: '链接', detail: '40 字' },
+    { kind: 'text', tint: pills.text, label: '文本', detail: '21 字' },
+    { kind: 'code2', tint: pills.code, label: '代码', detail: '24 字' }
+  ];
+
+  const renderTabs = () => tabs.map((tab) => {
+    const bg = tab.selected ? v(t.control.tab.selectedBackground) : v(t.control.tab.background);
+    const border = tab.selected ? accent : v(t.control.tab.border);
+    const color = tab.selected ? v(t.control.tab.textSelected) : v(t.control.tab.text);
+    return `<div class="tab" style="background:${bg};border-color:${border};color:${color};font-weight:${tab.selected ? 600 : 400}">
+      <i style="background:${tab.selected ? accent : tab.dot}"></i><span>${tab.label}</span>
+    </div>`;
+  }).join('');
+
+  const renderSearch = () => {
+    const bg = v(t.control.search.background);
+    const border = accent;
+    const divider = v(t.control.search.divider);
+    return `<div class="search" style="background:${bg};border-color:${border};box-shadow:0 0 12px ${rgba(accent, 0.12)}">
+      <svg class="search-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="${v(t.text.tertiary)}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="11" cy="11" r="8"></circle><path d="m21 21-4.3-4.3"></path>
+      </svg>
+      <span class="placeholder" style="color:${v(t.text.placeholder)}">搜索</span>
+      <span class="caret" style="background:${accent}"></span>
+      <span class="shortcut" style="color:${v(t.text.tertiary)}">⌘⇧F</span>
+      <span class="divider" style="background:${divider}"></span>
+      <span class="more" style="color:${v(t.text.secondary)}">⋯</span>
+    </div>`;
+  };
+
+  const renderBody = (card) => {
+    const body = v(t.text.body);
+    switch (card.kind) {
+      case 'image':
+        return `<div class="content">
+          <div class="photo" style="border-color:${v(t.surface.card.imageBorder)}">
+            <div style="position:absolute;inset:0;background:
+              radial-gradient(120% 90% at 18% 8%, #E0523B 0%, #8C281C 36%, #2A1512 70%, #14110F 100%);"></div>
+            <svg viewBox="0 0 236 185" preserveAspectRatio="none">
+              <path d="M0 148 L58 92 L106 130 L158 70 L236 138 L236 185 L0 185 Z" fill="#14110F" opacity=".55"></path>
+              <path d="M0 166 L46 128 L94 158 L152 112 L236 166 L236 185 L0 185 Z" fill="#0E0C0B" opacity=".72"></path>
+            </svg>
+            <span class="mono-tag">SCREENSHOT · 3024 × 650</span>
+          </div>
+        </div>`;
+      case 'code':
+        return `<div class="content"><div class="code" style="color:${body}">{"name":"Pastable",<br>&nbsp;"theme":"cinnabar",<br>&nbsp;"accent":"#C8402E"}</div></div>`;
+      case 'code2':
+        return `<div class="content"><div class="code" style="color:${body}">func greet(name: String) {<br>&nbsp;&nbsp;print("你好，\\(name)")<br>}</div></div>`;
+      case 'color':
+        return `<div class="content"><div class="swatch" style="background:${v(cat.color)}"><span class="chip">${v(cat.color).toUpperCase()}</span></div></div>`;
+      case 'link':
+        return `<div class="content"><div class="bodytext" style="color:${body}">https://github.com/QiuZHsGitHub/Pastable</div></div>`;
+      default:
+        return `<div class="content"><div class="bodytext" style="color:${body}">下午三点评审「中国潮色」主题，<br>记得带上色卡和充电器。</div></div>`;
+    }
+  };
+
+  const renderCard = (card) => {
+    const base = v(t.surface.card.base);
+    const ratio = v(card.selected ? t.card.tint.selected : t.card.tint.normal);
+    const top = mix(card.tint, base, ratio);
+    const border = card.selected ? accent : v(t.surface.card.border);
+    const width = card.selected ? 1.5 : 1;
+    const shadows = [];
+    if (card.selected) shadows.push(`0 0 18px ${rgba(accent, v(t.accent.glow))}`);
+    shadows.push(`0 10px 18px rgba(0, 0, 0, ${mode === 'dark' ? 0.26 : 0.09})`);
+    shadows.push(`0 4px 6px rgba(0, 0, 0, ${mode === 'dark' ? 0.14 : 0.05})`);
+    return `<div class="card" style="background:linear-gradient(180deg, ${top} 0%, ${base} 100%);border-color:${border};border-width:${width}px;box-shadow:${shadows.join(',')}">
+      ${renderBody(card)}
+      <div class="footer">
+        <span class="appicon">P</span>
+        <span class="time" style="color:${v(t.text.secondary)}">21 分钟前</span>
+        <span class="detail" style="color:${v(t.text.tertiary)}">${card.detail}</span>
+        <span class="pill" style="background:${v(t.control.pill.background)};color:${v(t.control.pill.text)}">
+          <i style="background:${card.tint}"></i>${card.label}
+        </span>
+      </div>
+    </div>`;
+  };
+
+  document.getElementById('root').innerHTML = `<div class="panel" style="background:linear-gradient(180deg, ${panelTop} 0%, ${panelMid} 16%, ${panelBottom} 100%);border-color:${panelBorder}">
+    <div class="header">
+      <div class="tabs">${renderTabs()}</div>
+      ${renderSearch()}
+    </div>
+    <div class="cards">${cards.map(renderCard).join('')}</div>
+  </div>`;
+</script>
+</body>
+</html>

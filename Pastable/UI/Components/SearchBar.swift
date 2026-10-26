@@ -36,6 +36,7 @@ struct SearchBar: View {
       .textFieldStyle(.plain)
       .font(.system(size: 13))
       .foregroundColor(theme.textPrimary)
+      .tint(theme.accent)
       .focused($isTextFieldFocused)
       
       // 3. 清除按钮 (仅在有文本时显示)
@@ -102,13 +103,13 @@ struct SearchBar: View {
       RoundedRectangle(cornerRadius: 10)
         .strokeBorder(
           isTextFieldFocused
-            ? Color.pastableOrange
+            ? theme.accent
             : theme.searchBorder,
           lineWidth: 1
         )
     )
     .shadow(
-      color: isTextFieldFocused ? Color.pastableOrange.opacity(0.12) : .clear,
+      color: isTextFieldFocused ? theme.accent.opacity(0.12) : .clear,
       radius: 8
     )
     .animation(.easeOut(duration: 0.16), value: isTextFieldFocused)

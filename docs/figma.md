@@ -1,5 +1,7 @@
 # Figma UI Space · Pastable / UI 2026
 
+> 当前 App 使用「中国潮色 · 朱砂」主题（见文末）。本文前文的 `2006 / 2011` 页面仍是旧版橙色基线，保留作为历史对照。
+
 Figma 文件（Paste）：
 
 - **Dark 页面入口**：<https://www.figma.com/design/4lqk62cQU0WffNMgUXkGez/Paste?node-id=2006-6>
@@ -24,7 +26,7 @@ Figma 文件（Paste）：
 
 Light 页面包含 `L00 · Cover`、`L01 · Panel`、`L02 · Empty`、`L03 · Cards`、`L04 · Tokens`、`L05 · Settings`、`L06 · Handoff`。
 
-## 视觉基线
+## 视觉基线（2006 / 2011 旧版）
 
 - 品牌色：`#F56300`
 - 面板 Dark：`#26272C → #151619` 不透明深色渐变；Light：`#EDF0F4 → #D7DCE4`。顶部圆角 24，1px 语义描边 + 顶部高光，无桌面透色
@@ -95,3 +97,16 @@ Light 页面包含 `L00 · Cover`、`L01 · Panel`、`L02 · Empty`、`L03 · Ca
 
 
 Figma 是视觉基线，SwiftUI 实现是最终源。两边卡片背景使用同一套规则：分类色与卡片底色混合后向下渐变；Dark 为 18%（选中 24%），Light 为 12%（选中 20%）。来源 App 图标只出现在页脚，不再影响卡片底色。
+
+## 中国潮色（已实现）
+
+基于美图 2021 年「中国潮色」滤镜系列做的朱砂主题，**已实现到 App 的 Light/Dark Token**，Figma 页面与源码使用同一套色值：
+
+- 页面：[Pastable / UI 2026 · 中国潮色](https://www.figma.com/design/4lqk62cQU0WffNMgUXkGez/Paste?node-id=2026-2)
+- 设计说明与 Token：[`design/theme-cinnabar/README.md`](../design/theme-cinnabar/README.md)
+- Token 源文件：[`tokens.json`](../design/theme-cinnabar/tokens.json)
+- 生成器：[`figma-plugin`](../design/theme-cinnabar/figma-plugin/manifest.json)
+
+页面包含 `00 Cover`、`01 Panel · Dark`、`01 Panel · Light`、`03 Tokens`、`04 Handoff` 五个 Frame。主色朱砂：Dark `#E0523B`、Light `#C8402E`；分类色换成晓山青、青花蓝、木槿紫、黛子粉、落暖橘。
+
+![中国潮色 · 朱砂](../design/theme-cinnabar/preview/figma-panel-dark.png)
