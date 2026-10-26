@@ -115,12 +115,12 @@ cd Pastable
 - iCloud 同步（默认关闭；开启后使用私人 CloudKit 数据库，详见 [docs/icloud.md](docs/icloud.md)）
 - 登录时启动、存储占用统计
 
-> 截图/复制得到的大尺寸 TIFF 会在后台自动转成 PNG，显著减小数据库体积。
+> 截图/复制得到的大尺寸 TIFF 会在后台自动转成 PNG，显著减小数据库体积；图片入库时会预生成小尺寸缩略图与展示元数据（字数/体积/文件数），卡片渲染无需解码原图。
 
 ## 开发与测试
 
 ```bash
-swift test    # 46 个逻辑测试，使用内存数据库
+swift test    # 52 个逻辑测试，使用内存数据库
 xcodebuild -project Pastable.xcodeproj -scheme Pastable \
   -configuration Debug -destination 'platform=macOS' \
   -derivedDataPath /tmp/PastableDerived CODE_SIGNING_ALLOWED=NO build

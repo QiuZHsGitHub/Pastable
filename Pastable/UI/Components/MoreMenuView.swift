@@ -5,7 +5,7 @@ struct MoreMenuView: View {
   @Environment(\.dismiss) private var dismiss
   @Environment(\.colorScheme) private var colorScheme
 
-  private var theme: AppTheme { AppTheme(colorScheme) }
+  private var theme: AppTheme { AppTheme.theme(for: colorScheme) }
 
   var onClearHistory: (() -> Void)?
   var onSettings: () -> Void
@@ -77,7 +77,7 @@ private struct MenuItemContent: View {
   var shortcut: String? = nil
   @Environment(\.colorScheme) private var colorScheme
 
-  private var theme: AppTheme { AppTheme(colorScheme) }
+  private var theme: AppTheme { AppTheme.theme(for: colorScheme) }
 
   var body: some View {
     HStack(spacing: 8) {
@@ -113,7 +113,7 @@ private struct MenuItemButton: View {
   @Environment(\.colorScheme) private var colorScheme
   @State private var isHovered = false
 
-  private var theme: AppTheme { AppTheme(colorScheme) }
+  private var theme: AppTheme { AppTheme.theme(for: colorScheme) }
   
   var body: some View {
     Button(action: action) {

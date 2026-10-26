@@ -6,7 +6,7 @@ struct SearchBar: View {
   var onClearHistory: (() -> Void)?
   @Environment(\.openSettings) private var openSettings
   @Environment(\.colorScheme) private var colorScheme
-  private var theme: AppTheme { AppTheme(colorScheme) }
+  private var theme: AppTheme { AppTheme.theme(for: colorScheme) }
   
   @State private var showMoreMenu = false
   @FocusState private var isTextFieldFocused: Bool

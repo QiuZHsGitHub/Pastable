@@ -6,13 +6,13 @@ struct CardCell: View {
   var onCopy: (() -> Void)? = nil
   
   @State private var isHovered: Bool = false
+  @State private var itemThumbnail: NSImage? = nil
   @State private var fileThumbnail: NSImage? = nil
   @State private var appIconImage: NSImage? = nil // Fix: Store distinct image state
   @State private var fileIconImage: NSImage? = nil // Fix: Store file icon state
   @Environment(\.colorScheme) private var colorScheme
-  private let imageCache = ImageCache.shared
 
-  private var theme: AppTheme { AppTheme(colorScheme) }
+  private var theme: AppTheme { AppTheme.theme(for: colorScheme) }
   
   var body: some View {
     ZStack {
@@ -37,17 +37,24 @@ struct CardCell: View {
         }
         
         // Content Preview
-        if let image = item.image {
+        if item.isImage {
           // Case A: Direct Image Data (Screenshots, etc.)
-          Image(nsImage: image)
-            .resizable()
-            .aspectRatio(contentMode: .fit)
-            .frame(maxWidth: .infinity, maxHeight: .infinity)
-            .cornerRadius(6)
-            .overlay(
-              RoundedRectangle(cornerRadius: 6)
-                .strokeBorder(theme.imageBorder, lineWidth: 1)
-            )
+          // Rendered from the capture-time thumbnail; the original payload is
+          // never decoded on this path.
+          if let image = itemThumbnail {
+            Image(nsImage: image)
+              .resizable()
+              .aspectRatio(contentMode: .fit)
+              .frame(maxWidth: .infinity, maxHeight: .infinity)
+              .cornerRadius(6)
+              .overlay(
+                RoundedRectangle(cornerRadius: 6)
+                  .strokeBorder(theme.imageBorder, lineWidth: 1)
+              )
+          } else {
+            ProgressView()
+              .frame(maxWidth: .infinity, maxHeight: .infinity)
+          }
         } else if item.isFile, item.fileURLs.first != nil {
            // Case B: Files
            // check if image file
@@ -105,7 +112,7 @@ struct CardCell: View {
                   .multilineTextAlignment(.leading)
                   .lineSpacing(2)
               } else {
-                Text(item.previewableText)
+                Text(previewDisplayText)
                   .font(item.isCode ? .system(size: 13, design: .monospaced) : .system(size: 13))
                   .foregroundColor(theme.textBody)
                   .multilineTextAlignment(.leading)
@@ -186,6 +193,7 @@ struct CardCell: View {
     .shadow(color: Color.black.opacity(theme.isDark ? 0.14 : 0.05), radius: 6, x: 0, y: 4)
     .scaleEffect(isHovered ? 1.02 : 1.0)
     .animation(.easeOut(duration: 0.18), value: isHovered)
+    .animation(nil, value: itemThumbnail)
     .animation(nil, value: fileThumbnail)
     .animation(nil, value: appIconImage)
     .animation(nil, value: fileIconImage)
@@ -201,16 +209,54 @@ struct CardCell: View {
       let fileURL = item.fileURLs.first
       let isImageFile = item.isImageFile
       let isFile = item.isFile
+      let isImageContent = item.isImage
       let appBundleId = item.application
 
       if let cachedHex = cachedRTFBackgroundHex {
         contentBackgroundColor = Color(hex: cachedHex)
       }
 
+      // 0. Direct image content: paint from the capture-time preview. Legacy
+      // records (stored before previews existed) generate one on first display
+      // and persist it, so the cost is paid at most once per record.
+      if isImageContent {
+        let thumbKey = item.thumbnailCacheKey
+        let preRendered = item.thumbnailData
+        let legacyPayload = preRendered == nil ? item.imageData : nil
+
+        let box = await Task.detached(priority: .userInitiated) { () -> SendableThumbnail in
+          if let cached = ImageCache.shared.cachedThumbnail(forKey: thumbKey) {
+            return SendableThumbnail(value: cached, generated: nil)
+          }
+
+          var generated: Data?
+          let image: NSImage?
+          if let preRendered {
+            image = NSImage(data: preRendered)
+          } else if let legacyPayload, let data = HistoryItem.thumbnailData(from: legacyPayload) {
+            generated = data
+            image = NSImage(data: data)
+          } else {
+            image = nil
+          }
+          ImageCache.shared.storeThumbnail(image, forKey: thumbKey)
+          return SendableThumbnail(value: image, generated: generated)
+        }.value
+
+        guard item.persistentModelID == itemId else { return }
+        itemThumbnail = box.value
+        if let generated = box.generated, item.thumbnailData == nil {
+          item.thumbnailData = generated
+          try? item.modelContext?.save()
+        }
+      }
+
       // 1. Load File Thumbnail
       if isImageFile, let url = fileURL {
         let box = await Task.detached(priority: .userInitiated) { () -> SendableImage in
-          let thumbnail = ImageCache.shared.thumbnail(forURL: url) { HistoryItem.loadThumbnail(for: $0) }
+          let thumbnail = ImageCache.shared.thumbnail(forKey: url.absoluteString) {
+            HistoryItem.loadThumbnail(for: url)
+          }
           return SendableImage(value: thumbnail)
         }.value
 
@@ -294,13 +340,28 @@ struct CardCell: View {
     )
   }
 
+  private static let byteFormatter: ByteCountFormatter = {
+    let formatter = ByteCountFormatter()
+    formatter.countStyle = .file
+    return formatter
+  }()
+
+  /// Card body text, capped at what the 10-line preview can ever show so
+  /// SwiftUI never lays out megabyte-sized strings.
+  private var previewDisplayText: String {
+    String(item.previewableText.prefix(2_000))
+  }
+
+  /// Footer metadata straight from the columns derived at capture time
+  /// (`HistoryItem.deriveDisplayMetadata`); legacy records compute once and
+  /// cache instead of re-scanning payloads on every frame.
   private var detailText: String {
-    if item.isImage, let data = item.imageData {
-      return ByteCountFormatter.string(fromByteCount: Int64(data.count), countStyle: .file)
+    if item.isImage {
+      return Self.byteFormatter.string(fromByteCount: Int64(item.displayTotalSize))
     }
 
     if item.isFile {
-      let count = item.fileURLs.count
+      let count = item.displayFileCount
       if count == 1 {
         return NSLocalizedString("unit.one_file", comment: "One file")
       }
@@ -309,7 +370,7 @@ struct CardCell: View {
 
     return String(
       format: NSLocalizedString("unit.chars_format", comment: "N characters"),
-      item.previewableText.count
+      item.displayTextLength
     )
   }
 
@@ -358,6 +419,13 @@ struct CardCell: View {
 
 private struct SendableImage: @unchecked Sendable {
   let value: NSImage?
+}
+
+/// Thumbnail lookup result, including a preview that was generated on the fly
+/// and should be persisted back to the model.
+private struct SendableThumbnail: @unchecked Sendable {
+  let value: NSImage?
+  let generated: Data?
 }
 
 #Preview("代码卡片 - 未选中") {

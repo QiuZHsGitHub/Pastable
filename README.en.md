@@ -115,12 +115,12 @@ Follow `./DEPENDENCIES.md` to add Swift Package dependencies in Xcode.
 - iCloud sync (off by default; uses a private CloudKit database, see [docs/icloud.md](docs/icloud.md))
 - Launch at login, storage usage statistics
 
-> Large TIFF screenshots are converted to PNG in the background, dramatically shrinking the store.
+> Large TIFF screenshots are converted to PNG in the background, dramatically shrinking the store. Images also get a small pre-rendered thumbnail and display metadata (character/file counts, payload size) at capture time, so cards never decode the original.
 
 ## Development & Tests
 
 ```bash
-swift test    # 46 logic tests using an in-memory store
+swift test    # 52 logic tests using an in-memory store
 xcodebuild -project Pastable.xcodeproj -scheme Pastable \
   -configuration Debug -destination 'platform=macOS' \
   -derivedDataPath /tmp/PastableDerived CODE_SIGNING_ALLOWED=NO build

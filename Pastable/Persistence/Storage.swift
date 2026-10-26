@@ -401,6 +401,33 @@ final class Storage {
 
   // MARK: - Trimming / retention
 
+  /// Fetch and delete one batch of matching records. Returns the number of
+  /// removed records, `0` when nothing matched, or `nil` when saving failed
+  /// (callers stop looping in that case).
+  private func deleteOneBatch(
+    _ predicate: Predicate<HistoryItem>?,
+    fetchLimit: Int
+  ) -> Int? {
+    var descriptor = FetchDescriptor<HistoryItem>(
+      predicate: predicate,
+      sortBy: [SortDescriptor(\.lastCopiedAt, order: .forward)]
+    )
+    descriptor.fetchLimit = max(1, fetchLimit)
+
+    guard let batch = try? context.fetch(descriptor), !batch.isEmpty else { return 0 }
+    for item in batch {
+      context.delete(item)
+    }
+
+    do {
+      try context.save()
+      return batch.count
+    } catch {
+      AppLogger.Storage.error("Failed to delete history batch", error: error)
+      return nil
+    }
+  }
+
   /// Delete the oldest unpinned records until at most `limit` records remain.
   @discardableResult
   func trimHistory(limit: Int? = nil) -> Int {
@@ -412,25 +439,13 @@ final class Storage {
             total > effectiveLimit else {
         break
       }
-
-      var descriptor = FetchDescriptor<HistoryItem>(
-        predicate: #Predicate { $0.pin == nil },
-        sortBy: [SortDescriptor(\.lastCopiedAt, order: .forward)]
-      )
-      descriptor.fetchLimit = min(20, total - effectiveLimit)
-
-      guard let batch = try? context.fetch(descriptor), !batch.isEmpty else { break }
-      for item in batch {
-        context.delete(item)
-      }
-
-      do {
-        try context.save()
-      } catch {
-        AppLogger.Storage.error("Failed to trim history", error: error)
+      guard let batch = deleteOneBatch(
+        #Predicate { $0.pin == nil },
+        fetchLimit: min(20, total - effectiveLimit)
+      ), batch > 0 else {
         break
       }
-      removed += batch.count
+      removed += batch
     }
 
     return removed
@@ -446,24 +461,13 @@ final class Storage {
     var removed = 0
 
     while removed < maxMaintenanceBatchCount {
-      var descriptor = FetchDescriptor<HistoryItem>(
-        predicate: #Predicate { $0.lastCopiedAt < cutoffDate && $0.pin == nil },
-        sortBy: [SortDescriptor(\.lastCopiedAt, order: .forward)]
-      )
-      descriptor.fetchLimit = 20
-
-      guard let batch = try? context.fetch(descriptor), !batch.isEmpty else { break }
-      for item in batch {
-        context.delete(item)
-      }
-
-      do {
-        try context.save()
-      } catch {
-        AppLogger.Storage.error("Failed to cleanup history", error: error)
+      guard let batch = deleteOneBatch(
+        #Predicate { $0.lastCopiedAt < cutoffDate && $0.pin == nil },
+        fetchLimit: 20
+      ), batch > 0 else {
         break
       }
-      removed += batch.count
+      removed += batch
     }
 
     return removed
@@ -512,19 +516,13 @@ final class Storage {
       guard let total = try? context.fetchCount(FetchDescriptor<HistoryItem>()), total > limit else {
         break
       }
-
-      var descriptor = FetchDescriptor<HistoryItem>(
-        predicate: #Predicate { $0.pin == nil },
-        sortBy: [SortDescriptor(\.lastCopiedAt, order: .forward)]
-      )
-      descriptor.fetchLimit = min(20, total - limit)
-
-      guard let batch = try? context.fetch(descriptor), !batch.isEmpty else { break }
-      for item in batch {
-        context.delete(item)
+      guard let batch = deleteOneBatch(
+        #Predicate { $0.pin == nil },
+        fetchLimit: min(20, total - limit)
+      ), batch > 0 else {
+        break
       }
-      try? context.save()
-      removed += batch.count
+      removed += batch
       await Task.yield()
     }
 
@@ -539,18 +537,13 @@ final class Storage {
     var removed = 0
 
     while removed < maxMaintenanceBatchCount {
-      var descriptor = FetchDescriptor<HistoryItem>(
-        predicate: #Predicate { $0.lastCopiedAt < cutoffDate && $0.pin == nil },
-        sortBy: [SortDescriptor(\.lastCopiedAt, order: .forward)]
-      )
-      descriptor.fetchLimit = 20
-
-      guard let batch = try? context.fetch(descriptor), !batch.isEmpty else { break }
-      for item in batch {
-        context.delete(item)
+      guard let batch = deleteOneBatch(
+        #Predicate { $0.lastCopiedAt < cutoffDate && $0.pin == nil },
+        fetchLimit: 20
+      ), batch > 0 else {
+        break
       }
-      try? context.save()
-      removed += batch.count
+      removed += batch
       await Task.yield()
     }
 
@@ -563,20 +556,10 @@ final class Storage {
     // up the contents.
     var removed = 0
     while removed < maxMaintenanceBatchCount {
-      var descriptor = FetchDescriptor<HistoryItem>()
-      descriptor.fetchLimit = 20
-
-      guard let batch = try? context.fetch(descriptor), !batch.isEmpty else { break }
-      for item in batch {
-        context.delete(item)
+      guard let batch = deleteOneBatch(nil, fetchLimit: 20), batch > 0 else {
+        break
       }
-      do {
-        try context.save()
-      } catch {
-        AppLogger.Storage.error("Failed to clear history", error: error)
-        return
-      }
-      removed += batch.count
+      removed += batch
     }
   }
 }

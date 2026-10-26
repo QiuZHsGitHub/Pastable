@@ -5,7 +5,7 @@ struct EmptyStateView: View {
   let searchText: String
   @Environment(\.colorScheme) private var colorScheme
 
-  private var theme: AppTheme { AppTheme(colorScheme) }
+  private var theme: AppTheme { AppTheme.theme(for: colorScheme) }
 
   var body: some View {
     VStack(spacing: 14) {

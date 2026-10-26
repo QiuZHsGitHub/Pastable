@@ -14,18 +14,21 @@ final class SearchService {
   func search(query: String, items: [HistoryItem], mode: SearchMode = .fuzzy) -> [HistoryItem] {
     let tokens = query
       .split(whereSeparator: \.isWhitespace)
-      .map { Self.normalize(String($0)) }
+      .map { Self.fold(String($0)) }
       .filter { !$0.isEmpty }
 
     guard !tokens.isEmpty else { return items }
 
+    let now = Date()
     var scored: [(item: HistoryItem, score: Double)] = []
     scored.reserveCapacity(items.count)
 
     for item in items {
       // Long clipboard entries should not make every keystroke O(size of history).
-      let title = Self.normalize(String(item.title.prefix(2_000)))
-      let body = Self.normalize(String(item.previewableText.prefix(8_000)))
+      // Normalized title/body are cached per item (see HistoryItem), so this
+      // loop only performs the actual matching work.
+      let title = item.normalizedSearchTitle
+      let body = item.normalizedSearchBody
 
       var total = 0.0
       var matchedAll = true
@@ -48,7 +51,7 @@ final class SearchService {
       guard matchedAll else { continue }
 
       // Small recency / frequency tie-breakers so common copies float up.
-      let age = max(0, Date().timeIntervalSince(item.lastCopiedAt))
+      let age = max(0, now.timeIntervalSince(item.lastCopiedAt))
       total += max(0, 3 - age / 86_400)
       total += min(2, Double(item.numberOfCopies) * 0.1)
 
@@ -67,7 +70,9 @@ final class SearchService {
 
   // MARK: - Matching
 
-  private static func normalize(_ value: String) -> String {
+  /// Case/diacritic/width-insensitive folding shared by the search tokens and
+  /// the per-item index (HistoryItem.normalizedSearchTitle/Body).
+  static func fold(_ value: String) -> String {
     value.folding(
       options: [.caseInsensitive, .diacriticInsensitive, .widthInsensitive],
       locale: .current

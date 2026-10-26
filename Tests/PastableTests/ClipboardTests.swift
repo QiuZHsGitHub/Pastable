@@ -216,6 +216,46 @@ final class ClipboardTests: XCTestCase {
     }
   }
 
+  func testThumbnailDataIsGeneratedForImagePayloads() {
+    let data = solidImageData(size: 500)
+    let thumbnail = HistoryItem.thumbnailData(from: data.tiff)
+
+    XCTAssertNotNil(thumbnail)
+    XCTAssertLessThan(thumbnail?.count ?? .max, data.tiff.count)
+  }
+
+  func testThumbnailDataUsesImageRepresentation() {
+    let data = solidImageData(size: 50)
+    let thumbnail = Clipboard.thumbnailData(for: [
+      RawContentSnapshot(type: NSPasteboard.PasteboardType.tiff.rawValue, value: data.tiff)
+    ])
+
+    XCTAssertNotNil(thumbnail)
+  }
+
+  func testMakeItemDerivesDisplayMetadataAndThumbnail() async {
+    await MainActor.run {
+      let snapshot = [
+        RawContentSnapshot(
+          type: NSPasteboard.PasteboardType.string.rawValue,
+          value: Data("hello".utf8)
+        )
+      ]
+      let thumbnail = Data([0xFF, 0xD8, 0xFF])
+      let item = Clipboard.makeItem(
+        from: snapshot,
+        frontmostApp: "com.apple.Safari",
+        hash: "text:fixed",
+        thumbnailData: thumbnail
+      )
+
+      XCTAssertEqual(item?.thumbnailData, thumbnail)
+      XCTAssertEqual(item?.displayTextLength, 5)
+      XCTAssertEqual(item?.displayTotalSize, 5)
+      XCTAssertEqual(item?.displayFileCount, 0)
+    }
+  }
+
   func testCopyMultipleFilesKeepsSeparatePasteboardItems() async {
     await MainActor.run {
       let pasteboard = self.makePasteboard()

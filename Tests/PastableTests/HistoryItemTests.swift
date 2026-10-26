@@ -143,4 +143,43 @@ final class HistoryItemTests: XCTestCase {
     XCTAssertTrue(fileItem.isFile)
     XCTAssertFalse(fileItem.isCode)
   }
+
+  func testDisplayMetadataFallsBackForLegacyRecords() {
+    let item = makeItem("hello")
+
+    // Legacy rows keep `-1` until the value is requested once.
+    XCTAssertEqual(item.textLength, -1)
+    XCTAssertEqual(item.displayTextLength, 5)
+    XCTAssertEqual(item.displayTotalSize, 5)
+  }
+
+  func testDeriveDisplayMetadataFillsCounts() {
+    let fileItem = HistoryItem(contents: [
+      HistoryItemContent(
+        type: NSPasteboard.PasteboardType.fileURL.rawValue,
+        value: URL(fileURLWithPath: "/tmp/a.txt").dataRepresentation
+      ),
+      HistoryItemContent(
+        type: NSPasteboard.PasteboardType.fileURL.rawValue,
+        value: URL(fileURLWithPath: "/tmp/b.txt").dataRepresentation
+      )
+    ])
+    fileItem.deriveDisplayMetadata()
+
+    XCTAssertEqual(fileItem.displayFileCount, 2)
+    XCTAssertGreaterThan(fileItem.displayTotalSize, 0)
+    XCTAssertEqual(fileItem.displayTextLength, fileItem.previewableText.count)
+  }
+
+  func testIsImageClassifiesWithoutDecoding() {
+    // Not decodable image bytes: classification must still report "image"
+    // because it only inspects the declared pasteboard types.
+    let imageItem = HistoryItem(contents: [
+      HistoryItemContent(type: NSPasteboard.PasteboardType.png.rawValue, value: Data([0x89, 0x50]))
+    ])
+    XCTAssertTrue(imageItem.isImage)
+
+    let textItem = makeItem("plain text")
+    XCTAssertFalse(textItem.isImage)
+  }
 }

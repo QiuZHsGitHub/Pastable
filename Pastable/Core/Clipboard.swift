@@ -89,9 +89,18 @@ final class Clipboard {
       guard !normalized.isEmpty else { return }
       let hash = HistoryItem.computeContentHash(rawContents: normalized)
 
+      // Pre-render the display preview while we are already off the main
+      // thread and hold the payload in memory. Cards can then paint without
+      // ever decoding the original screenshot (see HistoryItem.thumbnailData).
+      let thumbnail = Self.thumbnailData(for: normalized)
+      if let thumbnail, let image = NSImage(data: thumbnail) {
+        ImageCache.shared.storeThumbnail(image, forKey: "thumb:" + hash)
+      }
+
       await self?.commit(
         normalized,
         hash: hash,
+        thumbnailData: thumbnail,
         frontApp: frontApp,
         generation: captureGeneration,
         observedChangeCount: observedChangeCount
@@ -99,9 +108,21 @@ final class Clipboard {
     }
   }
 
+  /// Small JPEG preview for the image representation of a capture, or `nil`
+  /// for text/file content.
+  nonisolated static func thumbnailData(for contents: [RawContentSnapshot]) -> Data? {
+    for type in imageTypes {
+      guard let data = contents.first(where: { $0.type == type.rawValue })?.value,
+            !data.isEmpty else { continue }
+      return HistoryItem.thumbnailData(from: data)
+    }
+    return nil
+  }
+
   private func commit(
     _ contents: [RawContentSnapshot],
     hash: String,
+    thumbnailData: Data?,
     frontApp: String?,
     generation captureGeneration: Int,
     observedChangeCount: Int
@@ -119,7 +140,12 @@ final class Clipboard {
     lastCapturedHash = hash
     lastCapturedAt = now
 
-    guard let item = Self.makeItem(from: contents, frontmostApp: frontApp, hash: hash) else { return }
+    guard let item = Self.makeItem(
+      from: contents,
+      frontmostApp: frontApp,
+      hash: hash,
+      thumbnailData: thumbnailData
+    ) else { return }
 
     #if DEBUG
     let bytes = contents.reduce(0) { $0 + ($1.value?.count ?? 0) }
@@ -152,7 +178,25 @@ final class Clipboard {
       if !Preferences.saveFiles && itemTypes.contains(.fileURL) { continue }
       if !Preferences.saveImages && !itemTypes.isDisjoint(with: imageTypes) { continue }
 
+      // A single pasteboard item usually carries the same picture as several
+      // representations (PNG/JPEG/TIFF). `normalizedContents` keeps only the
+      // first one anyway, so read just that: the TIFF flavor alone can be tens
+      // of megabytes of pasteboard IO on the main thread.
+      var capturedImageType: String?
+
       for type in supportedTypes where enabled.contains(type) {
+        if imageTypes.contains(type) {
+          if capturedImageType != nil { continue }
+          if let data = item.data(forType: type), !data.isEmpty {
+            capturedImageType = type.rawValue
+            if seenTypes.insert(type.rawValue).inserted {
+              results.append(RawContentSnapshot(type: type.rawValue, value: data))
+            }
+          }
+          continue
+        }
+
+        guard !seenTypes.contains(type.rawValue) else { continue }
         guard let data = item.data(forType: type), !data.isEmpty else { continue }
 
         // Empty/whitespace-only text produces a blank "0 字" card. It carries
@@ -167,7 +211,6 @@ final class Clipboard {
           continue
         }
 
-        guard !seenTypes.contains(type.rawValue) else { continue }
         seenTypes.insert(type.rawValue)
         results.append(RawContentSnapshot(type: type.rawValue, value: data))
       }
@@ -238,7 +281,8 @@ final class Clipboard {
   static func makeItem(
     from contents: [RawContentSnapshot],
     frontmostApp: String?,
-    hash: String? = nil
+    hash: String? = nil,
+    thumbnailData: Data? = nil
   ) -> HistoryItem? {
     let models = contents.compactMap { content -> HistoryItemContent? in
       guard let value = content.value else { return nil }
@@ -251,6 +295,8 @@ final class Clipboard {
       contentHash: hash ?? HistoryItem.computeContentHash(rawContents: contents)
     )
     item.application = frontmostApp
+    item.thumbnailData = thumbnailData
+    item.deriveDisplayMetadata()
     return item
   }
 

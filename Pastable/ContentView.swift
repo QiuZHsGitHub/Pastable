@@ -7,7 +7,7 @@ struct ContentView: View {
   @ObservedObject var appState = AppState.shared
   @Environment(\.colorScheme) private var colorScheme
 
-  private var theme: AppTheme { AppTheme(colorScheme) }
+  private var theme: AppTheme { AppTheme.theme(for: colorScheme) }
 
   private let categories = ["All", "Text", "Code", "Links", "Others"]
   @State private var keyMonitor: Any?
@@ -66,6 +66,12 @@ struct ContentView: View {
     .onAppear {
       appState.updateItems(items)
       installKeyboardMonitor()
+    }
+    .onDisappear {
+      if let keyMonitor {
+        NSEvent.removeMonitor(keyMonitor)
+        self.keyMonitor = nil
+      }
     }
     .confirmationDialog(
       "clear_history.title",

@@ -7,7 +7,7 @@ struct CategoryFilter: View {
   @State private var hoveredCategory: String?
   @Environment(\.colorScheme) private var colorScheme
 
-  private var theme: AppTheme { AppTheme(colorScheme) }
+  private var theme: AppTheme { AppTheme.theme(for: colorScheme) }
 
   var body: some View {
     HStack(alignment: .center, spacing: 8) {

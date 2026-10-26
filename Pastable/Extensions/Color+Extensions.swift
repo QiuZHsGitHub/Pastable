@@ -1,8 +1,16 @@
 import SwiftUI
 
 extension Color {
+  /// Memoized: views re-parse the same handful of hex tokens on every render,
+  /// which showed up as measurable cost in card-heavy lists.
   init(hex: String) {
-    let hex = hex.trimmingCharacters(in: CharacterSet.alphanumerics.inverted)
+    self = Self.hexMemo.color(key: hex) { Color(parsedHex: hex) }
+  }
+
+  private static let hexMemo = ColorMemo()
+
+  private init(parsedHex: String) {
+    let hex = parsedHex.trimmingCharacters(in: CharacterSet.alphanumerics.inverted)
     var int: UInt64 = 0
     Scanner(string: hex).scanHexInt64(&int)
     let a, r, g, b: UInt64

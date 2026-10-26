@@ -7,14 +7,22 @@ final class AppState: ObservableObject {
   static let shared = AppState()
 
   @Published var isPanelVisible: Bool = false
-  @Published var searchText: String = ""
+  @Published var searchText: String = "" {
+    didSet { recomputeDisplayItems() }
+  }
   @Published var filteredItems: [HistoryItem] = []
   @Published var settingsTab: SettingsTab = .general
   @Published var shouldScrollToTop: Bool = false
   @Published var searchFocusRequest: SearchFocusRequest = .none
-  @Published var selectedCategory: String = "All"
+  @Published var selectedCategory: String = "All" {
+    didSet { recomputeDisplayItems() }
+  }
   @Published var selectedItemID: PersistentIdentifier?
   @Published var hoveredItemID: PersistentIdentifier?
+  /// Filtered + category-sorted view of the history. Recomputed on data or
+  /// search changes only (not per render), because the category filter runs
+  /// type classification over every record.
+  @Published private(set) var displayItems: [HistoryItem] = []
 
   enum SearchFocusRequest: Equatable {
     case none
@@ -89,21 +97,23 @@ final class AppState: ObservableObject {
 
   // MARK: - Filtering
 
-  var displayItems: [HistoryItem] {
+  private func recomputeDisplayItems() {
     let filtered = searchText.isEmpty ? allItems : filteredItems
 
+    let result: [HistoryItem]
     switch selectedCategory {
     case "Text":
-      return filtered.filter { !$0.isCode && !$0.isLink && !$0.isImage && !$0.isFile }
+      result = filtered.filter { !$0.isCode && !$0.isLink && !$0.isImage && !$0.isFile }
     case "Code":
-      return filtered.filter { $0.isCode }
+      result = filtered.filter { $0.isCode }
     case "Links":
-      return filtered.filter { $0.isLink }
+      result = filtered.filter { $0.isLink }
     case "Others":
-      return filtered.filter { $0.isImage || $0.isFile }
+      result = filtered.filter { $0.isImage || $0.isFile }
     default:
-      return filtered
+      result = filtered
     }
+    displayItems = result
   }
 
   func performSearch(query: String) {
@@ -112,6 +122,7 @@ final class AppState: ObservableObject {
     } else {
       filteredItems = SearchService.shared.search(query: query, items: allItems, mode: searchMode)
     }
+    recomputeDisplayItems()
   }
 
   func refreshSearch() {

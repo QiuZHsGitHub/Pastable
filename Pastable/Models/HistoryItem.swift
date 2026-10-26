@@ -1,5 +1,7 @@
 import AppKit
+import ImageIO
 import SwiftData
+import UniformTypeIdentifiers
 import Vision
 import CryptoKit
 
@@ -106,6 +108,19 @@ class HistoryItem {
   var cachedRTFBackgroundHexColor: String? // Cache for RTF content background color
   var contentHash: String? = nil // Stable hash for de-duplication
 
+  // Display metadata derived once in the capture pipeline (see
+  // `deriveDisplayMetadata` / `Clipboard.makeItem`) so the card layer never has
+  // to scan payloads or decode images just to paint a frame. Mirrors how Paste
+  // stores pre-rendered previews and size columns next to each record.
+  /// Pre-rendered small JPEG/PNG preview for image content.
+  @Attribute(.externalStorage) var thumbnailData: Data?
+  /// Characters in `previewableText`. `-1` = not derived (legacy record).
+  var textLength: Int = -1
+  /// Number of file URLs. `-1` = not derived (legacy record).
+  var fileCount: Int = -1
+  /// Payload bytes across all representations. `-1` = not derived (legacy record).
+  var totalSize: Int = -1
+
   /// Optional because CloudKit-backed SwiftData requires every relationship to
   /// be optional. Use `contentItems` for a non-optional view.
   @Relationship(deleteRule: .cascade, inverse: \HistoryItemContent.item)
@@ -113,11 +128,14 @@ class HistoryItem {
 
   var contentItems: [HistoryItemContent] { contents ?? [] }
 
+  /// Stable cache key for the pre-rendered preview image. Content-hash based so
+  /// the capture pipeline can warm the cache before the item is inserted.
+  var thumbnailCacheKey: String { "thumb:" + (contentHash ?? "") }
+
   // Non-persistent caches. Cards ask for these properties many times while the
   // panel is open; recomputing regexes / decoding images on every body pass was
   // the main cause of scroll and search jank.
-  @Transient private var cachedImageValue: NSImage?
-  @Transient private var cachedImageLoaded = false
+  @Transient private var cachedIsImageFlag: Bool?
   @Transient private var cachedImageDataValue: Data?
   @Transient private var cachedImageDataLoaded = false
   @Transient private var cachedFileURLsValue: [URL]?
@@ -129,6 +147,11 @@ class HistoryItem {
   @Transient private var cachedHexColorLoaded = false
   @Transient private var cachedFallbackPreviewText: String?
   @Transient private var textRecognitionScheduled = false
+  @Transient private var cachedNormalizedTitle: String?
+  @Transient private var cachedNormalizedBody: String?
+  @Transient private var fallbackTextLength = -1
+  @Transient private var fallbackFileCount = -1
+  @Transient private var fallbackTotalSize = -1
 
   init(contents: [HistoryItemContent] = [], contentHash: String? = nil) {
     self.firstCopiedAt = Date.now
@@ -143,6 +166,49 @@ class HistoryItem {
     let preview = cachedPreviewText?.prefix(60) ?? ""
     print("[HistoryItem][init] \(ISO8601DateFormatter().string(from: Date())) contents=\(contents.count) preview=\(preview)")
     #endif
+  }
+
+  /// Fill the persisted display metadata in one pass. Cheap: no image decoding,
+  /// no regex, only counting what the capture pipeline already holds in memory.
+  func deriveDisplayMetadata() {
+    textLength = previewableText.count
+    fileCount = fileURLs.count
+    totalSize = resolvedTotalSize()
+    fallbackTextLength = textLength
+    fallbackFileCount = fileCount
+    fallbackTotalSize = totalSize
+  }
+
+  /// Payload bytes. Image content reports the image payload (what the card
+  /// used to display), which for Universal Clipboard handoffs lives in a
+  /// temporary file instead of the stored representations.
+  private func resolvedTotalSize() -> Int {
+    if isImage, let data = imageData {
+      return data.count
+    }
+    return contentItems.reduce(0) { $0 + ($1.value?.count ?? 0) }
+  }
+
+  /// Display values with a lazy fallback for records created before the
+  /// metadata columns existed (their values stay `-1` until computed once).
+  var displayTextLength: Int {
+    if textLength >= 0 { return textLength }
+    if fallbackTextLength < 0 { fallbackTextLength = previewableText.count }
+    return fallbackTextLength
+  }
+
+  var displayFileCount: Int {
+    if fileCount >= 0 { return fileCount }
+    if fallbackFileCount < 0 { fallbackFileCount = fileURLs.count }
+    return fallbackFileCount
+  }
+
+  var displayTotalSize: Int {
+    if totalSize >= 0 { return totalSize }
+    if fallbackTotalSize < 0 {
+      fallbackTotalSize = resolvedTotalSize()
+    }
+    return fallbackTotalSize
   }
 
   func supersedes(_ item: HistoryItem) -> Bool {
@@ -235,25 +301,10 @@ class HistoryItem {
     }
 
     // 1k characters is trade-off for performance
-    var title = previewableText.shortened(to: 1_000)
+    let title = previewableText.shortened(to: 1_000)
+      .trimmingCharacters(in: .whitespacesAndNewlines)
 
-    // TODO: Add support for settings like showSpecialSymbols
-    let showSpecialSymbols = false 
-
-    if showSpecialSymbols {
-      if let range = title.range(of: "^ +", options: .regularExpression) {
-        title = title.replacingOccurrences(of: " ", with: "·", range: range)
-      }
-      if let range = title.range(of: " +$", options: .regularExpression) {
-        title = title.replacingOccurrences(of: " ", with: "·", range: range)
-      }
-      title = title
-        .replacingOccurrences(of: "\n", with: "⏎")
-        .replacingOccurrences(of: "\t", with: "⇥")
-    } else {
-      title = title.trimmingCharacters(in: .whitespacesAndNewlines)
-    }
-
+    // TODO: Add a setting that shows special symbols (⏎ ⇥ ·) instead of trimming.
     return title
   }
 
@@ -284,6 +335,33 @@ class HistoryItem {
     let text = computePreviewText()
     cachedFallbackPreviewText = text
     return text
+  }
+
+  // MARK: - Search index
+
+  /// Folded, length-capped text used by `SearchService`. Built lazily and kept
+  /// for the lifetime of the model instance, so typing in the search field no
+  /// longer re-folds every record (up to 10K characters each) per keystroke.
+  var normalizedSearchTitle: String {
+    if let cachedNormalizedTitle { return cachedNormalizedTitle }
+    let value = SearchService.fold(String(title.prefix(2_000)))
+    cachedNormalizedTitle = value
+    return value
+  }
+
+  var normalizedSearchBody: String {
+    if let cachedNormalizedBody { return cachedNormalizedBody }
+    let value = SearchService.fold(String(previewableText.prefix(8_000)))
+    cachedNormalizedBody = value
+    return value
+  }
+
+  /// Called whenever title/preview text is rewritten (currently only the OCR
+  /// pass) so search never matches against a stale index.
+  func invalidateSearchCache() {
+    cachedNormalizedTitle = nil
+    cachedNormalizedBody = nil
+    fallbackTextLength = -1
   }
   
   private func computePreviewText() -> String {
@@ -329,8 +407,10 @@ class HistoryItem {
     return NSAttributedString(html: data, documentAttributes: nil)
   }
 
+  /// Type-only check: deliberately avoids faulting in the image payload, which
+  /// matters because classification runs on the render path for every card.
   var hasImageRepresentation: Bool {
-    contentData([.png, .jpeg, .heic, .tiff]) != nil
+    hasContentType(Self.imageTypes)
   }
 
   var imageData: Data? {
@@ -338,7 +418,7 @@ class HistoryItem {
       return cachedImageDataValue
     }
 
-    var data = contentData([.png, .jpeg, .heic, .tiff])
+    var data = contentData(Self.imageTypes)
     if data == nil, universalClipboardImage, let url = fileURLs.first {
       data = try? Data(contentsOf: url)
     }
@@ -346,17 +426,6 @@ class HistoryItem {
     cachedImageDataValue = data
     cachedImageDataLoaded = true
     return data
-  }
-
-  var image: NSImage? {
-    if cachedImageLoaded {
-      return cachedImageValue
-    }
-
-    let value = imageData.flatMap(NSImage.init(data:))
-    cachedImageValue = value
-    cachedImageLoaded = true
-    return value
   }
 
   var rtfData: Data? { contentData([.rtf]) }
@@ -385,11 +454,18 @@ class HistoryItem {
     return Int(modified)
   }
 
-  var universalClipboard: Bool { contentData([.universalClipboard]) != nil }
+  var universalClipboard: Bool { hasContentType([.universalClipboard]) }
 
   private var universalClipboardImage: Bool { universalClipboard && fileURLs.first?.pathExtension == "jpeg" }
   private var universalClipboardText: Bool {
-    universalClipboard && contentData([.html, .tiff, .png, .jpeg, .rtf, .string, .heic]) != nil
+    universalClipboard && hasContentType([.html, .tiff, .png, .jpeg, .rtf, .string, .heic])
+  }
+
+  private static let imageTypes: [NSPasteboard.PasteboardType] = [.png, .jpeg, .heic, .tiff]
+
+  /// Whether any content declares one of `types`, without loading its payload.
+  private func hasContentType(_ types: [NSPasteboard.PasteboardType]) -> Bool {
+    contentItems.contains { types.contains(NSPasteboard.PasteboardType($0.type)) }
   }
 
   private func contentData(_ types: [NSPasteboard.PasteboardType]) -> Data? {
@@ -431,6 +507,7 @@ class HistoryItem {
         if model.cachedPreviewText?.isEmpty ?? true {
           model.cachedPreviewText = recognized
         }
+        model.invalidateSearchCache()
         try? contextBox.context.save()
       }
     }
@@ -457,8 +534,6 @@ class HistoryItem {
     return text.isEmpty ? nil : text
   }
 }
-
-import UniformTypeIdentifiers
 
 extension HistoryItem {
   var isCode: Bool {
@@ -501,8 +576,13 @@ extension HistoryItem {
     // Rule 3: Line Endings (+1)
     // Check if lines end with common code symbols: ; { } : -> =
     // Check last non-whitespace character of text or lines
-    let lineEndPattern = "[;{}:=>]\\s*$"
-    if text.range(of: lineEndPattern, options: .regularExpression) != nil { score += 1 }
+    if Self.codeLineEndRegex?.firstMatch(
+      in: text,
+      options: [],
+      range: NSRange(text.startIndex..., in: text)
+    ) != nil {
+      score += 1
+    }
     
     // Rule 4: Keywords (+3)
     // Unified regex for the most common keywords across mainstream languages.
@@ -529,6 +609,11 @@ extension HistoryItem {
     // Final Threshold: >= 6
     return score >= 6
   }
+
+  private static let codeLineEndRegex: NSRegularExpression? = try? NSRegularExpression(
+    pattern: "[;{}:=>]\\s*$",
+    options: []
+  )
 
   private static let codeKeywordsRegex: NSRegularExpression? = {
     let pattern = "(?x)\\b(" +
@@ -574,8 +659,15 @@ extension HistoryItem {
     return false
   }
   
+  /// True for image content. Uses the type check (plus the Universal Clipboard
+  /// handoff case) so classification never decodes the payload.
   var isImage: Bool {
-    return image != nil
+    if let cached = cachedIsImageFlag {
+      return cached
+    }
+    let result = hasImageRepresentation || universalClipboardImage
+    cachedIsImageFlag = result
+    return result
   }
   
   var isImageFile: Bool {
@@ -603,15 +695,47 @@ extension HistoryItem {
   static func loadThumbnail(for url: URL, maxPixelSize: Int = 400) -> NSImage? {
     let sourceOptions = [kCGImageSourceShouldCache: false] as CFDictionary
     guard let source = CGImageSourceCreateWithURL(url as CFURL, sourceOptions) else { return nil }
-    
-    let options: [CFString: Any] = [
-         kCGImageSourceCreateThumbnailFromImageAlways: true,
-         kCGImageSourceCreateThumbnailWithTransform: true,
-         kCGImageSourceThumbnailMaxPixelSize: maxPixelSize
-    ]
-    
-    guard let cgImage = CGImageSourceCreateThumbnailAtIndex(source, 0, options as CFDictionary) else { return nil }
+    return thumbnailImage(from: source, maxPixelSize: maxPixelSize)
+  }
+
+  /// Build a small JPEG preview from an image payload. Runs in the capture
+  /// pipeline (and as a lazy fallback for legacy records) so cards can paint
+  /// without ever decoding the original screenshot.
+  static func thumbnailData(from data: Data, maxPixelSize: Int = 560, quality: Double = 0.82) -> Data? {
+    let sourceOptions = [kCGImageSourceShouldCache: false] as CFDictionary
+    guard let source = CGImageSourceCreateWithData(data as CFData, sourceOptions),
+          let cgImage = thumbnailCGImage(from: source, maxPixelSize: maxPixelSize) else {
+      return nil
+    }
+
+    let output = NSMutableData()
+    guard let destination = CGImageDestinationCreateWithData(
+      output,
+      UTType.jpeg.identifier as CFString,
+      1,
+      nil
+    ) else {
+      return nil
+    }
+
+    let properties: [CFString: Any] = [kCGImageDestinationLossyCompressionQuality: quality]
+    CGImageDestinationAddImage(destination, cgImage, properties as CFDictionary)
+    guard CGImageDestinationFinalize(destination) else { return nil }
+    return output as Data
+  }
+
+  private static func thumbnailImage(from source: CGImageSource, maxPixelSize: Int) -> NSImage? {
+    guard let cgImage = thumbnailCGImage(from: source, maxPixelSize: maxPixelSize) else { return nil }
     return NSImage(cgImage: cgImage, size: .zero)
+  }
+
+  private static func thumbnailCGImage(from source: CGImageSource, maxPixelSize: Int) -> CGImage? {
+    let options: [CFString: Any] = [
+      kCGImageSourceCreateThumbnailFromImageAlways: true,
+      kCGImageSourceCreateThumbnailWithTransform: true,
+      kCGImageSourceThumbnailMaxPixelSize: maxPixelSize
+    ]
+    return CGImageSourceCreateThumbnailAtIndex(source, 0, options as CFDictionary)
   }
   var hexColor: String? {
     if cachedHexColorLoaded {
@@ -619,13 +743,22 @@ extension HistoryItem {
     }
 
     let text = previewableText.trimmingCharacters(in: .whitespacesAndNewlines)
-    let pattern = "^#([0-9a-fA-F]{3}|[0-9a-fA-F]{6}|[0-9a-fA-F]{8})$"
-    let value = text.range(of: pattern, options: .regularExpression) != nil ? text : nil
+    let isHex = Self.hexColorRegex?.firstMatch(
+      in: text,
+      options: [],
+      range: NSRange(text.startIndex..., in: text)
+    ) != nil
+    let value = isHex ? text : nil
 
     cachedHexColorValue = value
     cachedHexColorLoaded = true
     return value
   }
+
+  private static let hexColorRegex: NSRegularExpression? = try? NSRegularExpression(
+    pattern: "^#([0-9a-fA-F]{3}|[0-9a-fA-F]{6}|[0-9a-fA-F]{8})$",
+    options: []
+  )
 }
 
 /// A single, explicitly main-actor-confined context reference used to hop the
