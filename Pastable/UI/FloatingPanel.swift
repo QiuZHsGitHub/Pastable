@@ -22,7 +22,7 @@ final class FloatingPanel: NSPanel {
     self.isReleasedWhenClosed = false
 
     self.isFloatingPanel = true
-    self.level = .floating
+    self.level = .statusBar
     self.collectionBehavior = [.canJoinAllSpaces, .fullScreenAuxiliary]
     self.backgroundColor = .clear
     self.isOpaque = false
@@ -97,45 +97,23 @@ final class FloatingPanel: NSPanel {
     positionAtBottom(animated: false)
   }
 
-  /// Height to reserve above the bottom edge when the Dock is auto-hidden.
-  /// `visibleFrame` cannot help in that mode because macOS treats the reveal
-  /// area as usable space; the Dock then slides over the panel.
-  private var autoHiddenDockClearance: CGFloat {
-    guard let dock = UserDefaults(suiteName: "com.apple.dock"),
-          dock.bool(forKey: "autohide"),
-          (dock.string(forKey: "orientation") ?? "bottom") == "bottom"
-    else { return 0 }
-
-    let rawTile = dock.double(forKey: "tilesize")
-    let baseTile = rawTile > 0 ? max(40, rawTile) : 64
-    let magnified = dock.double(forKey: "largesize")
-    let maxTile = dock.bool(forKey: "magnification")
-      ? max(baseTile, magnified > 0 ? magnified : 96)
-      : baseTile
-
-    // Cap the reserve so a very large/magnified Dock cannot push the panel
-    // into the menu bar on a small display.
-    return min(140, max(96, maxTile + 16))
-  }
-
-  /// 将窗口定位到鼠标所在屏幕的可用区域底部（Dock / 菜单栏之外），全宽，
-  /// 高度跟随内容。Using visibleFrame (instead of frame + y = 0) keeps the
-  /// bottom row of cards from hiding behind a bottom Dock.
+  /// 将窗口定位到鼠标所在屏幕的可用区域底部，全宽，高度跟随内容。
+  /// 面板层级高于 Dock，自动隐藏的 Dock 会在面板后面滑出；不使用预留
+  /// Dock 高度的方案，避免 Dock 隐藏时面板悬空。
   func positionAtBottom(animated: Bool = true) {
     let mouseLocation = NSEvent.mouseLocation
     let screen = NSScreen.screens.first(where: { $0.frame.contains(mouseLocation) }) ?? NSScreen.main
     guard let screen else { return }
 
     let visible = screen.visibleFrame
-    // `visibleFrame` excludes the Dock only when it is permanently visible.
-    // With "Automatically hide and show the Dock" the Dock still overlays the
-    // bottom edge when the pointer reaches it, so reserve the reveal area.
-    let dockClearance = autoHiddenDockClearance
-    let availableHeight = max(0, visible.height - dockClearance)
-    let panelHeight = min(contentHeight, availableHeight)
+    let panelHeight = min(contentHeight, visible.height)
+    // Keep the panel flush with the bottom edge. The panel runs above the
+    // Dock's window level, so an auto-hidden Dock slides in behind it instead
+    // of covering the bottom row of cards. Reserving Dock height here would
+    // make the panel visibly “fly up” when the Dock is hidden.
     let finalFrame = NSRect(
       x: visible.origin.x,
-      y: visible.origin.y + dockClearance,
+      y: visible.origin.y,
       width: visible.width,
       height: panelHeight
     )

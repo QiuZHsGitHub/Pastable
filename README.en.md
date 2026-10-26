@@ -57,7 +57,7 @@ See [docs/theme.md](docs/theme.md) for the full token and Figma mapping.
 ## Highlights
 
 - **Bottom floating panel**: instantly opens recent clipboard history
-- **Dock avoidance**: reserves the auto-hidden Dock reveal area so the Dock never covers the panel
+- **Dock layering**: the panel stays above the Dock while open, so cards are never covered and the panel stays flush with the bottom edge
 - **Smart search**: supports both exact and fuzzy matching
 - **Auto content detection**: text, code, links, images, and files
 - **One-click paste**: select a card to restore clipboard and paste immediately
