@@ -1,6 +1,6 @@
 import AppKit
 
-final class ImageCache {
+final class ImageCache: @unchecked Sendable {
   static let shared = ImageCache()
   
   private let appIconCache = NSCache<NSString, NSImage>()

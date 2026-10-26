@@ -33,7 +33,7 @@ enum AppError: LocalizedError {
     
     var errorDescription: String? {
         switch self {
-        case .storageInitializationFailed(let error):
+        case .storageInitializationFailed:
             return "无法初始化数据库，请检查权限设置。"
         case .clipboardAccessDenied:
             return "无法访问剪贴板，请授予剪贴板权限。"

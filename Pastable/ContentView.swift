@@ -3,11 +3,15 @@ import SwiftData
 
 struct ContentView: View {
   @Environment(\.modelContext) private var modelContext
-  @Query(sort: \HistoryItem.firstCopiedAt, order: .reverse) private var items: [HistoryItem]
+  @Query(sort: \HistoryItem.lastCopiedAt, order: .reverse) private var items: [HistoryItem]
   @ObservedObject var appState = AppState.shared
-  
-  private let categories = ["All", "Code", "Links", "Others"]
-  @State private var selectedItemId: PersistentIdentifier? = nil
+  @Environment(\.colorScheme) private var colorScheme
+
+  private var theme: AppTheme { AppTheme(colorScheme) }
+
+  private let categories = ["All", "Text", "Code", "Links", "Others"]
+  @State private var keyMonitor: Any?
+  @State private var showClearConfirmation = false
 
   var body: some View {
     VStack(spacing: 0) {
@@ -17,100 +21,213 @@ struct ContentView: View {
         selectedCategory: $appState.selectedCategory,
         searchText: $appState.searchText,
         hasHistory: !items.isEmpty,
-        onClearHistory: {
-          for item in items {
-            modelContext.delete(item)
-          }
-        }
+        onClearHistory: { showClearConfirmation = true }
       )
 
-      // 2. Card List
-      CardList(
-        items: appState.displayItems,
-        selectedItemId: $selectedItemId,
-        onPaste: { item in
-          performPaste(item: item)
-        },
-        onDelete: { item in
-          modelContext.delete(item)
-        }
-      )
+      // 2. Card List / empty state
+      if appState.displayItems.isEmpty {
+        EmptyStateView(hasHistory: !items.isEmpty, searchText: appState.searchText)
+      } else {
+        CardList(
+          items: appState.displayItems,
+          selectedItemId: $appState.selectedItemID,
+          onPaste: { item in
+            performPaste(item: item)
+          },
+          onDelete: { item in
+            delete(item: item)
+          }
+        )
+      }
     }
-    .background(VisualEffectView(material: .menu))
+    .background(
+      LinearGradient(
+        stops: [
+          .init(color: theme.panelTop, location: 0),
+          .init(color: theme.panelMid, location: 0.16),
+          .init(color: theme.panelBottom, location: 1)
+        ],
+        startPoint: .top,
+        endPoint: .bottom
+      )
+    )
     .clipShape(TopRoundedRectangle(radius: 24))
+    .overlay(
+      TopRoundedRectangle(radius: 24)
+        .stroke(theme.panelBorder, lineWidth: 1)
+    )
     .edgesIgnoringSafeArea(.all)
-    .onChange(of: items) { oldValue, newValue in
+    .onChange(of: items) { _, newValue in
       appState.updateItems(newValue)
+    }
+    .onChange(of: appState.searchText) { _, _ in
+      appState.resetSelection()
     }
     .onAppear {
       appState.updateItems(items)
-      setupKeyboardMonitor()
+      installKeyboardMonitor()
     }
-    .preferredColorScheme(.dark)
+    .confirmationDialog(
+      "clear_history.title",
+      isPresented: $showClearConfirmation,
+      titleVisibility: .visible
+    ) {
+      Button("clear_history.confirm", role: .destructive) {
+        clearHistory()
+      }
+      Button("common.cancel", role: .cancel) {}
+    } message: {
+      Text("clear_history.message")
+    }
   }
-  
+
+  // MARK: - Actions
+
   private func performPaste(item: HistoryItem) {
-    // 1. Close panel
-    AppState.shared.appDelegate?.closePanel()
-    
-    // 2. Move item to top (update timestamp)
-    item.firstCopiedAt = Date()
+    let delegate = appState.appDelegate
+    appState.selectedItemID = item.persistentModelID
+
+    // 1. Close the panel and give focus back to the app the user came from.
+    // Without this, Cmd+V can be delivered to Pastable instead of the target app.
+    delegate?.closePanel()
+    delegate?.restorePreviousApplication()
+
+    // 2. Move the item to the front of the history.
     item.lastCopiedAt = Date()
     item.numberOfCopies += 1
-    
-    // Save the update to SwiftData
     do {
       try modelContext.save()
     } catch {
-      print("Failed to save paste timestamp: \(error.localizedDescription)")
+      AppLogger.Storage.error("Failed to save paste timestamp", error: error)
     }
-    
-    // 3. Copy item to clipboard
+
+    // 3. Copy and wait for the pasteboard write to settle before pressing Cmd+V.
     Clipboard.shared.copy(item)
-    
-    // 4. Wait a bit for clipboard to update, then paste
-    // This ensures the clipboard content is fully written before triggering paste
-    DispatchQueue.main.asyncAfter(deadline: .now() + 0.08) {
+    Task { @MainActor in
+      try? await Task.sleep(nanoseconds: 120_000_000)
       Clipboard.shared.paste()
     }
   }
-  
-  private func setupKeyboardMonitor() {
-    NSEvent.addLocalMonitorForEvents(matching: .keyDown) { event in
-      // Check for Fn functionality (or F1-F9 keys directly if mapped)
-      // Fn + Number typically emits F-keys (F1 = 122, F2 = 120...) or Number chars if Fn lock is on?
-      // User asked specifically for "Fn + 1 to 9".
-      // We will check for the presence of the .function modifier flag AND the number keys.
-      // However, usually Fn + Number keys are NOT standard key events unless mapped.
-      // Assuming user might mean F1..F9 keys which are often Fn+Number on laptops.
-        
-      // Option A: Check for F1..F9 keys (keycode 122, 120, 99, 118, 96, 97, 98, 100, 101)
-      // Option B: Check for .function modifier + Number keycodes (18...25)
-        
-      if event.modifierFlags.contains(.function) {
-        if let char = event.charactersIgnoringModifiers, let num = Int(char), num >= 1 && num <= 9 {
-             let index = num - 1
-             let items = AppState.shared.displayItems
-             if index < items.count {
-                 performPaste(item: items[index])
-                 return nil // Consume event
-             }
-        }
+
+  private func delete(item: HistoryItem) {
+    modelContext.delete(item)
+    do {
+      try modelContext.save()
+    } catch {
+      AppLogger.Storage.error("Failed to delete item", error: error)
+    }
+    if appState.selectedItemID == item.persistentModelID {
+      appState.resetSelection()
+    }
+  }
+
+  private func clearHistory() {
+    Storage.shared.clearAll()
+    appState.resetSelection()
+  }
+
+  // MARK: - Keyboard
+
+  private func installKeyboardMonitor() {
+    guard keyMonitor == nil else { return }
+
+    keyMonitor = NSEvent.addLocalMonitorForEvents(matching: .keyDown) { event in
+      let consumed = MainActor.assumeIsolated {
+        handleKeyDown(event) == nil
+      }
+      return consumed ? nil : event
+    }
+  }
+
+  private func handleKeyDown(_ event: NSEvent) -> NSEvent? {
+    guard appState.isPanelVisible else { return event }
+
+    let flags = event.modifierFlags.intersection(.deviceIndependentFlagsMask)
+
+    switch event.keyCode {
+    case 53: // Escape
+      appState.appDelegate?.closePanel(restorePrevious: true)
+      return nil
+
+    case 36, 76: // Return / keypad Enter
+      guard !flags.contains(.command), !flags.contains(.option) else { return event }
+      if let item = appState.item(with: appState.selectedItemID) ?? appState.displayItems.first {
+        performPaste(item: item)
+        return nil
       }
       return event
+
+    case 51 where flags.contains(.command): // Cmd + Delete
+      if let item = appState.item(with: appState.hoveredItemID)
+        ?? appState.item(with: appState.selectedItemID) {
+        delete(item: item)
+        return nil
+      }
+      return event
+
+    case 123, 124: // Left / Right
+      // Arrow keys carry the .function flag on macOS; ignore that and keypad
+      // flags when checking whether this is an unmodified navigation key.
+      let navigationFlags = flags.subtracting([.function, .numericPad, .capsLock])
+      guard appState.searchText.isEmpty, navigationFlags.isEmpty else { return event }
+      appState.moveSelection(by: event.keyCode == 123 ? -1 : 1)
+      return nil
+
+    default:
+      break
     }
+
+    // Fn + 1…9 (laptops) or Cmd + 1…9 quick paste. Arrow keys and the numeric
+    // keypad also set modifier flags on macOS, so only explicitly reject the
+    // modifiers that would change the meaning of the shortcut.
+    let disallowedFlags: NSEvent.ModifierFlags = [.option, .control]
+    if flags.intersection(disallowedFlags).isEmpty,
+       flags.contains(.command) || flags.contains(.function),
+       let index = Self.digitIndex(for: event) {
+      let displayItems = appState.displayItems
+      if displayItems.indices.contains(index) {
+        performPaste(item: displayItems[index])
+        return nil
+      }
+    }
+
+    return event
+  }
+
+  /// ANSI number row and the F1…F9 keys produced by Fn+number on laptops.
+  private static func digitIndex(for event: NSEvent) -> Int? {
+    let numberKeys: [UInt16: Int] = [
+      18: 1, 19: 2, 20: 3, 21: 4, 23: 5, 22: 6, 26: 7, 28: 8, 25: 9
+    ]
+    if let index = numberKeys[event.keyCode] {
+      return index - 1
+    }
+
+    let functionKeys: [UInt16: Int] = [
+      122: 1, 120: 2, 99: 3, 118: 4, 96: 5, 97: 6, 98: 7, 100: 8, 101: 9
+    ]
+    if let index = functionKeys[event.keyCode] {
+      return index - 1
+    }
+
+    if let character = event.charactersIgnoringModifiers,
+       let number = Int(character), number >= 1, number <= 9 {
+      return number - 1
+    }
+
+    return nil
   }
 }
 
 // Custom Shape for top rounded corners
 struct TopRoundedRectangle: Shape {
     var radius: CGFloat
-    
+
     func path(in rect: CGRect) -> Path {
         var path = Path()
         let w = rect.width
         let h = rect.height
-        
+
         // Start bottom left
         path.move(to: CGPoint(x: 0, y: h))
         // Line up to top left start
@@ -125,7 +242,7 @@ struct TopRoundedRectangle: Shape {
         path.addLine(to: CGPoint(x: w, y: h))
         // Close path
         path.closeSubpath()
-        
+
         return path
     }
 }

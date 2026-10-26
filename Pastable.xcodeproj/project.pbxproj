@@ -7,11 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		2FA3317A2F084076006CF86C /* Defaults in Frameworks */ = {isa = PBXBuildFile; productRef = 2FA331792F084076006CF86C /* Defaults */; };
-		2FA3317C2F084076006CF86C /* DefaultsMacros in Frameworks */ = {isa = PBXBuildFile; productRef = 2FA3317B2F084076006CF86C /* DefaultsMacros */; };
-		2FA3317F2F08408B006CF86C /* Sauce in Frameworks */ = {isa = PBXBuildFile; productRef = 2FA3317E2F08408B006CF86C /* Sauce */; };
 		2FA331822F084099006CF86C /* KeyboardShortcuts in Frameworks */ = {isa = PBXBuildFile; productRef = 2FA331812F084099006CF86C /* KeyboardShortcuts */; };
-		2FA331842F0840A1006CF86C /* Fuse in Frameworks */ = {isa = PBXBuildFile; productRef = 2FA331832F0840A1006CF86C /* Fuse */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -31,11 +27,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				2FA3317F2F08408B006CF86C /* Sauce in Frameworks */,
 				2FA331822F084099006CF86C /* KeyboardShortcuts in Frameworks */,
-				2FA331842F0840A1006CF86C /* Fuse in Frameworks */,
-				2FA3317A2F084076006CF86C /* Defaults in Frameworks */,
-				2FA3317C2F084076006CF86C /* DefaultsMacros in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -78,11 +70,7 @@
 			);
 			name = Pastable;
 			packageProductDependencies = (
-				2FA331792F084076006CF86C /* Defaults */,
-				2FA3317B2F084076006CF86C /* DefaultsMacros */,
-				2FA3317E2F08408B006CF86C /* Sauce */,
 				2FA331812F084099006CF86C /* KeyboardShortcuts */,
-				2FA331832F0840A1006CF86C /* Fuse */,
 			);
 			productName = Pastable;
 			productReference = 2F281D9D2F02CF6300D0A090 /* Pastable.app */;
@@ -115,10 +103,7 @@
 			mainGroup = 2F281D942F02CF6300D0A090;
 			minimizedProjectReferenceProxies = 1;
 			packageReferences = (
-				2FA331782F084076006CF86C /* XCRemoteSwiftPackageReference "Defaults" */,
-				2FA3317D2F08408B006CF86C /* XCRemoteSwiftPackageReference "Sauce" */,
 				2FA331802F084099006CF86C /* XCRemoteSwiftPackageReference "KeyboardShortcuts" */,
-				2FA331822F0840A0006CF86C /* XCRemoteSwiftPackageReference "fuse-swift" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 2F281D9E2F02CF6300D0A090 /* Products */;
@@ -277,10 +262,10 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_ENTITLEMENTS = Pastable/Pastable.entitlements;
-				CODE_SIGN_STYLE = Automatic;
+				CODE_SIGN_STYLE = Manual;
 				COMBINE_HIDPI_IMAGES = YES;
 				CURRENT_PROJECT_VERSION = 2;
-				DEVELOPMENT_TEAM = 754Q6V2X9B;
+				DEVELOPMENT_TEAM = "";
 				ENABLE_HARDENED_RUNTIME = YES;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
@@ -292,6 +277,7 @@
 				MARKETING_VERSION = 1.0.1;
 				PRODUCT_BUNDLE_IDENTIFIER = com.qzh.Pastable;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE_SPECIFIER = "";
 				REGISTER_APP_GROUPS = YES;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
@@ -304,10 +290,10 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_ENTITLEMENTS = Pastable/Pastable.entitlements;
-				CODE_SIGN_STYLE = Automatic;
+				CODE_SIGN_STYLE = Manual;
 				COMBINE_HIDPI_IMAGES = YES;
 				CURRENT_PROJECT_VERSION = 2;
-				DEVELOPMENT_TEAM = 754Q6V2X9B;
+				DEVELOPMENT_TEAM = "";
 				ENABLE_HARDENED_RUNTIME = YES;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
@@ -319,6 +305,7 @@
 				MARKETING_VERSION = 1.0.1;
 				PRODUCT_BUNDLE_IDENTIFIER = com.qzh.Pastable;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE_SPECIFIER = "";
 				REGISTER_APP_GROUPS = YES;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
@@ -349,22 +336,6 @@
 /* End XCConfigurationList section */
 
 /* Begin XCRemoteSwiftPackageReference section */
-		2FA331782F084076006CF86C /* XCRemoteSwiftPackageReference "Defaults" */ = {
-			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/sindresorhus/Defaults";
-			requirement = {
-				kind = upToNextMajorVersion;
-				minimumVersion = 9.0.6;
-			};
-		};
-		2FA3317D2F08408B006CF86C /* XCRemoteSwiftPackageReference "Sauce" */ = {
-			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/Clipy/Sauce";
-			requirement = {
-				branch = master;
-				kind = branch;
-			};
-		};
 		2FA331802F084099006CF86C /* XCRemoteSwiftPackageReference "KeyboardShortcuts" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/sindresorhus/KeyboardShortcuts";
@@ -373,41 +344,13 @@
 				minimumVersion = 2.4.0;
 			};
 		};
-		2FA331822F0840A0006CF86C /* XCRemoteSwiftPackageReference "fuse-swift" */ = {
-			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/krisk/fuse-swift";
-			requirement = {
-				kind = upToNextMajorVersion;
-				minimumVersion = 1.4.0;
-			};
-		};
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
-		2FA331792F084076006CF86C /* Defaults */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = 2FA331782F084076006CF86C /* XCRemoteSwiftPackageReference "Defaults" */;
-			productName = Defaults;
-		};
-		2FA3317B2F084076006CF86C /* DefaultsMacros */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = 2FA331782F084076006CF86C /* XCRemoteSwiftPackageReference "Defaults" */;
-			productName = DefaultsMacros;
-		};
-		2FA3317E2F08408B006CF86C /* Sauce */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = 2FA3317D2F08408B006CF86C /* XCRemoteSwiftPackageReference "Sauce" */;
-			productName = Sauce;
-		};
 		2FA331812F084099006CF86C /* KeyboardShortcuts */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = 2FA331802F084099006CF86C /* XCRemoteSwiftPackageReference "KeyboardShortcuts" */;
 			productName = KeyboardShortcuts;
-		};
-		2FA331832F0840A1006CF86C /* Fuse */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = 2FA331822F0840A0006CF86C /* XCRemoteSwiftPackageReference "fuse-swift" */;
-			productName = Fuse;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};

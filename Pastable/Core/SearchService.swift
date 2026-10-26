@@ -1,56 +1,121 @@
 import Foundation
 
-struct SearchResult: Identifiable {
-  let id = UUID()
-  let item: HistoryItem
-  let score: Double // Higher is better
-}
-
-class SearchService {
+final class SearchService {
   static let shared = SearchService()
-  
+
   enum SearchMode: String, CaseIterable {
     case exact
     case fuzzy
   }
-  
+
+  /// Search both the title and the full preview text, require every token to
+  /// match, and rank title hits above body hits. This keeps large histories fast
+  /// while making multi-word queries behave the way users expect.
   func search(query: String, items: [HistoryItem], mode: SearchMode = .fuzzy) -> [HistoryItem] {
-    guard !query.isEmpty else { return items }
-    
-    switch mode {
-    case .exact:
-      return items.filter { item in
-        item.title.localizedCaseInsensitiveContains(query)
+    let tokens = query
+      .split(whereSeparator: \.isWhitespace)
+      .map { Self.normalize(String($0)) }
+      .filter { !$0.isEmpty }
+
+    guard !tokens.isEmpty else { return items }
+
+    var scored: [(item: HistoryItem, score: Double)] = []
+    scored.reserveCapacity(items.count)
+
+    for item in items {
+      // Long clipboard entries should not make every keystroke O(size of history).
+      let title = Self.normalize(String(item.title.prefix(2_000)))
+      let body = Self.normalize(String(item.previewableText.prefix(8_000)))
+
+      var total = 0.0
+      var matchedAll = true
+
+      for token in tokens {
+        if let score = Self.substringScore(token: token, in: title, base: 100) {
+          total += score
+        } else if let score = Self.substringScore(token: token, in: body, base: 60) {
+          total += score
+        } else if mode == .fuzzy, let score = Self.fuzzyScore(token: token, in: title, base: 24) {
+          total += score
+        } else if mode == .fuzzy, let score = Self.fuzzyScore(token: token, in: body, base: 12) {
+          total += score
+        } else {
+          matchedAll = false
+          break
+        }
       }
-      
-    case .fuzzy:
-      // Try simple search first as it's faster and often what users want
-      let simpleResults = items.filter { item in
-        item.title.localizedCaseInsensitiveContains(query)
-      }
-      
-      if !simpleResults.isEmpty {
-        return simpleResults
-      }
-      
-      // Fallback to approximate matching
-      return items.filter { item in
-        smartMatch(query: query, target: item.title)
-      }
+
+      guard matchedAll else { continue }
+
+      // Small recency / frequency tie-breakers so common copies float up.
+      let age = max(0, Date().timeIntervalSince(item.lastCopiedAt))
+      total += max(0, 3 - age / 86_400)
+      total += min(2, Double(item.numberOfCopies) * 0.1)
+
+      scored.append((item, total))
     }
+
+    return scored
+      .sorted { lhs, rhs in
+        if lhs.score == rhs.score {
+          return lhs.item.lastCopiedAt > rhs.item.lastCopiedAt
+        }
+        return lhs.score > rhs.score
+      }
+      .map(\.item)
   }
-  
-  private func smartMatch(query: String, target: String) -> Bool {
-    var queryIndex = query.startIndex
-    var targetIndex = target.startIndex
-    
-    while queryIndex < query.endIndex && targetIndex < target.endIndex {
-      if query[queryIndex].lowercased() == target[targetIndex].lowercased() {
-        queryIndex = query.index(after: queryIndex)
+
+  // MARK: - Matching
+
+  private static func normalize(_ value: String) -> String {
+    value.folding(
+      options: [.caseInsensitive, .diacriticInsensitive, .widthInsensitive],
+      locale: .current
+    )
+  }
+
+  private static func substringScore(token: String, in text: String, base: Double) -> Double? {
+    guard !token.isEmpty, !text.isEmpty, let range = text.range(of: token) else { return nil }
+
+    var score = base
+    if range.lowerBound == text.startIndex {
+      score += 15
+    } else {
+      let previous = text[text.index(before: range.lowerBound)]
+      if !previous.isLetter && !previous.isNumber {
+        score += 8
       }
-      targetIndex = target.index(after: targetIndex)
     }
-    
-    return queryIndex == query.endIndex
+    return score
+  }
+
+  /// Ordered subsequence matching, used only as a fallback in fuzzy mode.
+  private static func fuzzyScore(token: String, in text: String, base: Double) -> Double? {
+    guard !token.isEmpty, !text.isEmpty else { return nil }
+
+    var tokenIndex = token.startIndex
+    var textIndex = text.startIndex
+    var firstMatchOffset: Int?
+    var offset = 0
+    var gaps = 0
+
+    while tokenIndex < token.endIndex && textIndex < text.endIndex {
+      if token[tokenIndex] == text[textIndex] {
+        if firstMatchOffset == nil {
+          firstMatchOffset = offset
+        }
+        tokenIndex = token.index(after: tokenIndex)
+      } else if firstMatchOffset != nil {
+        gaps += 1
+      }
+      textIndex = text.index(after: textIndex)
+      offset += 1
+    }
+
+    guard tokenIndex == token.endIndex, let firstMatchOffset else { return nil }
+
+    let positionBonus = firstMatchOffset == 0 ? 8.0 : 0.0
+    let gapPenalty = min(10.0, Double(gaps) * 0.5)
+    return max(1, base + positionBonus - gapPenalty)
   }
 }

@@ -6,13 +6,13 @@
 // Category
 "category.all" = "All";
 "category.text" = "Text";
-"category.code" = "Code Snippets";
+"category.code" = "Code";
 "category.links" = "Links";
 "category.link" = "Link";
 "category.image" = "Images";
 "category.file" = "Files";
 "category.color" = "Colors";
-"category.others" = "Others";
+"category.others" = "Media";
 
 // Search
 "search.placeholder" = "Search";
@@ -64,3 +64,58 @@
 "settings.about.contact" = "Contact";
 
 "settings.about.copyright" = "Copyright © 2026 NullPointer";
+
+// Empty states
+"empty.no_history" = "No clipboard history yet";
+"empty.no_results" = "No matching results";
+"empty.no_category" = "Nothing in this category";
+"empty.hint" = "Anything you copy will appear here";
+"empty.category_hint" = "Try another category";
+
+// Units
+"unit.chars_format" = "%d chars";
+"unit.files_format" = "%d files";
+"unit.one_file" = "1 file";
+
+// Common
+"common.cancel" = "Cancel";
+"common.ok" = "OK";
+
+// Clear history
+"clear_history.title" = "Clear History?";
+"clear_history.message" = "This removes all clipboard history and cannot be undone.";
+"clear_history.confirm" = "Clear History";
+
+// Accessibility
+"accessibility.title" = "Accessibility Permission Required";
+"accessibility.message" = "Automatic paste needs Accessibility access. Open System Settings > Privacy & Security > Accessibility and enable Pastable. Copying still works without it.";
+"accessibility.open_settings" = "Open System Settings";
+
+// Extra menu item
+"menu.open" = "Open Pastable";
+
+// Permissions
+"settings.general.permissions" = "Permissions";
+"settings.general.accessibility.granted" = "Accessibility access granted";
+"settings.general.accessibility.required" = "Accessibility access is off";
+"settings.general.accessibility.hint" = "Required for automatic paste; copying still works.";
+"settings.general.login_item_error" = "Couldn't update Login Item";
+"settings.general.launch_at_login_approval" = "The login item was registered but still needs approval in System Settings > General > Login Items.";
+
+// Storage statistics
+"settings.storage.items" = "History Items";
+"settings.storage.database_size" = "Database Size";
+
+// History maintenance
+"maintenance.title" = "Clean Up Clipboard History?";
+"maintenance.message" = "The clipboard store has %ld items, but your limit is %ld. %ld items are also older than your retention window. Cleaning up frees space now.\n\nChoosing “Keep Everything” raises the limit to %ld and turns off retention.";
+"maintenance.clean" = "Clean Up";
+"maintenance.keep" = "Keep Everything";
+"maintenance.later" = "Later";
+"settings.storage.cleanup_now" = "Clean Up Now";
+
+// Empty state hints and units
+"empty.search_hint" = "Try a different keyword";
+"empty.shortcut.open" = "Open";
+"empty.shortcut.paste" = "Paste";
+"empty.shortcut.quick" = "Quick paste";

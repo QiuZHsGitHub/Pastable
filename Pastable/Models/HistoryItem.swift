@@ -109,7 +109,24 @@ class HistoryItem {
   @Relationship(deleteRule: .cascade, inverse: \HistoryItemContent.item)
   var contents: [HistoryItemContent] = []
 
-  init(contents: [HistoryItemContent] = []) {
+  // Non-persistent caches. Cards ask for these properties many times while the
+  // panel is open; recomputing regexes / decoding images on every body pass was
+  // the main cause of scroll and search jank.
+  @Transient private var cachedImageValue: NSImage?
+  @Transient private var cachedImageLoaded = false
+  @Transient private var cachedImageDataValue: Data?
+  @Transient private var cachedImageDataLoaded = false
+  @Transient private var cachedFileURLsValue: [URL]?
+  @Transient private var cachedFileURLsLoaded = false
+  @Transient private var cachedIsImageFileFlag: Bool?
+  @Transient private var cachedCodeFlag: Bool?
+  @Transient private var cachedLinkFlag: Bool?
+  @Transient private var cachedHexColorValue: String?
+  @Transient private var cachedHexColorLoaded = false
+  @Transient private var cachedFallbackPreviewText: String?
+  @Transient private var textRecognitionScheduled = false
+
+  init(contents: [HistoryItemContent] = [], contentHash: String? = nil) {
     self.firstCopiedAt = Date.now
     self.lastCopiedAt = Date.now
     self.contents = contents
@@ -117,7 +134,7 @@ class HistoryItem {
     self.cachedPreviewText = self.computePreviewText()
     // Helper to set title immediately as well
     self.title = self.generateTitle()
-    self.contentHash = Self.computeContentHash(contents: contents)
+    self.contentHash = contentHash ?? Self.computeContentHash(contents: contents)
     #if DEBUG
     let preview = cachedPreviewText?.prefix(60) ?? ""
     print("[HistoryItem][init] \(ISO8601DateFormatter().string(from: Date())) contents=\(contents.count) preview=\(preview)")
@@ -135,15 +152,23 @@ class HistoryItem {
   }
 
   static func computeContentHash(contents: [HistoryItemContent]) -> String {
-    let typeSet = Set(contents.map { $0.type })
+    computeContentHash(rawContents: contents.map {
+      RawContentSnapshot(type: $0.type, value: $0.value)
+    })
+  }
+
+  /// Hash a pasteboard snapshot without requiring SwiftData models. Used by the
+  /// capture pipeline so hashing (and image decoding) can happen off the main thread.
+  static func computeContentHash(rawContents: [RawContentSnapshot]) -> String {
+    let typeSet = Set(rawContents.map(\.type))
     func sha256(_ data: Data) -> String {
       let digest = SHA256.hash(data: data)
       return digest.map { String(format: "%02x", $0) }.joined()
     }
     func dataForType(_ type: NSPasteboard.PasteboardType) -> Data? {
-      return contents.first(where: { $0.type == type.rawValue })?.value
+      rawContents.first(where: { $0.type == type.rawValue })?.value
     }
-    
+
     // Prefer plain text
     if typeSet.contains(NSPasteboard.PasteboardType.string.rawValue),
        let data = dataForType(.string),
@@ -151,55 +176,54 @@ class HistoryItem {
        !text.isEmpty {
       return "text:\(sha256(Data(text.utf8)))"
     }
-    
+
     // File URLs
     if typeSet.contains(NSPasteboard.PasteboardType.fileURL.rawValue) {
-      let urls = contents
+      let urls = rawContents
         .filter { $0.type == NSPasteboard.PasteboardType.fileURL.rawValue }
         .compactMap { $0.value }
         .compactMap { URL(dataRepresentation: $0, relativeTo: nil, isAbsolute: true)?.absoluteString }
+        .sorted()
         .joined(separator: "\n")
       if !urls.isEmpty {
         return "files:\(sha256(Data(urls.utf8)))"
       }
     }
-    
+
     // Image data
     for imageType in [NSPasteboard.PasteboardType.png, .tiff, .jpeg, .heic] {
       if let data = dataForType(imageType), !data.isEmpty {
         return "image:\(sha256(data))"
       }
     }
-    
+
     // RTF
     if let data = dataForType(.rtf),
        let rtf = NSAttributedString(rtf: data, documentAttributes: nil)?.string,
        !rtf.isEmpty {
       return "rtf:\(sha256(Data(rtf.utf8)))"
     }
-    
+
     // HTML
     if let data = dataForType(.html),
        let html = NSAttributedString(html: data, documentAttributes: nil)?.string,
        !html.isEmpty {
       return "html:\(sha256(Data(html.utf8)))"
     }
-    
+
     // Fallback: hash first non-empty data
-    if let raw = contents.first(where: { $0.value != nil })?.value {
+    if let raw = rawContents.first(where: { $0.value != nil })?.value {
       return "raw:\(sha256(raw))"
     }
-    
+
     return ""
   }
 
   func generateTitle() -> String {
-    guard image == nil else {
-      Task {
-        self.performTextRecognition()
-      }
-      return ""
-    }
+    // Images get their title from a background Vision pass after insertion.
+    // Never block a pasteboard capture on OCR, and avoid decoding the image just
+    // to decide whether OCR is needed.
+    guard !hasImageRepresentation else { return "" }
     
     // If it's a file, use the filename as title (decoded)
     if let fileURL = fileURLs.first {
@@ -229,13 +253,32 @@ class HistoryItem {
     return title
   }
 
+  /// True for records like an empty clipboard string, which would render as a
+  /// blank "0 字" card. Images/files are never considered empty: their hash
+  /// prefix lets us distinguish them without loading the binary payload.
+  var isEffectivelyEmpty: Bool {
+    if !previewableText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+      return false
+    }
+
+    let hash = contentHash ?? ""
+    if hash.hasPrefix("image:") || hash.hasPrefix("files:") {
+      return false
+    }
+
+    return true
+  }
+
   var previewableText: String {
-    if let cached = cachedPreviewText {
+    if let cached = cachedPreviewText, !cached.isEmpty {
       return cached
     }
-    // Fallback if not cached (migration scenario)
+    if let cached = cachedFallbackPreviewText {
+      return cached
+    }
+    // Fallback for records created by an older version of the app.
     let text = computePreviewText()
-    // We can't save here easily as it's a computed property and we are in a getter
+    cachedFallbackPreviewText = text
     return text
   }
   
@@ -256,12 +299,21 @@ class HistoryItem {
   }
 
   var fileURLs: [URL] {
-    guard !universalClipboardText else {
-      return []
+    if cachedFileURLsLoaded {
+      return cachedFileURLsValue ?? []
     }
 
-    return allContentData([.fileURL])
-      .compactMap { URL(dataRepresentation: $0, relativeTo: nil, isAbsolute: true) }
+    let urls: [URL]
+    if universalClipboardText {
+      urls = []
+    } else {
+      urls = allContentData([.fileURL])
+        .compactMap { URL(dataRepresentation: $0, relativeTo: nil, isAbsolute: true) }
+    }
+
+    cachedFileURLsValue = urls
+    cachedFileURLsLoaded = true
+    return urls
   }
 
   var htmlData: Data? { contentData([.html]) }
@@ -273,22 +325,34 @@ class HistoryItem {
     return NSAttributedString(html: data, documentAttributes: nil)
   }
 
+  var hasImageRepresentation: Bool {
+    contentData([.png, .jpeg, .heic, .tiff]) != nil
+  }
+
   var imageData: Data? {
-    var data: Data?
-    data = contentData([.tiff, .png, .jpeg, .heic])
+    if cachedImageDataLoaded {
+      return cachedImageDataValue
+    }
+
+    var data = contentData([.png, .jpeg, .heic, .tiff])
     if data == nil, universalClipboardImage, let url = fileURLs.first {
       data = try? Data(contentsOf: url)
     }
 
+    cachedImageDataValue = data
+    cachedImageDataLoaded = true
     return data
   }
 
   var image: NSImage? {
-    guard let data = imageData else {
-      return nil
+    if cachedImageLoaded {
+      return cachedImageValue
     }
 
-    return NSImage(data: data)
+    let value = imageData.flatMap(NSImage.init(data:))
+    cachedImageValue = value
+    cachedImageLoaded = true
+    return value
   }
 
   var rtfData: Data? { contentData([.rtf]) }
@@ -338,33 +402,55 @@ class HistoryItem {
       .compactMap { $0.value }
   }
 
-  private func performTextRecognition() {
-    guard let cgImage = image?.cgImage(forProposedRect: nil, context: nil, hints: nil) else {
+  /// Run Vision off the main thread and only fill an empty title.
+  /// Called after the item has been inserted into a context so the result can
+  /// be persisted safely.
+  func scheduleTextRecognitionIfNeeded() {
+    guard !textRecognitionScheduled, title.isEmpty, hasImageRepresentation, let data = imageData else {
       return
     }
+    textRecognitionScheduled = true
 
-    let requestHandler = VNImageRequestHandler(cgImage: cgImage)
-    let request = VNRecognizeTextRequest(completionHandler: recognizeTextHandler)
-    request.recognitionLevel = .fast
-    request.recognitionLanguages = ["zh-Hans", "en-US"]
+    let itemID = persistentModelID
+    guard let context = modelContext else { return }
+    let contextBox = MainContextBox(context: context)
+    Task.detached(priority: .utility) {
+      guard let text = Self.recognizeText(in: data), !text.isEmpty else { return }
 
-    do {
-      try requestHandler.perform([request])
-    } catch {
-      print("Unable to perform the request: \(error).")
+      await MainActor.run {
+        guard let model = contextBox.context.model(for: itemID) as? HistoryItem,
+              model.title.isEmpty else { return }
+        let recognized = String(text.prefix(500))
+        model.title = recognized
+        // Images start with an empty preview. Populate it so the OCR text is
+        // searchable and cards show a meaningful header.
+        if model.cachedPreviewText?.isEmpty ?? true {
+          model.cachedPreviewText = recognized
+        }
+        try? contextBox.context.save()
+      }
     }
   }
 
-  private func recognizeTextHandler(request: VNRequest, error: Error?) {
-    guard let observations = request.results as? [VNRecognizedTextObservation] else {
-      return
+  private static func recognizeText(in data: Data) -> String? {
+    let request = VNRecognizeTextRequest()
+    request.recognitionLevel = .fast
+    request.usesLanguageCorrection = false
+    request.recognitionLanguages = ["zh-Hans", "en-US"]
+
+    let handler = VNImageRequestHandler(data: data)
+    do {
+      try handler.perform([request])
+    } catch {
+      return nil
     }
 
-    let recognizedStrings = observations.compactMap { observation in
-      return observation.topCandidates(1).first?.string
-    }
-
-    self.title = recognizedStrings.joined(separator: "\n")
+    let observations = request.results ?? []
+    let text = observations
+      .compactMap { $0.topCandidates(1).first?.string }
+      .joined(separator: "\n")
+      .trimmingCharacters(in: .whitespacesAndNewlines)
+    return text.isEmpty ? nil : text
   }
 }
 
@@ -372,6 +458,15 @@ import UniformTypeIdentifiers
 
 extension HistoryItem {
   var isCode: Bool {
+    if let cached = cachedCodeFlag {
+      return cached
+    }
+    let result = computeIsCode()
+    cachedCodeFlag = result
+    return result
+  }
+
+  private func computeIsCode() -> Bool {
     // 0. Exclude non-text types
     if isImage || isFile { return false }
 
@@ -385,7 +480,11 @@ extension HistoryItem {
     
     // Rule 1: Alphanumeric Ratio >= 55% (+2)
     // Code is dense with English letters/numbers. Natural language (especially non-English) is sparser in ASCII.
-    let alphanumericCount = text.unicodeScalars.filter { Character($0).isLetter || Character($0).isNumber }.count
+    let alphanumericCount = text.unicodeScalars.reduce(into: 0) { count, scalar in
+      if scalar.properties.isAlphabetic || CharacterSet.decimalDigits.contains(scalar) {
+        count += 1
+      }
+    }
     let ratio = Double(alphanumericCount) / Double(text.count)
     if ratio >= 0.55 { score += 2 }
     
@@ -402,22 +501,11 @@ extension HistoryItem {
     if text.range(of: lineEndPattern, options: .regularExpression) != nil { score += 1 }
     
     // Rule 4: Keywords (+3)
-    // Unified Regex for Top-20 keywords across main languages
-    let keywordsPattern = "(?x)\\b(" +
-        "func|var|let|if|else|return|class|struct|import|public|private|void|int|double|float|string|bool" +
-        "|def|elif|for|while|try|except|with|lambda|pass" + // Python
-        "|function|const|await|async|export|interface|extends" + // JS/TS
-        "|public|static|new|package" + // Java/C#
-        "|echo|array|use|namespace" + // PHP
-        "|SELECT|FROM|WHERE|INSERT|UPDATE|DELETE|CREATE|TABLE" + // SQL
-        "|mov|push|pop|call|ret" + // Assembly
-        ")\\b"
-    
-    do {
-        let regex = try NSRegularExpression(pattern: keywordsPattern, options: .caseInsensitive)
+    // Unified regex for the most common keywords across mainstream languages.
+    if let regex = Self.codeKeywordsRegex {
         let matches = regex.numberOfMatches(in: text, options: [], range: NSRange(text.startIndex..., in: text))
         if matches >= 2 { score += 3 }
-    } catch {}
+    }
     
     // Rule 5: Paired Braces/Brackets (+2)
     let openBrace = text.filter { $0 == "{" }.count
@@ -438,7 +526,29 @@ extension HistoryItem {
     return score >= 6
   }
 
+  private static let codeKeywordsRegex: NSRegularExpression? = {
+    let pattern = "(?x)\\b(" +
+        "func|var|let|if|else|return|class|struct|import|public|private|void|int|double|float|string|bool" +
+        "|def|elif|for|while|try|except|with|lambda|pass" +
+        "|function|const|await|async|export|interface|extends" +
+        "|public|static|new|package" +
+        "|echo|array|use|namespace" +
+        "|SELECT|FROM|WHERE|INSERT|UPDATE|DELETE|CREATE|TABLE" +
+        "|mov|push|pop|call|ret" +
+        ")\\b"
+    return try? NSRegularExpression(pattern: pattern, options: .caseInsensitive)
+  }()
+
   var isLink: Bool {
+    if let cached = cachedLinkFlag {
+      return cached
+    }
+    let result = computeIsLink()
+    cachedLinkFlag = result
+    return result
+  }
+
+  private func computeIsLink() -> Bool {
     let text = previewableText.trimmingCharacters(in: .whitespacesAndNewlines)
     guard !text.isEmpty else { return false }
     
@@ -465,11 +575,20 @@ extension HistoryItem {
   }
   
   var isImageFile: Bool {
-    guard let url = fileURLs.first,
-          let type = try? url.resourceValues(forKeys: [.contentTypeKey]).contentType else {
-      return false
+    if let cached = cachedIsImageFileFlag {
+      return cached
     }
-    return type.conforms(to: .image)
+
+    let result: Bool
+    if let url = fileURLs.first,
+       let type = try? url.resourceValues(forKeys: [.contentTypeKey]).contentType {
+      result = type.conforms(to: .image)
+    } else {
+      result = false
+    }
+
+    cachedIsImageFileFlag = result
+    return result
   }
   
   var isFile: Bool {
@@ -491,12 +610,22 @@ extension HistoryItem {
     return NSImage(cgImage: cgImage, size: .zero)
   }
   var hexColor: String? {
+    if cachedHexColorLoaded {
+      return cachedHexColorValue
+    }
+
     let text = previewableText.trimmingCharacters(in: .whitespacesAndNewlines)
     let pattern = "^#([0-9a-fA-F]{3}|[0-9a-fA-F]{6}|[0-9a-fA-F]{8})$"
-    
-    if text.range(of: pattern, options: .regularExpression) != nil {
-      return text
-    }
-    return nil
+    let value = text.range(of: pattern, options: .regularExpression) != nil ? text : nil
+
+    cachedHexColorValue = value
+    cachedHexColorLoaded = true
+    return value
   }
+}
+
+/// A single, explicitly main-actor-confined context reference used to hop the
+/// result of background OCR back to SwiftData.
+private struct MainContextBox: @unchecked Sendable {
+  let context: ModelContext
 }

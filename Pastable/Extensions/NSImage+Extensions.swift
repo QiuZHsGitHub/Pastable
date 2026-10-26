@@ -98,10 +98,10 @@ extension NSImage {
     var result = finalColor
     
     // Post-Processing: Ensure Dark Theme Compatibility
-    // Use a "Soft Knee" compression curve to smoothly darken bright colors without sudden jumps.
-    // Maps input brightness [0.4 ... 1.0] -> [0.4 ... 0.7].
-    if result.brightnessComponent > 0.5 {
-        let newBrightness = 0.5 + (result.brightnessComponent - 0.5) * 0.5
+    // Bright app icons (white/grey) used to produce near-white cards with white
+    // text. Use a soft knee that caps brightness for the dark UI.
+    if result.brightnessComponent > 0.45 {
+        let newBrightness = 0.45 + (result.brightnessComponent - 0.45) * 0.2
         result = NSColor(
           calibratedHue: result.hueComponent,
           saturation: result.saturationComponent,

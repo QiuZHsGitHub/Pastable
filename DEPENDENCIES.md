@@ -1,31 +1,33 @@
-# Swift Package Manager 依赖安装指南
+# 依赖说明
 
-## 在 Xcode 中添加依赖
-
-1. 打开 `Pastable.xcodeproj`
-2. 选择项目（Project Navigator 顶部的蓝色图标）
-3. 选择 **Package Dependencies** 标签页
-4. 点击 **+** 按钮添加依赖
-
-## 需要添加的依赖
+项目只依赖一个第三方库：
 
 | 包名 | URL | 版本 |
 |------|-----|------|
-| Defaults | `https://github.com/sindresorhus/Defaults.git` | 8.2.0 |
-| Fuse | `https://github.com/krisk/fuse-swift.git` | 1.4.0 |
-| KeyboardShortcuts | `https://github.com/sindresorhus/KeyboardShortcuts.git` | 2.0.2 |
-| LaunchAtLogin | `https://github.com/sindresorhus/LaunchAtLogin.git` | 1.1.0 |
-| Sauce | `https://github.com/Clipy/Sauce.git` | 2.4.1 |
-| Settings | `https://github.com/sindresorhus/Settings.git` | 3.1.1 |
-| Sparkle | `https://github.com/sparkle-project/Sparkle.git` | 2.6.4 |
-| swift-log | `https://github.com/apple/swift-log.git` | 1.6.4 |
-| SwiftHEXColors | `https://github.com/thii/SwiftHEXColors.git` | 1.4.1 |
+| KeyboardShortcuts | `https://github.com/sindresorhus/KeyboardShortcuts.git` | 2.4.0 |
 
-## 添加步骤
+依赖已经写入 `Pastable.xcodeproj` 和 `Package.swift`，Xcode 打开工程时会自动解析，**不需要手动添加**。
 
-对于每个依赖：
-1. 点击 **+** 按钮
-2. 在搜索框中粘贴 URL
-3. 选择 **Exact Version** 并输入版本号
-4. 点击 **Add Package**
-5. 勾选需要添加到 Target 的产品
+```bash
+# 需要时手动解析/更新
+xcodebuild -project Pastable.xcodeproj -scheme Pastable -resolvePackageDependencies
+```
+
+## 命令与测试
+
+```bash
+# 逻辑层单元测试（39 个用例，使用内存 SwiftData，不会碰真实数据库）
+swift test
+
+# 构建 macOS App
+xcodebuild -project Pastable.xcodeproj -scheme Pastable \
+  -configuration Debug -destination 'platform=macOS' \
+  -derivedDataPath /tmp/PastableDerived CODE_SIGNING_ALLOWED=NO build
+```
+
+端到端调试时可以用环境变量把数据库重定向到临时目录，避免污染真实历史：
+
+```bash
+PASTABLE_STORAGE_DIR=/tmp/PastableTest \
+  /tmp/PastableDerived/Build/Products/Debug/Pastable.app/Contents/MacOS/Pastable
+```

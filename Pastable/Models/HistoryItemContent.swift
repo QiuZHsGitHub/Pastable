@@ -1,6 +1,13 @@
 import Foundation
 import SwiftData
 
+/// A snapshot of one pasteboard representation, decoupled from SwiftData so it
+/// can cross thread boundaries while capturing.
+struct RawContentSnapshot: Sendable {
+  let type: String
+  let value: Data?
+}
+
 @Model
 class HistoryItemContent {
   var type: String = ""

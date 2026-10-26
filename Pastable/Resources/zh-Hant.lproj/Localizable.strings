@@ -6,9 +6,9 @@
 // Category
 "category.all" = "全部";
 "category.text" = "文字";
-"category.code" = "程式碼片段";
+"category.code" = "程式碼";
 "category.links" = "連結";
-"category.others" = "其他";
+"category.others" = "媒體";
 
 // Search
 "search.placeholder" = "搜尋";
@@ -60,3 +60,63 @@
 "settings.about.contact" = "聯絡信箱";
 
 "settings.about.copyright" = "版權所有 © 2026 NullPointer";
+
+// Category (missing entries)
+"category.image" = "圖片";
+"category.file" = "檔案";
+"category.color" = "顏色";
+
+// Empty states
+"empty.no_history" = "還沒有剪貼簿紀錄";
+"empty.no_results" = "沒有符合的結果";
+"empty.no_category" = "這個分類下沒有內容";
+"empty.hint" = "複製任意內容後會自動出現在這裡";
+"empty.category_hint" = "換個分類試試";
+
+// Units
+"unit.chars_format" = "%d 字";
+"unit.files_format" = "%d 檔案";
+"unit.one_file" = "1 檔案";
+
+// Common
+"common.cancel" = "取消";
+"common.ok" = "好";
+
+// Clear history
+"clear_history.title" = "清除紀錄？";
+"clear_history.message" = "將刪除全部剪貼簿紀錄，且無法復原。";
+"clear_history.confirm" = "清除";
+
+// Accessibility
+"accessibility.title" = "需要輔助功能權限";
+"accessibility.message" = "自動貼上需要輔助功能權限。請開啟「系統設定 > 隱私權與安全性 > 輔助功能」並啟用 Pastable。未開啟時仍可正常複製內容。";
+"accessibility.open_settings" = "開啟系統設定";
+
+// Extra menu item
+"menu.open" = "打開 Pastable";
+
+// Permissions
+"settings.general.permissions" = "權限";
+"settings.general.accessibility.granted" = "已取得輔助功能權限";
+"settings.general.accessibility.required" = "未開啟輔助功能權限";
+"settings.general.accessibility.hint" = "自動貼上需要此權限，複製內容不受影響。";
+"settings.general.login_item_error" = "無法更新登入項目";
+"settings.general.launch_at_login_approval" = "登入項目已註冊，但仍需在「系統設定 > 一般 > 登入項目」中允許。";
+
+// Storage statistics
+"settings.storage.items" = "紀錄";
+"settings.storage.database_size" = "資料庫大小";
+
+// History maintenance
+"maintenance.title" = "清理剪貼簿紀錄？";
+"maintenance.message" = "目前有 %ld 筆紀錄，但上限是 %ld 筆；另有 %ld 筆已超過保留時間。清理可以立即釋放空間。\n\n選擇「全部保留」會把上限提高到 %ld 筆並關閉保留時間限制。";
+"maintenance.clean" = "立即清理";
+"maintenance.keep" = "全部保留";
+"maintenance.later" = "稍後";
+"settings.storage.cleanup_now" = "立即清理";
+
+// Empty state hints and units
+"empty.search_hint" = "換個關鍵字試試";
+"empty.shortcut.open" = "開啟";
+"empty.shortcut.paste" = "貼上";
+"empty.shortcut.quick" = "快速貼上";

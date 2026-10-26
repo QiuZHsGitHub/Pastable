@@ -7,21 +7,19 @@ struct CardList: View {
   @ObservedObject var appState = AppState.shared
   let onPaste: (HistoryItem) -> Void
   let onDelete: (HistoryItem) -> Void
-  
-  @State private var hoveredItemId: PersistentIdentifier?
-  
+
   var body: some View {
     ScrollViewReader { proxy in
       ScrollView(.horizontal, showsIndicators: false) {
         LazyHStack(spacing: 16) {
           ForEach(items) { item in
             cardView(for: item)
-              .id(item.id) // Important for scrollTo
+              .id(item.persistentModelID)
           }
         }
         .padding(.vertical, 16)
-        .padding(.horizontal, 24)  // contentInset
-        .id("ScrollToTopAnchor") // Anchor applied to the padded container
+        .padding(.horizontal, 24)
+        .id("ScrollToTopAnchor")
       }
       .scrollIndicators(.automatic)
       .frame(height: 273)
@@ -30,59 +28,58 @@ struct CardList: View {
           AppState.shared.searchFocusRequest = .blur
         }
       )
-      .onChange(of: AppState.shared.shouldScrollToTop) { shouldScroll in
-        if shouldScroll {
-          proxy.scrollTo("ScrollToTopAnchor", anchor: .leading)
-          DispatchQueue.main.async {
-             AppState.shared.shouldScrollToTop = false
-          }
+      .onChange(of: appState.shouldScrollToTop) { _, shouldScroll in
+        guard shouldScroll else { return }
+        proxy.scrollTo("ScrollToTopAnchor", anchor: .leading)
+        appState.shouldScrollToTop = false
+      }
+      .onChange(of: selectedItemId) { _, newValue in
+        guard let newValue else { return }
+        withAnimation(.easeInOut(duration: 0.15)) {
+          proxy.scrollTo(newValue, anchor: .center)
         }
       }
       .onAppear {
-          // If a new item was added while hidden, snap to top immediately without animation
-          if AppState.shared.shouldScrollToTop {
-              proxy.scrollTo("ScrollToTopAnchor", anchor: .leading)
-              // Reset signal
-              DispatchQueue.main.async {
-                  AppState.shared.shouldScrollToTop = false
-              }
-          }
-      }
-      // Global shortcut for delete on hover (Command+Delete)
-      // Hidden button trick to attach keyboard shortcut
-      .background(
-        Button("") {
-          if let hoveredId = hoveredItemId, let item = items.first(where: { $0.id == hoveredId }) {
-             onDelete(item)
-          }
+        // If a new item was added while the panel was hidden, snap to the front
+        // without animating.
+        if appState.shouldScrollToTop {
+          proxy.scrollTo("ScrollToTopAnchor", anchor: .leading)
+          appState.shouldScrollToTop = false
         }
-        .keyboardShortcut(.delete, modifiers: .command)
-        .hidden()
-      )
+      }
     }
   }
-  
+
   // MARK: - Private Views
-  
+
   @ViewBuilder
   private func cardView(for item: HistoryItem) -> some View {
     Button(action: {
+      selectedItemId = item.persistentModelID
       onPaste(item)
     }) {
       CardCell(
         item: item,
-        isSelected: selectedItemId == item.id,
-        onCopy: nil // Inner action handled by parent Button
+        isSelected: selectedItemId == item.persistentModelID,
+        onCopy: nil
       )
     }
     .buttonStyle(.plain)
     .onHover { hovering in
       if hovering {
-        hoveredItemId = item.id
-      } else if hoveredItemId == item.id {
-        hoveredItemId = nil
+        appState.hoveredItemID = item.persistentModelID
+      } else if appState.hoveredItemID == item.persistentModelID {
+        appState.hoveredItemID = nil
       }
     }
+    .help(cardTitle(for: item))
+  }
+
+  private func cardTitle(for item: HistoryItem) -> String {
+    if item.isFile, let fileURL = item.fileURLs.first {
+      return fileURL.lastPathComponent.removingPercentEncoding ?? fileURL.lastPathComponent
+    }
+    return item.title.isEmpty ? item.previewableText : item.title
   }
 }
 
@@ -90,7 +87,7 @@ struct CardList: View {
 
 private struct CardListPreview: View {
   @State private var selectedId: PersistentIdentifier? = nil
-  
+
   var body: some View {
     CardList(
       items: HistoryItem.examples,

@@ -5,6 +5,8 @@ struct SearchBar: View {
   var hasHistory: Bool = false
   var onClearHistory: (() -> Void)?
   @Environment(\.openSettings) private var openSettings
+  @Environment(\.colorScheme) private var colorScheme
+  private var theme: AppTheme { AppTheme(colorScheme) }
   
   @State private var showMoreMenu = false
   @FocusState private var isTextFieldFocused: Bool
@@ -12,27 +14,35 @@ struct SearchBar: View {
   var body: some View {
     HStack(spacing: 0) { // 主容器
       // 1. 搜索图标
-      Image(systemName: "magnifyingglass")
-        .font(.system(size: 14, weight: .medium))
-        .foregroundColor(isTextFieldFocused ? .white : .white.opacity(0.5))
-        .frame(width: 32)
+      Image("icon_search")
+        .renderingMode(.template)
+        .resizable()
+        .scaledToFit()
+        .frame(width: 14, height: 14)
+        .foregroundColor(isTextFieldFocused ? theme.textPrimary : theme.textTertiary)
+        .frame(width: 34, height: 34)
         .contentShape(Rectangle())
         .onTapGesture {
           isTextFieldFocused = true
         }
       
       // 2. 文本输入框
-      TextField("search.placeholder", text: $text)
-        .textFieldStyle(.plain)
-        .font(.system(size: 13)) //稍微调小字体以显得更精致
-        .foregroundColor(.white)
-        .focused($isTextFieldFocused)
+      TextField(
+        "",
+        text: $text,
+        prompt: Text("search.placeholder")
+          .foregroundColor(theme.textPlaceholder)
+      )
+      .textFieldStyle(.plain)
+      .font(.system(size: 13))
+      .foregroundColor(theme.textPrimary)
+      .focused($isTextFieldFocused)
       
       // 3. 清除按钮 (仅在有文本时显示)
       if !text.isEmpty {
         Button(action: { text = "" }) {
           Image(systemName: "xmark.circle.fill")
-            .foregroundColor(.white.opacity(0.5))
+            .foregroundColor(theme.textTertiary)
             .font(.system(size: 14))
         }
         .buttonStyle(.plain)
@@ -40,19 +50,27 @@ struct SearchBar: View {
         .transition(.opacity)
       }
 
-      // 4. 分隔线
+      // 4. 空闲时显示快捷键提示
+      if text.isEmpty {
+        Text("⌘⇧F")
+          .font(.system(size: 10, weight: .medium, design: .monospaced))
+          .foregroundColor(theme.textTertiary)
+          .padding(.trailing, 8)
+      }
+
+      // 5. 分隔线
       Rectangle()
-        .fill(Color.white.opacity(0.15))
-        .frame(width: 1, height: 16)
+        .fill(theme.searchDivider)
+        .frame(width: 1, height: 18)
         .padding(.horizontal, 4)
       
-      // 5. 更多按钮
+      // 6. 更多按钮
       Button(action: {
         showMoreMenu.toggle()
       }) {
         Image(systemName: "ellipsis")
           .font(.system(size: 14, weight: .medium))
-          .foregroundColor(showMoreMenu ? .white : .white.opacity(0.6)) // 菜单打开时高亮
+          .foregroundColor(showMoreMenu ? theme.textPrimary : theme.textSecondary)
           .frame(width: 32, height: 32)
           .contentShape(Rectangle()) // 增大点击区域
       }
@@ -72,17 +90,34 @@ struct SearchBar: View {
         )
       }
     }
-    .frame(height: 32)
+    // Match the Figma spacing: the trailing ⋯ sits 6px inside the rounded field
+    // instead of touching its right edge.
+    .padding(.trailing, 10)
+    .frame(height: 36)
     .background(
-      RoundedRectangle(cornerRadius: 8)
-        .fill(Color.white.opacity(isTextFieldFocused ? 0.15 : 0.08)) // 动态背景
+      RoundedRectangle(cornerRadius: 10)
+        .fill(theme.searchBackground)
     )
     .overlay(
-      RoundedRectangle(cornerRadius: 8)
-        .stroke(Color.white.opacity(isTextFieldFocused ? 0.3 : 0.1), lineWidth: 1) // 细微边框
+      RoundedRectangle(cornerRadius: 10)
+        .strokeBorder(
+          isTextFieldFocused
+            ? Color.pastableOrange
+            : theme.searchBorder,
+          lineWidth: 1
+        )
     )
-    .animation(.easeInOut(duration: 0.2), value: isTextFieldFocused) // 平滑过渡
-    .onChange(of: AppState.shared.searchFocusRequest) { request in
+    .shadow(
+      color: isTextFieldFocused ? Color.pastableOrange.opacity(0.12) : .clear,
+      radius: 8
+    )
+    .animation(.easeOut(duration: 0.16), value: isTextFieldFocused)
+    .onAppear {
+      if AppState.shared.isPanelVisible {
+        isTextFieldFocused = true
+      }
+    }
+    .onChange(of: AppState.shared.searchFocusRequest) { _, request in
       if request == .focus {
         isTextFieldFocused = true
         // Reset signal
@@ -100,19 +135,17 @@ struct SearchBar: View {
   }
 
   private func openSettingsWindow(targetTab: AppState.SettingsTab?) {
-    if let targetTab {
-      AppState.shared.settingsTab = targetTab
-    }
+    // Close the panel first so it does not float above the Settings window.
+    // The hosting view stays alive, so the captured `openSettings` action is
+    // still valid after `orderOut`.
+    AppState.shared.appDelegate?.closePanel(restorePrevious: true)
     NSApp.activate(ignoringOtherApps: true)
-    if #available(macOS 14.0, *) {
-      openSettings()
-    } else {
-      NSApp.sendAction(Selector(("showSettingsWindow:")), to: nil, from: nil)
-    }
-    if let targetTab {
-      DispatchQueue.main.async {
+
+    DispatchQueue.main.async {
+      if let targetTab {
         AppState.shared.settingsTab = targetTab
       }
+      openSettings()
     }
   }
 }

@@ -8,7 +8,6 @@ struct PastableApp: App {
     Settings {
       SettingsView()
         .modelContainer(Storage.shared.container)
-        .preferredColorScheme(.dark)
     }
   }
 }

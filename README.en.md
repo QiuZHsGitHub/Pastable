@@ -22,6 +22,7 @@
 
 ## Table of Contents
 
+- [Themes](#themes)
 - [Highlights](#highlights)
 - [Quick Start](#quick-start)
 - [Download](#download)
@@ -31,6 +32,28 @@
 - [Inspirations](#inspirations)
 - [License](#license)
 
+## Figma
+
+- Dark design space: [Pastable / UI 2026](https://www.figma.com/design/4lqk62cQU0WffNMgUXkGez/Paste?node-id=2006-6)
+- Light design space: [Pastable / UI 2026 · Light](https://www.figma.com/design/4lqk62cQU0WffNMgUXkGez/Paste?node-id=2011-11)
+- Tokens and handoff: [docs/figma.md](docs/figma.md) · [docs/theme.md](docs/theme.md)
+- Panel frame: [Dark](https://www.figma.com/design/4lqk62cQU0WffNMgUXkGez/Paste?node-id=2006-15) · [Light](https://www.figma.com/design/4lqk62cQU0WffNMgUXkGez/Paste?node-id=2011-24)
+
+## Themes
+
+Follows the **macOS system Light / Dark appearance** by default. No forced dark mode and no extra theme picker. The panel is opaque layered glass; all text uses solid tokens instead of white/black alpha:
+
+- Dark: panel `#2B2C31 → #151619`, text `#F3F4F6 / #A8ADB6 / #8B9099`
+- Light: panel `#EDF0F4 → #D7DCE4`, cards `#FFFFFF`, text `#101216 / #414750 / #515861`
+- Cards: category tint over the card base, Dark 18%/24%, Light 12%/20%
+
+<p align="center">
+  <img src="./docs/assets/pastable-panel-2026.png" alt="Pastable Dark" width="49%" />
+  <img src="./docs/assets/pastable-panel-light-2026.png" alt="Pastable Light" width="49%" />
+</p>
+
+See [docs/theme.md](docs/theme.md) for the full token and Figma mapping.
+
 ## Highlights
 
 - **Bottom floating panel**: instantly opens recent clipboard history
@@ -39,6 +62,10 @@
 - **One-click paste**: select a card to restore clipboard and paste immediately
 - **History management**: retention window, capacity control, and manual cleanup
 - **Custom shortcuts**: configurable global hotkey for panel toggle
+
+<p align="center">
+  <img src="./docs/assets/pastable-panel-2026.png" alt="Pastable panel (2026-10)" width="100%" />
+</p>
 
 ## Quick Start
 
@@ -66,19 +93,36 @@ Follow `./DEPENDENCIES.md` to add Swift Package dependencies in Xcode.
 
 ## Usage
 
-- **Toggle panel**: use your configured shortcut (default `Cmd + Shift + V`)
+- **Toggle panel**: use your configured shortcut (default `Cmd + Shift + V`); search is focused automatically
 - **Focus search**: `Cmd + Shift + F`
-- **Quick paste**: click a card to paste into the active app
-- **Delete card**: hover a card and press `Cmd + Delete`
+- **Quick paste**: click a card, or select one and press `Enter`
+- **Select a card**: `←` / `→` while the search field is empty
+- **Number shortcuts**: `Cmd + 1…9` or `Fn + 1…9` to paste the Nth item
+- **Delete card**: hover it (or select it) and press `Cmd + Delete`
+- **Close panel**: `Esc` or the global shortcut again
 
 ## Settings
 
-- Search mode: Exact / Fuzzy
-- Auto paste
+- Search mode: Exact / Fuzzy (searches titles and full content; all tokens must match)
+- Auto paste (requires Accessibility permission; a clear prompt is shown and the app falls back to copy-only)
 - Remove formatting
 - Sound feedback
-- Save types: Text / Image / File
-- History limit and retention duration
+- Save types: Text / Image / File (disabled types are no longer captured)
+- History limit and retention duration (actually enforced; a one-time prompt offers Clean Up / Keep Everything / Later)
+- Launch at login, storage usage statistics
+
+> Large TIFF screenshots are converted to PNG in the background, dramatically shrinking the store.
+
+## Development & Tests
+
+```bash
+swift test    # 39 logic tests using an in-memory store
+xcodebuild -project Pastable.xcodeproj -scheme Pastable \
+  -configuration Debug -destination 'platform=macOS' \
+  -derivedDataPath /tmp/PastableDerived CODE_SIGNING_ALLOWED=NO build
+```
+
+Use `PASTABLE_STORAGE_DIR=/tmp/PastableTest` to redirect the database while debugging.
 
 ## Project Structure
 
@@ -86,9 +130,10 @@ Follow `./DEPENDENCIES.md` to add Swift Package dependencies in Xcode.
 Pastable/
 ├── Core/          # lifecycle, clipboard monitor, search, theme
 ├── Models/        # history models and content parsing
-├── Persistence/   # SwiftData persistence and dedup logic
+├── Persistence/   # SwiftData persistence, dedup, retention
 ├── UI/            # floating panel, cards, settings views
 └── Extensions/    # shared extensions and pasteboard types
+Tests/             # SwiftPM unit tests
 ```
 
 ## Inspirations

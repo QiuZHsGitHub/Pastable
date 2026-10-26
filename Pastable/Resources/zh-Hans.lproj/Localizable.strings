@@ -6,13 +6,13 @@
 // Category
 "category.all" = "全部";
 "category.text" = "文本";
-"category.code" = "代码片段";
+"category.code" = "代码";
 "category.links" = "链接";
 "category.link" = "链接";
 "category.image" = "图片";
 "category.file" = "文件";
 "category.color" = "颜色";
-"category.others" = "其他";
+"category.others" = "媒体";
 
 // Search
 "search.placeholder" = "搜索";
@@ -64,3 +64,58 @@
 "settings.about.contact" = "联系邮箱";
 
 "settings.about.copyright" = "版权所有 © 2026 NullPointer";
+
+// Empty states
+"empty.no_history" = "还没有剪贴板历史";
+"empty.no_results" = "没有匹配结果";
+"empty.no_category" = "这个分类下没有内容";
+"empty.hint" = "复制任意内容后会自动出现在这里";
+"empty.category_hint" = "换个分类试试";
+
+// Units
+"unit.chars_format" = "%d 字";
+"unit.files_format" = "%d 文件";
+"unit.one_file" = "1 文件";
+
+// Common
+"common.cancel" = "取消";
+"common.ok" = "好";
+
+// Clear history
+"clear_history.title" = "清空历史记录？";
+"clear_history.message" = "将删除全部剪贴板历史，且无法撤销。";
+"clear_history.confirm" = "清空";
+
+// Accessibility
+"accessibility.title" = "需要辅助功能权限";
+"accessibility.message" = "自动粘贴需要辅助功能权限。请打开「系统设置 > 隐私与安全性 > 辅助功能」并开启 Pastable。未开启时仍可正常复制内容。";
+"accessibility.open_settings" = "打开系统设置";
+
+// Extra menu item
+"menu.open" = "打开 Pastable";
+
+// Permissions
+"settings.general.permissions" = "权限";
+"settings.general.accessibility.granted" = "已获得辅助功能权限";
+"settings.general.accessibility.required" = "未开启辅助功能权限";
+"settings.general.accessibility.hint" = "自动粘贴需要此权限，复制内容不受影响。";
+"settings.general.login_item_error" = "无法更新登录项";
+"settings.general.launch_at_login_approval" = "登录项已注册，但仍需在「系统设置 > 通用 > 登录项」中允许。";
+
+// Storage statistics
+"settings.storage.items" = "历史记录";
+"settings.storage.database_size" = "数据库大小";
+
+// History maintenance
+"maintenance.title" = "清理剪贴板历史？";
+"maintenance.message" = "当前有 %ld 条历史记录，但上限是 %ld 条；另有 %ld 条已超过保留时间。清理可以立即释放空间。\n\n选择“全部保留”会把上限提高到 %ld 条并关闭保留时间限制。";
+"maintenance.clean" = "立即清理";
+"maintenance.keep" = "全部保留";
+"maintenance.later" = "稍后";
+"settings.storage.cleanup_now" = "立即清理";
+
+// Empty state hints and units
+"empty.search_hint" = "换个关键词试试";
+"empty.shortcut.open" = "呼出";
+"empty.shortcut.paste" = "粘贴";
+"empty.shortcut.quick" = "快贴";

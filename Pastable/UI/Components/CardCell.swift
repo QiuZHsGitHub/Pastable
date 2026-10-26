@@ -9,32 +9,31 @@ struct CardCell: View {
   @State private var fileThumbnail: NSImage? = nil
   @State private var appIconImage: NSImage? = nil // Fix: Store distinct image state
   @State private var fileIconImage: NSImage? = nil // Fix: Store file icon state
-  @ObservedObject var themeManager = ThemeManager.shared
+  @Environment(\.colorScheme) private var colorScheme
   private let imageCache = ImageCache.shared
+
+  private var theme: AppTheme { AppTheme(colorScheme) }
   
   var body: some View {
     ZStack {
-      // 背景渐变
+      // 自适应色 -> 深色两段渐变。比「纯色 + 黑遮罩」更有层次，也避免
+      // 浅色 App 图标把整张卡压成一块灰。
       backgroundGradient
-      
-      // 右下角模糊装饰圆形
-      Circle()
-        .fill(Color.white.opacity(0.05))
-        .frame(width: 112, height: 112)
-        .blur(radius: 24)
-        .offset(x: 60, y: 80)
-      
+
       // 主内容
       VStack(alignment: .leading, spacing: 8) {
-        // Header
-        HStack {
-          Text(cardTitle)
-            .font(.system(size: 16))
-            .foregroundColor(.white)
-            .lineLimit(1)
-            .padding(.trailing, 40)
-          
-          Spacer()
+        // Header — only when it adds information. For plain text the title is
+        // just a truncated copy of the body and used to be rendered twice.
+        if shouldShowTitle {
+          HStack {
+            Text(cardTitle)
+              .font(.system(size: 15, weight: .semibold))
+              .foregroundColor(theme.textPrimary)
+              .lineLimit(1)
+              .padding(.trailing, 40)
+
+            Spacer()
+          }
         }
         
         // Content Preview
@@ -44,7 +43,11 @@ struct CardCell: View {
             .resizable()
             .aspectRatio(contentMode: .fit)
             .frame(maxWidth: .infinity, maxHeight: .infinity)
-            .cornerRadius(4)
+            .cornerRadius(6)
+            .overlay(
+              RoundedRectangle(cornerRadius: 6)
+                .strokeBorder(theme.imageBorder, lineWidth: 1)
+            )
         } else if item.isFile, item.fileURLs.first != nil {
            // Case B: Files
            // check if image file
@@ -55,7 +58,11 @@ struct CardCell: View {
                  .resizable()
                  .aspectRatio(contentMode: .fit)
                  .frame(maxWidth: .infinity, maxHeight: .infinity)
-                 .cornerRadius(4)
+                 .cornerRadius(6)
+                 .overlay(
+                   RoundedRectangle(cornerRadius: 6)
+                     .strokeBorder(theme.imageBorder, lineWidth: 1)
+                 )
              }
            } else {
              // Case B.2: Generic File Icon
@@ -77,11 +84,18 @@ struct CardCell: View {
         } else {
           // Case C: Text or Color
           if let hexCode = item.hexColor {
-            // Case C.1: Hex Color Preview (Full Fill)
-            Color(hex: hexCode)
-              .frame(maxWidth: .infinity, maxHeight: .infinity)
-              .frame(minHeight: 120) // Ensure it takes up space even if empty? Text cards are usually fixed height.
-              .cornerRadius(4)
+            // Case C.1: Hex Color Preview (Full Fill + readable value)
+            ZStack {
+              Color(hex: hexCode)
+              Text(hexCode.uppercased())
+                .font(.system(size: 19, weight: .semibold, design: .monospaced))
+                .foregroundColor(theme.contrastText(on: hexCode))
+                .padding(.horizontal, 10)
+                .padding(.vertical, 6)
+                .background(theme.contrastChip(on: hexCode), in: RoundedRectangle(cornerRadius: 8))
+            }
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
+            .clipShape(RoundedRectangle(cornerRadius: 6))
           } else {
             // Case C.2: Regular Text (Preview)
             Group {
@@ -89,11 +103,13 @@ struct CardCell: View {
                 Text(attrStr)
                   .frame(width: 236, alignment: .topLeading)
                   .multilineTextAlignment(.leading)
+                  .lineSpacing(2)
               } else {
                 Text(item.previewableText)
                   .font(item.isCode ? .system(size: 13, design: .monospaced) : .system(size: 13))
-                  .foregroundColor(Color(hex: "#FFFFFF").opacity(0.8))
+                  .foregroundColor(theme.textBody)
                   .multilineTextAlignment(.leading)
+                  .lineSpacing(2)
                   .frame(width: 236, alignment: .topLeading)
               }
             }
@@ -114,57 +130,65 @@ struct CardCell: View {
           }
         }
         
-        // Footer
-        HStack {
-          Text(item.firstCopiedAt.timeAgoDisplay())
-            .font(.system(size: 11))
-            .foregroundColor(.white.opacity(0.6))
-          
-          Spacer()
-          
-          Text("\(item.previewableText.count) chars")
-            .font(.system(size: 11))
-            .foregroundColor(.white.opacity(0.6))
-          
-          Text(contentTypeLabel)
-            .font(.system(size: 11))
-            .padding(.horizontal, 8)
-            .padding(.vertical, 4)
-            .background(Color.white.opacity(0.2))
-            .overlay(alignment: .bottom) {
-                 Rectangle()
-                   .fill(categoryIndicatorColor)
-                   .frame(height: 2)
-            }
-            .clipShape(RoundedRectangle(cornerRadius: 4))
-            .foregroundColor(.white.opacity(0.8))
+        // Footer: source icon → time → detail → type. Type is the only
+        // emphasized item; everything else is secondary metadata.
+        HStack(spacing: 6) {
+          if let icon = appIconImage {
+            Image(nsImage: icon)
+              .resizable()
+              .frame(width: 16, height: 16)
+              .cornerRadius(4)
+          }
+
+          Text(item.lastCopiedAt.timeAgoDisplay())
+            .font(.system(size: 11.5))
+            .foregroundColor(theme.textSecondary)
+            .lineLimit(1)
+
+          Spacer(minLength: 4)
+
+          Text(detailText)
+            .font(.system(size: 11.5))
+            .foregroundColor(theme.textTertiary)
+            .lineLimit(1)
+
+          HStack(spacing: 5) {
+            Circle()
+              .fill(categoryIndicatorColor)
+              .frame(width: 6, height: 6)
+            Text(contentTypeLabel)
+              .font(.system(size: 11, weight: .medium))
+              .foregroundColor(theme.typePillText)
+              .lineLimit(1)
+          }
+          .padding(.horizontal, 8)
+          .padding(.vertical, 4)
+          .background(theme.typePillBackground)
+          .clipShape(Capsule())
         }
       }
       .padding(12)
       
 
       
-      // App Icon (Watermark style) - 展示在右上角 (Z-Index Top)
-      if let icon = appIconImage {
-        Image(nsImage: icon)
-          .resizable()
-          .frame(width: 70, height: 70)
-          .cornerRadius(8)
-          .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topTrailing)
-          .padding(.top, -15)
-          .padding(.trailing, -15)
-      }
     }
     .frame(width: 260, height: 241)
     .clipShape(RoundedRectangle(cornerRadius: 14))
-    .shadow(color: Color.black.opacity(0.1), radius: 15, x: 0, y: 10)
-    .shadow(color: Color.black.opacity(0.1), radius: 6, x: 0, y: 4)
-    .scaleEffect(isHovered ? 1.05 : 1.0)
-    .animation(.easeInOut(duration: 0.2), value: isHovered)
+    .overlay(
+      RoundedRectangle(cornerRadius: 14)
+        .strokeBorder(
+          isSelected ? Color.pastableOrange : theme.cardBorder,
+          lineWidth: isSelected ? 1.5 : 1
+        )
+    )
+    .shadow(color: isSelected ? Color.pastableOrange.opacity(theme.isDark ? 0.24 : 0.16) : .clear, radius: 10)
+    .shadow(color: Color.black.opacity(theme.isDark ? (isHovered ? 0.36 : 0.26) : (isHovered ? 0.14 : 0.09)), radius: 18, x: 0, y: 10)
+    .shadow(color: Color.black.opacity(theme.isDark ? 0.14 : 0.05), radius: 6, x: 0, y: 4)
+    .scaleEffect(isHovered ? 1.02 : 1.0)
+    .animation(.easeOut(duration: 0.18), value: isHovered)
     .animation(nil, value: fileThumbnail)
     .animation(nil, value: appIconImage)
     .animation(nil, value: fileIconImage)
-    .animation(nil, value: adaptiveColor)
     .animation(nil, value: cachedAttributedText)
     .animation(nil, value: contentBackgroundColor)
     .onHover { hovering in
@@ -172,8 +196,6 @@ struct CardCell: View {
     }
     .task(id: item.persistentModelID) {
       let itemId = item.persistentModelID
-      let isAdaptiveMode = ThemeManager.shared.currentMode == .adaptive
-      let cachedAdaptiveHex = item.cachedAdaptiveHexColor
       let cachedRTFBackgroundHex = item.cachedRTFBackgroundHexColor
       let rtfData = item.rtfData
       let fileURL = item.fileURLs.first
@@ -181,129 +203,127 @@ struct CardCell: View {
       let isFile = item.isFile
       let appBundleId = item.application
 
+      if let cachedHex = cachedRTFBackgroundHex {
+        contentBackgroundColor = Color(hex: cachedHex)
+      }
+
       // 1. Load File Thumbnail
       if isImageFile, let url = fileURL {
-        Task.detached(priority: .userInitiated) {
-            let thumb = await self.imageCache.thumbnail(forURL: url) { HistoryItem.loadThumbnail(for: $0) }
-          await MainActor.run {
-            guard item.persistentModelID == itemId else { return }
-            fileThumbnail = thumb
-          }
-        }
+        let box = await Task.detached(priority: .userInitiated) { () -> SendableImage in
+          let thumbnail = ImageCache.shared.thumbnail(forURL: url) { HistoryItem.loadThumbnail(for: $0) }
+          return SendableImage(value: thumbnail)
+        }.value
+
+        guard item.persistentModelID == itemId else { return }
+        fileThumbnail = box.value
       }
-      
-      // 2. Load App Icon
+
+      // 2. Load App Icon for the footer (the card background follows the
+      // category tint, matching the Figma design; app-icon average colors are
+      // intentionally not used for the card surface anymore).
       if let bundleId = appBundleId,
          let path = NSWorkspace.shared.urlForApplication(withBundleIdentifier: bundleId)?.path {
-        Task.detached(priority: .userInitiated) {
-            let icon = await self.imageCache.appIcon(forBundleId: bundleId, path: path)
-          var adaptive: Color? = nil
-          var adaptiveHexToCache: String? = nil
-          
-          if isAdaptiveMode {
-            if let cachedHex = cachedAdaptiveHex {
-              adaptive = Color(hex: cachedHex)
-            } else if let color = icon?.averageColor() {
-              adaptive = color
-              adaptiveHexToCache = color.toHex()
-            }
-          }
-          
-          await MainActor.run {
-            guard item.persistentModelID == itemId else { return }
-            appIconImage = icon
-            if let adaptive = adaptive {
-              self.adaptiveColor = adaptive
-            }
-            if let adaptiveHexToCache = adaptiveHexToCache {
-              item.cachedAdaptiveHexColor = adaptiveHexToCache
-            }
-          }
-        }
+        let box = await Task.detached(priority: .userInitiated) { () -> SendableImage in
+          SendableImage(value: ImageCache.shared.appIcon(forBundleId: bundleId, path: path))
+        }.value
+
+        guard item.persistentModelID == itemId else { return }
+        appIconImage = box.value
       }
-      
+
       // 3. Load Generic File Icon
       if isFile, !isImageFile, let url = fileURL {
-        Task.detached(priority: .userInitiated) {
-          let icon = self.imageCache.fileIcon(forPath: url.path)
-          await MainActor.run {
-            guard item.persistentModelID == itemId else { return }
-            fileIconImage = icon
+        let box = await Task.detached(priority: .userInitiated) { () -> SendableImage in
+          SendableImage(value: ImageCache.shared.fileIcon(forPath: url.path))
+        }.value
+
+        guard item.persistentModelID == itemId else { return }
+        fileIconImage = box.value
+      }
+
+      // 4. Parse RTF content off the main thread.
+      if let rtfData, self.cachedAttributedText == nil {
+        let parsed = await Task.detached(priority: .userInitiated) { () -> (AttributedString, Color?)? in
+          guard let rtf = NSAttributedString(rtf: rtfData, documentAttributes: nil) else { return nil }
+          return (AttributedString(rtf), rtf.effectiveBackgroundColor)
+        }.value
+
+        guard item.persistentModelID == itemId else { return }
+        if let parsed {
+          cachedAttributedText = parsed.0
+          contentBackgroundColor = parsed.1
+          if item.cachedRTFBackgroundHexColor == nil,
+             let color = parsed.1,
+             let hex = color.toHex() {
+            item.cachedRTFBackgroundHexColor = hex
+            try? item.modelContext?.save()
           }
         }
-      }
-      
-      // 5. Load RTF Content & Background (Optimization)
-      
-      // A. Try Color Cache First (For Background)
-      if let cachedHex = cachedRTFBackgroundHex {
-           self.contentBackgroundColor = Color(hex: cachedHex)
-      }
-      
-      // B. Parse RTF Async (To get the text & validation)
-      if let rtfData = rtfData, self.cachedAttributedText == nil {
-          Task.detached(priority: .userInitiated) {
-              // Reconstruct attributed string from Data on background thread
-              if let rtf = NSAttributedString(rtf: rtfData, documentAttributes: nil) {
-                  let attrStr = AttributedString(rtf)
-                  let bgColor = rtf.effectiveBackgroundColor
-                  
-                  await MainActor.run {
-                      guard item.persistentModelID == itemId else { return }
-                      self.cachedAttributedText = attrStr
-                      // Update active background color from actual content (self-healing)
-                      self.contentBackgroundColor = bgColor
-                      
-                      // Cache the background color if missing
-                      if item.cachedRTFBackgroundHexColor == nil, let color = bgColor, let hex = color.toHex() {
-                          item.cachedRTFBackgroundHexColor = hex
-                      }
-                  }
-              }
-          }
       }
     }
   }
-  
+
   // MARK: - Private Properties
-  @State private var adaptiveColor: Color? = nil
   @State private var cachedAttributedText: AttributedString? = nil
   @State private var contentBackgroundColor: Color? = nil
   
+  /// Single source of truth for the category accent. The color card uses the
+  /// actual hex value, everything else uses the type color.
+  private var tintHex: String {
+    if let hex = item.hexColor { return hex }
+    if item.isCode { return "#3B82F6" }
+    if item.isLink { return "#A855F7" }
+    if item.isImage || item.isFile { return "#EC4899" }
+    return "#9CA3AF"
+  }
+
   private var categoryIndicatorColor: Color {
-      if item.isCode { return Color(hex: "#3B82F6") } // Code: Blue
-      if item.isLink { return Color(hex: "#A855F7") } // Link: Purple
-      if item.isImage || item.isFile { return Color(hex: "#EC4899") } // Others: Pink
-      return Color(hex: "#9CA3AF") // Text/Default: Gray
+    Color(hex: tintHex)
   }
-  
-  @ViewBuilder
+
+  /// Figma card surface: category tint at the top fading to the card base.
+  /// Dark uses 18%/24%; light uses 10%/16% over white.
   private var backgroundGradient: some View {
-    let palette = ThemeManager.shared.activePalette
-    
-    // 1. Priority: Adaptive App Color (Source-based)
-    if ThemeManager.shared.currentMode == .adaptive {
-        if let adaptive = adaptiveColor {
-            adaptive
-        } else if let cachedHex = item.cachedAdaptiveHexColor {
-             Color(hex: cachedHex)
-        }
-    } 
-    // 2. Priority: Theme Palette (Category-based)
-    else {
-        if item.isCode {
-          palette.codeColor
-        } else if item.isLink {
-          palette.linkColor
-        } else if item.isImage || item.isFile {
-          palette.otherColor
-        } else {
-          // Text or Color (Hex Code falls here, usually implies Text category)
-          palette.textColor
-        }
-    }
+    LinearGradient(
+      colors: [
+        theme.cardTop(tintHex: tintHex, selected: isSelected),
+        theme.cardBase
+      ],
+      startPoint: .top,
+      endPoint: .bottom
+    )
   }
-  
+
+  private var detailText: String {
+    if item.isImage, let data = item.imageData {
+      return ByteCountFormatter.string(fromByteCount: Int64(data.count), countStyle: .file)
+    }
+
+    if item.isFile {
+      let count = item.fileURLs.count
+      if count == 1 {
+        return NSLocalizedString("unit.one_file", comment: "One file")
+      }
+      return String(format: NSLocalizedString("unit.files_format", comment: "N files"), count)
+    }
+
+    return String(
+      format: NSLocalizedString("unit.chars_format", comment: "N characters"),
+      item.previewableText.count
+    )
+  }
+
+  private var shouldShowTitle: Bool {
+    if item.isFile { return true }
+    if item.isImage { return !item.title.isEmpty }
+
+    let title = item.title.trimmingCharacters(in: .whitespacesAndNewlines)
+    guard !title.isEmpty else { return false }
+
+    let preview = item.previewableText.trimmingCharacters(in: .whitespacesAndNewlines)
+    return !preview.hasPrefix(title)
+  }
+
   private var cardTitle: String {
     // 1. If it's a file, always show the filename (ignoring potentially stale item.title)
     if item.isFile, let fileURL = item.fileURLs.first {
@@ -334,6 +354,10 @@ struct CardCell: View {
         return NSLocalizedString("category.text", comment: "Text")
     }
   }
+}
+
+private struct SendableImage: @unchecked Sendable {
+  let value: NSImage?
 }
 
 #Preview("代码卡片 - 未选中") {
