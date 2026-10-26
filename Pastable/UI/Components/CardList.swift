@@ -72,15 +72,8 @@ struct CardList: View {
         appState.hoveredItemID = nil
       }
     }
-    .help(cardTitle(for: item))
   }
 
-  private func cardTitle(for item: HistoryItem) -> String {
-    if item.isFile, let fileURL = item.fileURLs.first {
-      return fileURL.lastPathComponent.removingPercentEncoding ?? fileURL.lastPathComponent
-    }
-    return item.title.isEmpty ? item.previewableText : item.title
-  }
 }
 
 // MARK: - Preview
