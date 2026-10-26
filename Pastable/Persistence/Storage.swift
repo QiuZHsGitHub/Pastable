@@ -5,11 +5,22 @@ import SwiftData
 final class Storage {
   static let shared = Storage()
 
+  /// The CloudKit container declared in `Pastable.entitlements`.
+  static let iCloudContainerIdentifier = "iCloud.com.qzh.Pastable"
+
   var container: ModelContainer
   var context: ModelContext { container.mainContext }
 
   /// Location of the SQLite store, or `nil` when running in memory.
   private(set) var url: URL?
+
+  /// Whether the user asked for iCloud sync for this launch.
+  private(set) var iCloudSyncRequested: Bool
+  /// Whether the container was actually opened with a CloudKit database.
+  private(set) var isCloudSyncActive = false
+  /// Populated when CloudKit could not be opened; the app then falls back to the
+  /// local store so clipboard capture keeps working.
+  private(set) var cloudSyncError: String?
 
   private let fileManager = FileManager.default
   private var capturesSinceMaintenance = 0
@@ -33,12 +44,17 @@ final class Storage {
     return base.appending(path: "Storage.sqlite")
   }
 
-  init(inMemory: Bool = false, url: URL? = nil) {
+  init(inMemory: Bool = false, url: URL? = nil, cloudSyncEnabled: Bool? = nil) {
+    let requested = cloudSyncEnabled ?? Preferences.iCloudSyncEnabled
+    self.iCloudSyncRequested = requested
+
     if inMemory {
       self.url = nil
-      self.container = try! ModelContainer(
-        for: HistoryItem.self,
-        configurations: ModelConfiguration(isStoredInMemoryOnly: true)
+      self.isCloudSyncActive = false
+      self.container = try! Self.makeContainer(
+        url: nil,
+        inMemory: true,
+        cloudSync: false
       )
       return
     }
@@ -51,29 +67,80 @@ final class Storage {
       withIntermediateDirectories: true
     )
 
+    // CloudKit is opt-in. Existing local records are adopted by the CloudKit
+    // store when it opens, so enabling sync does not require a separate import.
+    if requested {
+      do {
+        self.container = try Self.makeContainer(
+          url: resolvedURL,
+          inMemory: false,
+          cloudSync: true
+        )
+        self.isCloudSyncActive = true
+        AppLogger.Storage.info("Opened SwiftData store with CloudKit sync")
+        return
+      } catch {
+        let message = error.localizedDescription
+        self.cloudSyncError = message
+        AppLogger.Storage.error(
+          "Cannot open iCloud store, falling back to local storage",
+          error: error
+        )
+      }
+    }
+
     do {
-      self.container = try ModelContainer(
-        for: HistoryItem.self,
-        configurations: ModelConfiguration(url: resolvedURL)
+      self.container = try Self.makeContainer(
+        url: resolvedURL,
+        inMemory: false,
+        cloudSync: false
       )
     } catch {
       AppLogger.Storage.error("Cannot open database, moving it aside", error: error)
       Self.moveStoreAside(resolvedURL)
 
       do {
-        self.container = try ModelContainer(
-          for: HistoryItem.self,
-          configurations: ModelConfiguration(url: resolvedURL)
+        self.container = try Self.makeContainer(
+          url: resolvedURL,
+          inMemory: false,
+          cloudSync: false
         )
       } catch {
         AppLogger.Storage.error("Cannot recreate database, using in-memory store", error: error)
         self.url = nil
-        self.container = try! ModelContainer(
-          for: HistoryItem.self,
-          configurations: ModelConfiguration(isStoredInMemoryOnly: true)
+        self.container = try! Self.makeContainer(
+          url: nil,
+          inMemory: true,
+          cloudSync: false
         )
       }
     }
+  }
+
+  private static func makeContainer(
+    url: URL?,
+    inMemory: Bool,
+    cloudSync: Bool
+  ) throws -> ModelContainer {
+    let configuration: ModelConfiguration
+    if inMemory {
+      configuration = ModelConfiguration(
+        isStoredInMemoryOnly: true,
+        cloudKitDatabase: .none
+      )
+    } else {
+      configuration = ModelConfiguration(
+        url: url!,
+        cloudKitDatabase: cloudSync
+          ? .private(iCloudContainerIdentifier)
+          : .none
+      )
+    }
+
+    return try ModelContainer(
+      for: HistoryItem.self,
+      configurations: configuration
+    )
   }
 
   /// Keep a corrupt store for debugging instead of silently deleting user data.
@@ -88,7 +155,8 @@ final class Storage {
     }
   }
 
-  /// Human readable size of the store including its WAL/SHM side files.
+  /// Human readable size of the store, including its WAL/SHM side files and the
+  /// external blobs SwiftData keeps in `.Storage_SUPPORT`.
   var size: String {
     guard let url else { return "" }
 
@@ -100,12 +168,92 @@ final class Storage {
       total += bytes.int64Value
     }
 
+    let supportDirectory = url.deletingLastPathComponent()
+      .appendingPathComponent(".Storage_SUPPORT", isDirectory: true)
+    if let enumerator = fileManager.enumerator(
+      at: supportDirectory,
+      includingPropertiesForKeys: [.fileSizeKey],
+      options: []
+    ) {
+      for case let fileURL as URL in enumerator {
+        guard let values = try? fileURL.resourceValues(forKeys: [.fileSizeKey]),
+              let fileSize = values.fileSize else { continue }
+        total += Int64(fileSize)
+      }
+    }
+
     guard total > 0 else { return "" }
     return ByteCountFormatter.string(fromByteCount: total, countStyle: .file)
   }
 
   func itemCount() -> Int {
     (try? context.fetchCount(FetchDescriptor<HistoryItem>())) ?? 0
+  }
+
+  // MARK: - iCloud reconciliation
+
+  /// Two devices can copy the same content independently and upload two records
+  /// for the same hash. CloudKit has no unique constraints, so collapse those
+  /// remote duplicates locally the next time the app reconciles.
+  ///
+  /// This only reads scalar columns (not the pasteboard blobs) and is therefore
+  /// cheap enough to run at launch and whenever the panel opens.
+  @discardableResult
+  func deduplicateHistory(force: Bool = false) -> Int {
+    guard force || isCloudSyncActive else { return 0 }
+
+    let items: [HistoryItem]
+    do {
+      items = try context.fetch(
+        FetchDescriptor<HistoryItem>(
+          sortBy: [SortDescriptor(\.lastCopiedAt, order: .reverse)]
+        )
+      )
+    } catch {
+      AppLogger.Storage.error("Failed to load history for iCloud reconciliation", error: error)
+      return 0
+    }
+
+    var keepers: [String: HistoryItem] = [:]
+    var duplicates: [HistoryItem] = []
+
+    for item in items {
+      guard let hash = item.contentHash, !hash.isEmpty else { continue }
+      if let keeper = keepers[hash] {
+        mergeForCloud(keeper: keeper, duplicate: item)
+        duplicates.append(item)
+      } else {
+        keepers[hash] = item
+      }
+    }
+
+    guard !duplicates.isEmpty else { return 0 }
+    for item in duplicates {
+      context.delete(item)
+    }
+
+    do {
+      try context.save()
+      AppLogger.Storage.info("Merged \(duplicates.count) duplicate item(s) after iCloud sync")
+      return duplicates.count
+    } catch {
+      AppLogger.Storage.error("Failed to merge iCloud duplicates", error: error)
+      context.rollback()
+      return 0
+    }
+  }
+
+  private func mergeForCloud(keeper: HistoryItem, duplicate: HistoryItem) {
+    let keeperWasNewer = keeper.lastCopiedAt >= duplicate.lastCopiedAt
+    keeper.firstCopiedAt = min(keeper.firstCopiedAt, duplicate.firstCopiedAt)
+    keeper.lastCopiedAt = max(keeper.lastCopiedAt, duplicate.lastCopiedAt)
+    keeper.numberOfCopies += duplicate.numberOfCopies
+    if keeper.pin == nil {
+      keeper.pin = duplicate.pin
+    }
+    if !keeperWasNewer {
+      keeper.application = duplicate.application
+    }
   }
 
   struct MaintenancePreview {
@@ -164,7 +312,7 @@ final class Storage {
   func addOrUpdate(_ newItem: HistoryItem) -> Bool {
     do {
       if newItem.contentHash == nil || newItem.contentHash?.isEmpty == true {
-        newItem.contentHash = HistoryItem.computeContentHash(contents: newItem.contents)
+        newItem.contentHash = HistoryItem.computeContentHash(contents: newItem.contentItems)
       }
       let hash = newItem.contentHash ?? ""
 
@@ -186,7 +334,7 @@ final class Storage {
           let missing = try context.fetch(missingDescriptor)
           if !missing.isEmpty {
             for item in missing {
-              item.contentHash = HistoryItem.computeContentHash(contents: item.contents)
+              item.contentHash = HistoryItem.computeContentHash(contents: item.contentItems)
             }
             matches = try context.fetch(descriptor)
           }
@@ -324,6 +472,9 @@ final class Storage {
   /// Batched maintenance used at launch so an oversized legacy store does not
   /// block the first frame or spike memory by loading every image at once.
   func performMaintenance() async {
+    if isCloudSyncActive {
+      deduplicateHistory()
+    }
     let emptyRemoved = purgeEmptyItems()
     let retentionRemoved = await purgeExpiredInBatches()
     let trimmed = await trimInBatches()

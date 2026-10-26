@@ -11,6 +11,10 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 
   func applicationWillFinishLaunching(_ notification: Notification) {
     Preferences.registerDefaults()
+    // Start observing Core Data + CloudKit events before the SwiftData
+    // container is first opened, so a failed initial sync is visible in
+    // Settings instead of silently showing "connected".
+    _ = CloudSyncMonitor.shared
     applyUIAutomationAppearanceIfNeeded()
     // Hide the Dock icon before the first frame to avoid a dock-icon flash.
     NSApp.setActivationPolicy(.accessory)
@@ -205,6 +209,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     panel.makeFirstResponder(nil)
 
     AppState.shared.isPanelVisible = true
+    // CloudKit may have delivered a duplicate while the panel was closed.
+    Storage.shared.deduplicateHistory()
     // Reset search on open
     AppState.shared.searchText = ""
     AppState.shared.resetSelection()

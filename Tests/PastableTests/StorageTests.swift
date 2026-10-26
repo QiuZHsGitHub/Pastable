@@ -207,6 +207,65 @@ final class StorageTests: XCTestCase {
     }
   }
 
+  func testCloudReconciliationMergesDuplicateHashes() async {
+    await MainActor.run {
+      let storage = Storage(inMemory: true)
+      let firstDate = Date(timeIntervalSinceNow: -3_600)
+
+      // A pinned local record and a newer record with the same content can both
+      // arrive from CloudKit because the schema has no unique constraint.
+      let pinned = self.textItem("cloud duplicate", at: firstDate)
+      pinned.pin = "keep"
+      storage.context.insert(pinned)
+      try? storage.context.save()
+
+      let remoteCopy = self.textItem("cloud duplicate", at: Date())
+      remoteCopy.application = "com.apple.Safari"
+      remoteCopy.numberOfCopies = 2
+      storage.context.insert(remoteCopy)
+      try? storage.context.save()
+
+      XCTAssertEqual(storage.itemCount(), 2)
+      XCTAssertEqual(storage.deduplicateHistory(force: true), 1)
+      XCTAssertEqual(storage.itemCount(), 1)
+
+      let items = (try? storage.context.fetch(FetchDescriptor<HistoryItem>())) ?? []
+      XCTAssertEqual(items.count, 1)
+      XCTAssertEqual(items.first?.pin, "keep")
+      XCTAssertEqual(items.first?.application, "com.apple.Safari")
+      XCTAssertEqual(items.first?.numberOfCopies, 3)
+      XCTAssertEqual(
+        items.first?.firstCopiedAt.timeIntervalSince1970 ?? 0,
+        firstDate.timeIntervalSince1970,
+        accuracy: 0.01
+      )
+      XCTAssertEqual(
+        try? storage.context.fetchCount(FetchDescriptor<HistoryItemContent>()),
+        1
+      )
+    }
+  }
+
+  func testCloudReconciliationIsSkippedWhenSyncIsOff() async {
+    await MainActor.run {
+      let storage = Storage(inMemory: true)
+      storage.addOrUpdate(self.textItem("local duplicate"))
+      let duplicate = self.textItem("local duplicate")
+      storage.context.insert(duplicate)
+      try? storage.context.save()
+
+      XCTAssertEqual(storage.itemCount(), 2)
+      XCTAssertEqual(storage.deduplicateHistory(), 0)
+      XCTAssertEqual(storage.itemCount(), 2)
+    }
+  }
+
+  func testICloudSyncIsOptInByDefault() {
+    UserDefaults.standard.removeObject(forKey: Preferences.Key.iCloudSyncEnabled)
+    Preferences.registerDefaults()
+    XCTAssertFalse(Preferences.iCloudSyncEnabled)
+  }
+
 
   func testPurgeEmptyItemsRemovesBlankTextRecords() async {
     await MainActor.run {

@@ -28,6 +28,7 @@
 - [Download](#download)
 - [Usage](#usage)
 - [Settings](#settings)
+- [iCloud Sync](docs/icloud.md)
 - [Project Structure](#project-structure)
 - [Inspirations](#inspirations)
 - [License](#license)
@@ -62,6 +63,7 @@ See [docs/theme.md](docs/theme.md) for the full token and Figma mapping.
 - **Auto content detection**: text, code, links, images, and files
 - **One-click paste**: select a card to restore clipboard and paste immediately
 - **History management**: retention window, capacity control, and manual cleanup
+- **Optional iCloud sync**: sync clipboard history across Macs signed in with the same Apple ID through a private CloudKit database
 - **Custom shortcuts**: configurable global hotkey for panel toggle
 
 <p align="center">
@@ -110,6 +112,7 @@ Follow `./DEPENDENCIES.md` to add Swift Package dependencies in Xcode.
 - Sound feedback
 - Save types: Text / Image / File (disabled types are no longer captured)
 - History limit and retention duration (actually enforced; a one-time prompt offers Clean Up / Keep Everything / Later)
+- iCloud sync (off by default; uses a private CloudKit database, see [docs/icloud.md](docs/icloud.md))
 - Launch at login, storage usage statistics
 
 > Large TIFF screenshots are converted to PNG in the background, dramatically shrinking the store.
@@ -117,7 +120,7 @@ Follow `./DEPENDENCIES.md` to add Swift Package dependencies in Xcode.
 ## Development & Tests
 
 ```bash
-swift test    # 39 logic tests using an in-memory store
+swift test    # 46 logic tests using an in-memory store
 xcodebuild -project Pastable.xcodeproj -scheme Pastable \
   -configuration Debug -destination 'platform=macOS' \
   -derivedDataPath /tmp/PastableDerived CODE_SIGNING_ALLOWED=NO build

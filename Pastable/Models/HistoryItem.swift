@@ -106,8 +106,12 @@ class HistoryItem {
   var cachedRTFBackgroundHexColor: String? // Cache for RTF content background color
   var contentHash: String? = nil // Stable hash for de-duplication
 
+  /// Optional because CloudKit-backed SwiftData requires every relationship to
+  /// be optional. Use `contentItems` for a non-optional view.
   @Relationship(deleteRule: .cascade, inverse: \HistoryItemContent.item)
-  var contents: [HistoryItemContent] = []
+  var contents: [HistoryItemContent]? = []
+
+  var contentItems: [HistoryItemContent] { contents ?? [] }
 
   // Non-persistent caches. Cards ask for these properties many times while the
   // panel is open; recomputing regexes / decoding images on every body pass was
@@ -142,12 +146,12 @@ class HistoryItem {
   }
 
   func supersedes(_ item: HistoryItem) -> Bool {
-    return item.contents
+    return item.contentItems
       .filter { content in
         !Self.transientTypes.contains(content.type)
       }
       .allSatisfy { content in
-        contents.contains(where: { $0.type == content.type && $0.value == content.value })
+        contents?.contains(where: { $0.type == content.type && $0.value == content.value }) ?? false
       }
   }
 
@@ -389,7 +393,7 @@ class HistoryItem {
   }
 
   private func contentData(_ types: [NSPasteboard.PasteboardType]) -> Data? {
-    let content = contents.first(where: { content in
+    let content = contentItems.first(where: { content in
       return types.contains(NSPasteboard.PasteboardType(content.type))
     })
 
@@ -397,7 +401,7 @@ class HistoryItem {
   }
 
   private func allContentData(_ types: [NSPasteboard.PasteboardType]) -> [Data] {
-    return contents
+    return contentItems
       .filter { types.contains(NSPasteboard.PasteboardType($0.type)) }
       .compactMap { $0.value }
   }

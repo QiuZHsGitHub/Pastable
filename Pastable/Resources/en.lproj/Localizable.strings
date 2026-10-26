@@ -48,6 +48,23 @@
 "settings.storage.history_count" = "Max History Items";
 "settings.storage.clear_all" = "Clear All History";
 "settings.storage.retention" = "Retention";
+"settings.storage.icloud" = "iCloud";
+"settings.storage.icloud_sync" = "Sync with iCloud";
+"settings.storage.icloud.footer" = "Uses your private iCloud database. Clipboard contents leave this Mac and count toward your iCloud storage.";
+"settings.storage.icloud.enable_title" = "Turn On iCloud Sync?";
+"settings.storage.icloud.enable_message" = "Clipboard history, including text and images, will be stored in your private iCloud database and synced to Macs signed in with the same Apple ID. The change takes effect after Pastable restarts.";
+"settings.storage.icloud.disable_title" = "Turn Off iCloud Sync?";
+"settings.storage.icloud.disable_message" = "History will stay only on this Mac. Items already synced to iCloud are not deleted automatically. The change takes effect after Pastable restarts.";
+"settings.storage.icloud.restart_now" = "Restart Now";
+"settings.storage.icloud.restart_later" = "Later";
+"settings.storage.icloud.restart_pending" = "Restart Pastable to apply this change.";
+"settings.storage.icloud.local_only" = "History is stored only on this Mac.";
+"settings.storage.icloud.start_failed" = "iCloud sync is unavailable. History is still stored locally.";
+"settings.storage.icloud.checking" = "Checking iCloud availability…";
+"settings.storage.icloud.connected" = "iCloud connected. Changes sync automatically.";
+"settings.storage.icloud.no_account" = "Not signed in to iCloud. Sign in, then restart Pastable.";
+"settings.storage.icloud.restricted" = "iCloud is restricted on this Mac.";
+"settings.storage.icloud.check_failed" = "Unable to check iCloud status.";
 
 // Settings - Storage - Retention Options
 "24 hours" = "24 Hours";

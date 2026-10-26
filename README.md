@@ -28,6 +28,7 @@
 - [下载安装](#下载安装)
 - [使用方式](#使用方式)
 - [设置项](#设置项)
+- [iCloud 同步](docs/icloud.md)
 - [项目结构](#项目结构)
 - [灵感来源](#灵感来源)
 - [许可证](#许可证)
@@ -62,6 +63,7 @@
 - **内容类型识别**：自动识别文本、代码、链接、图片、文件
 - **一键回贴**：选中卡片即可写回剪贴板并自动执行粘贴
 - **历史管理**：支持保留时长、容量限制与手动清空
+- **可选 iCloud 同步**：通过私人 CloudKit 数据库在登录同一 Apple ID 的 Mac 之间同步剪贴板历史
 - **快捷键体系**：支持自定义全局唤起快捷键
 
 <p align="center">
@@ -110,6 +112,7 @@ cd Pastable
 - 音效反馈
 - 保存类型：文本 / 图片 / 文件（关闭的类型不会再被采集）
 - 历史上限与保留时间（会真正执行；首次发现有历史超过限制时会询问「清理 / 全部保留 / 稍后」）
+- iCloud 同步（默认关闭；开启后使用私人 CloudKit 数据库，详见 [docs/icloud.md](docs/icloud.md)）
 - 登录时启动、存储占用统计
 
 > 截图/复制得到的大尺寸 TIFF 会在后台自动转成 PNG，显著减小数据库体积。
@@ -117,7 +120,7 @@ cd Pastable
 ## 开发与测试
 
 ```bash
-swift test    # 39 个逻辑测试，使用内存数据库
+swift test    # 46 个逻辑测试，使用内存数据库
 xcodebuild -project Pastable.xcodeproj -scheme Pastable \
   -configuration Debug -destination 'platform=macOS' \
   -derivedDataPath /tmp/PastableDerived CODE_SIGNING_ALLOWED=NO build

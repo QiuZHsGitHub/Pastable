@@ -24,6 +24,7 @@ let package = Package(
                 "Assets.xcassets",
                 "Resources",
                 "Pastable.entitlements",
+                "PastableDebug.entitlements",
                 ".codex",
                 ".specify"
             ]

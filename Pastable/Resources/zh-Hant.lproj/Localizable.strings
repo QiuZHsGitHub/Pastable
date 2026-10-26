@@ -44,6 +44,23 @@
 "settings.storage.history_count" = "紀錄最大數量";
 "settings.storage.clear_all" = "清除所有紀錄";
 "settings.storage.retention" = "保留時間";
+"settings.storage.icloud" = "iCloud";
+"settings.storage.icloud_sync" = "iCloud 同步";
+"settings.storage.icloud.footer" = "使用你的 iCloud 私人資料庫。開啟後，剪貼簿內容會離開本機，並佔用 iCloud 儲存空間。";
+"settings.storage.icloud.enable_title" = "開啟 iCloud 同步？";
+"settings.storage.icloud.enable_message" = "剪貼簿紀錄（包括文字和圖片）會儲存到你的 iCloud 私人資料庫，並同步到登入相同 Apple ID 的 Mac。修改會在重新啟動 Pastable 後生效。";
+"settings.storage.icloud.disable_title" = "關閉 iCloud 同步？";
+"settings.storage.icloud.disable_message" = "關閉後，紀錄只會儲存在這台 Mac；已經同步到 iCloud 的內容不會自動刪除。修改會在重新啟動 Pastable 後生效。";
+"settings.storage.icloud.restart_now" = "立即重新啟動";
+"settings.storage.icloud.restart_later" = "稍後";
+"settings.storage.icloud.restart_pending" = "重新啟動 Pastable 後生效。";
+"settings.storage.icloud.local_only" = "紀錄僅儲存在這台 Mac。";
+"settings.storage.icloud.start_failed" = "iCloud 同步暫不可用，紀錄仍儲存在本機。";
+"settings.storage.icloud.checking" = "正在檢查 iCloud 狀態…";
+"settings.storage.icloud.connected" = "已連接 iCloud，修改會自動同步。";
+"settings.storage.icloud.no_account" = "尚未登入 iCloud。請登入後重新啟動 Pastable。";
+"settings.storage.icloud.restricted" = "這台 Mac 上的 iCloud 受到限制。";
+"settings.storage.icloud.check_failed" = "無法檢查 iCloud 狀態。";
 
 // Settings - Storage - Retention Options
 "24 hours" = "24 小時";

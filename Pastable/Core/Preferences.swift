@@ -17,6 +17,7 @@ enum Preferences {
     static let historyRetentionDuration = "historyRetentionDuration"
     static let searchMode = "searchMode"
     static let maintenanceSnoozeUntil = "maintenanceSnoozeUntil"
+    static let iCloudSyncEnabled = "iCloudSyncEnabled"
   }
 
   private static var defaults: UserDefaults { .standard }
@@ -33,7 +34,8 @@ enum Preferences {
       Key.playSounds: true,
       Key.historySize: defaultHistorySize,
       Key.historyRetentionDuration: 0,
-      Key.searchMode: "fuzzy"
+      Key.searchMode: "fuzzy",
+      Key.iCloudSyncEnabled: false
     ])
   }
 
@@ -47,6 +49,14 @@ enum Preferences {
   static var pasteAutomatically: Bool { bool(Key.pasteAutomatically, fallback: true) }
   static var removeFormatting: Bool { bool(Key.removeFormatting, fallback: false) }
   static var playSounds: Bool { bool(Key.playSounds, fallback: true) }
+  static var iCloudSyncEnabled: Bool {
+    #if DEBUG
+    if let override = ProcessInfo.processInfo.environment["PASTABLE_ICLOUD_SYNC"] {
+      return override == "1" || override.lowercased() == "true"
+    }
+    #endif
+    return bool(Key.iCloudSyncEnabled, fallback: false)
+  }
 
   /// 0 / negative values mean "unlimited"; never return a negative limit.
   static var historyLimit: Int {

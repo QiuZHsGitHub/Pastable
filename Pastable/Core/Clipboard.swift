@@ -293,7 +293,7 @@ final class Clipboard {
   // MARK: - Copy & paste
 
   func copy(_ item: HistoryItem) {
-    let contents = item.contents.filter { $0.value != nil }
+    let contents = item.contentItems.filter { $0.value != nil }
     var pasteboardItems: [NSPasteboardItem] = []
 
     let stripFormatting = Preferences.removeFormatting && !item.isImage && !item.isFile

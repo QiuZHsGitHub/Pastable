@@ -33,7 +33,7 @@ final class ContentHashing {
         }
         
         // Fallback: hash the first non-empty content
-        if let firstContent = item.contents.first?.value {
+        if let firstContent = item.contentItems.first?.value {
             return "fallback:\(hashData(firstContent))"
         }
         

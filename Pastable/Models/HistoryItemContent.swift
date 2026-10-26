@@ -11,7 +11,10 @@ struct RawContentSnapshot: Sendable {
 @Model
 class HistoryItemContent {
   var type: String = ""
-  var value: Data?
+  /// External storage keeps large screenshots out of the CloudKit record
+  /// (records have a small inline payload limit; SwiftData maps this to an
+  /// asset instead).
+  @Attribute(.externalStorage) var value: Data?
 
   @Relationship
   var item: HistoryItem?
