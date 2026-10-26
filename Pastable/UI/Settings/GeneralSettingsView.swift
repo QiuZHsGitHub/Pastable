@@ -44,12 +44,19 @@ struct GeneralSettingsView: View {
               Text("settings.general.accessibility.hint")
                 .font(.caption)
                 .foregroundStyle(.secondary)
+              Text("settings.general.accessibility.restart_hint")
+                .font(.caption2)
+                .foregroundStyle(.secondary)
+                .fixedSize(horizontal: false, vertical: true)
             }
           }
 
           Spacer()
 
           if !accessibilityTrusted {
+            Button("settings.general.accessibility.recheck") {
+              accessibilityTrusted = AXIsProcessTrusted()
+            }
             Button("accessibility.open_settings") {
               openAccessibilitySettings()
             }
@@ -103,6 +110,14 @@ struct GeneralSettingsView: View {
   }
 
   private func openAccessibilitySettings() {
+    // Ask macOS to register this exact binary in the Accessibility list.
+    // Opening only the pane can leave the user looking at an older Pastable
+    // entry (especially with ad-hoc Debug builds).
+    let options = [
+      kAXTrustedCheckOptionPrompt.takeUnretainedValue() as String: true
+    ] as CFDictionary
+    _ = AXIsProcessTrustedWithOptions(options)
+
     guard let url = URL(string: "x-apple.systempreferences:com.apple.preference.security?Privacy_Accessibility") else {
       return
     }

@@ -99,6 +99,8 @@
 "settings.general.accessibility.granted" = "Accessibility access granted";
 "settings.general.accessibility.required" = "Accessibility access is off";
 "settings.general.accessibility.hint" = "Required for automatic paste; copying still works.";
+"settings.general.accessibility.recheck" = "Recheck";
+"settings.general.accessibility.restart_hint" = "If the toggle is already on, quit and reopen Pastable. Xcode Debug builds must be re-added to Accessibility after each recompile.";
 "settings.general.login_item_error" = "Couldn't update Login Item";
 "settings.general.launch_at_login_approval" = "The login item was registered but still needs approval in System Settings > General > Login Items.";
 
