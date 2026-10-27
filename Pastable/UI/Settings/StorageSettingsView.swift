@@ -12,6 +12,8 @@ struct StorageSettingsView: View {
   @State private var itemCount = 0
   @State private var storageSize = ""
   @State private var showClearConfirmation = false
+  @State private var cleanupStatus: String?
+  @State private var cleanupStatusToken = 0
   @State private var pendingSyncValue: Bool?
   @State private var showSyncRestartAlert = false
 
@@ -90,10 +92,22 @@ struct StorageSettingsView: View {
         }
 
         Button("settings.storage.cleanup_now") {
-          Storage.shared.resumeAutomaticMaintenance()
-          Storage.shared.cleanup()
-          Storage.shared.trimHistory()
+          let removed = Storage.shared.performCleanupNow()
           refreshStats()
+          cleanupStatus = removed > 0
+            ? String(
+              format: NSLocalizedString("settings.storage.cleanup_removed", comment: "Cleanup removed N items"),
+              removed
+            )
+            : NSLocalizedString("settings.storage.cleanup_nothing", comment: "Nothing to clean up")
+          scheduleCleanupStatusReset()
+        }
+
+        if let cleanupStatus {
+          Text(cleanupStatus)
+            .font(.caption)
+            .foregroundStyle(.secondary)
+            .fixedSize(horizontal: false, vertical: true)
         }
       }
 
@@ -237,6 +251,19 @@ struct StorageSettingsView: View {
   private func refreshStats() {
     itemCount = Storage.shared.itemCount()
     storageSize = Storage.shared.size
+  }
+
+  /// Auto-hide the cleanup result after a few seconds so the row does not
+  /// linger until the next click.
+  private func scheduleCleanupStatusReset() {
+    cleanupStatusToken += 1
+    let token = cleanupStatusToken
+    Task { @MainActor in
+      try? await Task.sleep(nanoseconds: 5_000_000_000)
+      if cleanupStatusToken == token {
+        cleanupStatus = nil
+      }
+    }
   }
 }
 

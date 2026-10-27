@@ -133,6 +133,8 @@
 "maintenance.keep" = "全部保留";
 "maintenance.later" = "稍後";
 "settings.storage.cleanup_now" = "立即清理";
+"settings.storage.cleanup_removed" = "已清理 %ld 條歷史記錄。";
+"settings.storage.cleanup_nothing" = "沒有需要清理的歷史記錄。";
 
 // Empty state hints and units
 "empty.search_hint" = "換個關鍵字試試";

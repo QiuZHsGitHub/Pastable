@@ -132,6 +132,8 @@
 "maintenance.keep" = "全部保留";
 "maintenance.later" = "稍后";
 "settings.storage.cleanup_now" = "立即清理";
+"settings.storage.cleanup_removed" = "已清理 %ld 条历史记录。";
+"settings.storage.cleanup_nothing" = "没有需要清理的历史记录。";
 
 // Empty state hints and units
 "empty.search_hint" = "换个关键词试试";

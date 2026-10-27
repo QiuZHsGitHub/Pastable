@@ -144,6 +144,45 @@ final class StorageTests: XCTestCase {
     }
   }
 
+  func testPerformCleanupNowReportsRemovedCount() async {
+    await MainActor.run {
+      let storage = Storage(inMemory: true)
+      let old = Date(timeIntervalSinceNow: -40 * 86_400)
+      storage.addOrUpdate(self.textItem("old one", at: old))
+      storage.addOrUpdate(self.textItem("old two", at: old))
+      storage.addOrUpdate(self.textItem("recent", at: Date()))
+
+      UserDefaults.standard.set(2, forKey: Preferences.Key.historySize)
+      UserDefaults.standard.set(30 * 86_400, forKey: Preferences.Key.historyRetentionDuration)
+
+      // Both expired records are removed; the remaining one fits the limit.
+      XCTAssertEqual(storage.performCleanupNow(), 2)
+      XCTAssertEqual(storage.itemCount(), 1)
+
+      // Everything is within the limits now: the UI reports zero removals
+      // instead of appearing to do nothing.
+      XCTAssertEqual(storage.performCleanupNow(), 0)
+      XCTAssertEqual(storage.itemCount(), 1)
+    }
+  }
+
+  func testPerformCleanupNowTrimsOverLimitHistory() async {
+    await MainActor.run {
+      let storage = Storage(inMemory: true)
+      for index in 1...4 {
+        storage.addOrUpdate(
+          self.textItem("item \(index)", at: Date(timeIntervalSinceNow: TimeInterval(-index * 60)))
+        )
+      }
+
+      UserDefaults.standard.set(2, forKey: Preferences.Key.historySize)
+      UserDefaults.standard.set(0, forKey: Preferences.Key.historyRetentionDuration)
+
+      XCTAssertEqual(storage.performCleanupNow(), 2)
+      XCTAssertEqual(storage.itemCount(), 2)
+    }
+  }
+
   func testLegacyItemsWithoutHashAreBackfilledBeforeInsert() async {
     await MainActor.run {
       let storage = Storage(inMemory: true)

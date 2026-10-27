@@ -132,6 +132,8 @@
 "maintenance.keep" = "Keep Everything";
 "maintenance.later" = "Later";
 "settings.storage.cleanup_now" = "Clean Up Now";
+"settings.storage.cleanup_removed" = "Cleaned up %ld history items.";
+"settings.storage.cleanup_nothing" = "Nothing to clean up right now.";
 
 // Empty state hints and units
 "empty.search_hint" = "Try a different keyword";

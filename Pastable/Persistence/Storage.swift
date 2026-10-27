@@ -473,6 +473,25 @@ final class Storage {
     return removed
   }
 
+  /// Manual "Clean Up Now" from Settings: run every cleanup pass immediately
+  /// (blank legacy records, retention expiry, over-limit trimming) and return
+  /// how many records were removed so the UI can report the result. Without
+  /// the returned count the button looks dead when everything is already
+  /// within the configured limits.
+  @discardableResult
+  func performCleanupNow() -> Int {
+    resumeAutomaticMaintenance()
+    let emptyRemoved = purgeEmptyItems()
+    let retentionRemoved = cleanup()
+    let trimmed = trimHistory()
+
+    let total = emptyRemoved + retentionRemoved + trimmed
+    if total > 0 {
+      AppLogger.Storage.info("Manual cleanup removed \(total) items")
+    }
+    return total
+  }
+
   /// Batched maintenance used at launch so an oversized legacy store does not
   /// block the first frame or spike memory by loading every image at once.
   func performMaintenance() async {
