@@ -132,6 +132,14 @@ class HistoryItem {
   /// the capture pipeline can warm the cache before the item is inserted.
   var thumbnailCacheKey: String { "thumb:" + (contentHash ?? "") }
 
+  /// Stable cache key for the parsed RTF preview (see `PreviewCache`). Falls
+  /// back to the record id so two legacy rows without a hash never share one
+  /// cached preview.
+  var attributedPreviewCacheKey: String {
+    if let contentHash, !contentHash.isEmpty { return "rtf:" + contentHash }
+    return "rtf:id:" + String(describing: persistentModelID)
+  }
+
   // Non-persistent caches. Cards ask for these properties many times while the
   // panel is open; recomputing regexes / decoding images on every body pass was
   // the main cause of scroll and search jank.
@@ -362,6 +370,14 @@ class HistoryItem {
     cachedNormalizedTitle = nil
     cachedNormalizedBody = nil
     fallbackTextLength = -1
+  }
+
+  /// Build the folded search strings ahead of time (driven by AppState's idle
+  /// warm-up pass) so the first keystroke after launch does not have to fold
+  /// every pending record in one go.
+  func warmUpSearchIndex() {
+    _ = normalizedSearchTitle
+    _ = normalizedSearchBody
   }
   
   private func computePreviewText() -> String {

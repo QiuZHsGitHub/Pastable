@@ -211,29 +211,31 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     AppState.shared.isPanelVisible = true
     // CloudKit may have delivered a duplicate while the panel was closed.
     Storage.shared.deduplicateHistory()
-    // Reset search on open
+    // Reset search on open. The search field deliberately does NOT take
+    // keyboard focus: opening the panel (whichever way it was triggered) must
+    // never steal typed input from whatever the user is doing. ⌘⇧F or a click
+    // on the field focuses it. `makeFirstResponder(nil)` above plus this blur
+    // request clear any focus the field still holds from a previous session.
     AppState.shared.searchText = ""
     AppState.shared.resetSelection()
-    AppState.shared.searchFocusRequest = .focus
-
-    // Focusing the SwiftUI text field before the window is key is unreliable.
-    Task { @MainActor in
-      try? await Task.sleep(nanoseconds: 80_000_000)
-      guard panel.isVisible else { return }
-      AppState.shared.searchFocusRequest = .focus
-    }
+    AppState.shared.searchFocusRequest = .blur
   }
 
   /// Return keyboard focus to the app the panel was opened over. Called before
   /// synthesizing Cmd+V; otherwise the paste can be delivered to Pastable.
-  @MainActor func restorePreviousApplication() {
+  /// Returns the app that was activated so `Clipboard.paste(whenReadyFor:)` can
+  /// wait for it to actually take focus before posting the keystroke.
+  @MainActor @discardableResult
+  func restorePreviousApplication() -> NSRunningApplication? {
     guard let previousApplication,
           previousApplication.processIdentifier != ProcessInfo.processInfo.processIdentifier else {
-      return
+      return nil
     }
 
     previousApplication.activate(options: [])
+    let restored = previousApplication
     self.previousApplication = nil
+    return restored
   }
 
   // MARK: - Status item
@@ -304,14 +306,31 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     NSApp.terminate(nil)
   }
 
-  @MainActor private func openSettingsWindow(tab: AppState.SettingsTab?) {
+  /// Opens the Settings window, selecting `tab` when given.
+  ///
+  /// The SwiftUI `Settings` scene only responds to SwiftUI's own `openSettings`
+  /// environment action. The classic AppKit `showSettingsWindow:` trick is
+  /// accepted by `SwiftUI.AppDelegate` but silently does nothing in this app,
+  /// so we use the action captured from the panel's hosted hierarchy at launch
+  /// (see `SearchBar.onAppear`); it works even while the panel is closed.
+  @MainActor func openSettingsWindow(tab: AppState.SettingsTab?) {
     if let tab {
       AppState.shared.settingsTab = tab
     }
 
     NSApp.activate(ignoringOtherApps: true)
-    if !NSApp.sendAction(Selector(("showSettingsWindow:")), to: nil, from: nil) {
-      NSApp.sendAction(Selector(("showPreferencesWindow:")), to: nil, from: nil)
+
+    // Defer past any menu/popover tracking that is still unwinding: opening a
+    // window from inside a tracking run loop is unreliable.
+    Task { @MainActor in
+      if let openSettings = AppState.shared.openSettingsAction {
+        openSettings()
+        return
+      }
+      // Fallback for the case the panel UI has not been evaluated yet.
+      if !NSApp.sendAction(Selector(("showSettingsWindow:")), to: nil, from: nil) {
+        NSApp.sendAction(Selector(("showPreferencesWindow:")), to: nil, from: nil)
+      }
     }
   }
 

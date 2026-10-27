@@ -96,7 +96,7 @@ struct ContentView: View {
     // 1. Close the panel and give focus back to the app the user came from.
     // Without this, Cmd+V can be delivered to Pastable instead of the target app.
     delegate?.closePanel()
-    delegate?.restorePreviousApplication()
+    let target = delegate?.restorePreviousApplication()
 
     // 2. Move the item to the front of the history.
     item.lastCopiedAt = Date()
@@ -107,11 +107,12 @@ struct ContentView: View {
       AppLogger.Storage.error("Failed to save paste timestamp", error: error)
     }
 
-    // 3. Copy and wait for the pasteboard write to settle before pressing Cmd+V.
+    // 3. Copy, then fire Cmd+V as soon as the pasteboard write is observable
+    // and the target app has keyboard focus (with a timeout fallback instead
+    // of the old fixed 120ms delay).
     Clipboard.shared.copy(item)
     Task { @MainActor in
-      try? await Task.sleep(nanoseconds: 120_000_000)
-      Clipboard.shared.paste()
+      await Clipboard.shared.paste(whenReadyFor: target)
     }
   }
 

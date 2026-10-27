@@ -61,6 +61,7 @@ struct CardList: View {
       CardCell(
         item: item,
         isSelected: selectedItemId == item.persistentModelID,
+        highlightTokens: appState.searchTokens,
         onCopy: nil
       )
     }
@@ -71,6 +72,11 @@ struct CardList: View {
       } else if appState.hoveredItemID == item.persistentModelID {
         appState.hoveredItemID = nil
       }
+    }
+    .onAppear {
+      // Scroll paging: once cards near the end of the loaded window show up,
+      // extend it so older history stays reachable.
+      appState.expandDisplayWindowIfNeeded(around: item.persistentModelID)
     }
   }
 

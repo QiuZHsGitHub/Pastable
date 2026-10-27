@@ -8,14 +8,20 @@ final class SearchService {
     case fuzzy
   }
 
+  /// Query split into folded tokens — exactly what `search` matches against.
+  /// Cards use it to show why they matched (see `SearchHighlight`).
+  static func tokens(for query: String) -> [String] {
+    query
+      .split(whereSeparator: \.isWhitespace)
+      .map { fold(String($0)) }
+      .filter { !$0.isEmpty }
+  }
+
   /// Search both the title and the full preview text, require every token to
   /// match, and rank title hits above body hits. This keeps large histories fast
   /// while making multi-word queries behave the way users expect.
   func search(query: String, items: [HistoryItem], mode: SearchMode = .fuzzy) -> [HistoryItem] {
-    let tokens = query
-      .split(whereSeparator: \.isWhitespace)
-      .map { Self.fold(String($0)) }
-      .filter { !$0.isEmpty }
+    let tokens = Self.tokens(for: query)
 
     guard !tokens.isEmpty else { return items }
 

@@ -98,7 +98,7 @@ Follow `./DEPENDENCIES.md` to add Swift Package dependencies in Xcode.
 
 ## Usage
 
-- **Toggle panel**: use your configured shortcut (default `Cmd + Shift + V`); search is focused automatically
+- **Toggle panel**: use your configured shortcut (default `Cmd + Shift + V`); the panel never steals keyboard focus
 - **Focus search**: `Cmd + Shift + F`
 - **Quick paste**: click a card, or select one and press `Enter`
 - **Select a card**: `←` / `→` while the search field is empty

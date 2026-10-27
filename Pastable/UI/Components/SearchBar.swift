@@ -114,9 +114,13 @@ struct SearchBar: View {
     )
     .animation(.easeOut(duration: 0.16), value: isTextFieldFocused)
     .onAppear {
-      if AppState.shared.isPanelVisible {
-        isTextFieldFocused = true
-      }
+      // Capture the SwiftUI `openSettings` action while this hosted hierarchy
+      // is alive: it is the only reliable way to open the `Settings` scene
+      // (see AppDelegate.openSettingsWindow). This runs at launch, so the
+      // status-bar menu can use it too, even before the panel is shown.
+      AppState.shared.openSettingsAction = { openSettings() }
+      // No auto-focus here: the search field only takes the keyboard when the
+      // user asks for it (⌘⇧F or a click), never because the panel appeared.
     }
     .onChange(of: AppState.shared.searchFocusRequest) { _, request in
       if request == .focus {
@@ -140,13 +144,9 @@ struct SearchBar: View {
     // The hosting view stays alive, so the captured `openSettings` action is
     // still valid after `orderOut`.
     AppState.shared.appDelegate?.closePanel(restorePrevious: true)
-    NSApp.activate(ignoringOtherApps: true)
 
     DispatchQueue.main.async {
-      if let targetTab {
-        AppState.shared.settingsTab = targetTab
-      }
-      openSettings()
+      AppState.shared.appDelegate?.openSettingsWindow(tab: targetTab)
     }
   }
 }

@@ -410,6 +410,36 @@ final class Clipboard {
     playSound()
   }
 
+  /// Post Cmd+V as soon as the pasteboard write is observable and the target
+  /// app has keyboard focus, instead of sleeping a fixed interval: the paste
+  /// lands sooner on a fast machine and never fires while the target is still
+  /// switching on a slow one. The timeout keeps the old "always pastes
+  /// eventually" guarantee for unusually slow activations.
+  func paste(whenReadyFor target: NSRunningApplication?, timeout: TimeInterval = 0.4) async {
+    guard Preferences.pasteAutomatically else { return }
+
+    // One short beat so the write from `copy(_:)` is observable everywhere.
+    try? await Task.sleep(nanoseconds: 16_000_000)
+
+    if let target, !target.isTerminated {
+      let deadline = Date().addingTimeInterval(timeout)
+      while Date() < deadline {
+        if NSWorkspace.shared.frontmostApplication?.processIdentifier == target.processIdentifier,
+           pasteboard.changeCount == changeCount {
+          break
+        }
+        try? await Task.sleep(nanoseconds: 12_000_000)
+      }
+    } else {
+      // No known target app (panel opened over the desktop, focus already
+      // lost, …): keep the previous settle delay rather than risk delivering
+      // Cmd+V to an app that is still switching.
+      try? await Task.sleep(nanoseconds: 120_000_000)
+    }
+
+    paste()
+  }
+
   /// Posting synthetic key events requires the Accessibility permission. Without
   /// it the key press is silently dropped, which looks like a broken app.
   private func ensureAccessibility() -> Bool {

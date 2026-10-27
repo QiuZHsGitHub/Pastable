@@ -11,6 +11,10 @@ final class AppState: ObservableObject {
     didSet { recomputeDisplayItems() }
   }
   @Published var filteredItems: [HistoryItem] = []
+  /// Folded tokens of the active search (see `SearchService.tokens(for:)`).
+  /// Updated together with the debounced search result so cards can show why
+  /// they matched without re-tokenizing per render.
+  @Published private(set) var searchTokens: [String] = []
   @Published var settingsTab: SettingsTab = .general
   @Published var shouldScrollToTop: Bool = false
   @Published var searchFocusRequest: SearchFocusRequest = .none
@@ -23,6 +27,18 @@ final class AppState: ObservableObject {
   /// search changes only (not per render), because the category filter runs
   /// type classification over every record.
   @Published private(set) var displayItems: [HistoryItem] = []
+
+  /// How many filtered items the shelf materializes at once. The visible band
+  /// is only a handful of cards; capping the window keeps SwiftUI diffing and
+  /// `ForEach` bookkeeping bounded even if the history grows to the
+  /// "unlimited" sizes clipboard managers like Paste allow. The window grows
+  /// as the user scrolls or arrow-keys toward its end.
+  static let displayWindowBatchSize = 120
+
+  @Published private(set) var displayLimit = AppState.displayWindowBatchSize
+
+  /// Full (uncapped) size of the current filtered + category result.
+  private var availableCount = 0
 
   enum SearchFocusRequest: Equatable {
     case none
@@ -38,6 +54,11 @@ final class AppState: ObservableObject {
   }
 
   weak var appDelegate: AppDelegate?
+
+  /// SwiftUI `openSettings` action captured from the panel's hosted hierarchy.
+  /// The Settings scene only opens reliably through this action (the AppKit
+  /// `showSettingsWindow:` trick silently no-ops in this app).
+  var openSettingsAction: (() -> Void)?
 
   private var allItems: [HistoryItem] = []
   private var cancellables = Set<AnyCancellable>()
@@ -93,6 +114,7 @@ final class AppState: ObservableObject {
     }
 
     performSearch(query: searchText)
+    scheduleSearchWarmUp()
   }
 
   // MARK: - Filtering
@@ -113,13 +135,36 @@ final class AppState: ObservableObject {
     default:
       result = filtered
     }
-    displayItems = result
+
+    availableCount = result.count
+    displayItems = result.count > displayLimit
+      ? Array(result.prefix(displayLimit))
+      : result
+  }
+
+  /// Grow the lazily loaded display window by one batch. No-op while every
+  /// result is already visible.
+  func expandDisplayWindow() {
+    guard availableCount > displayItems.count else { return }
+    displayLimit += Self.displayWindowBatchSize
+    recomputeDisplayItems()
+  }
+
+  /// Called from `CardList` when a card near the end of the loaded window
+  /// appears, so scrolling into older history stays seamless.
+  func expandDisplayWindowIfNeeded(around id: PersistentIdentifier) {
+    guard availableCount > displayItems.count,
+          let index = displayItems.firstIndex(where: { $0.persistentModelID == id }),
+          index >= displayItems.count - 12 else { return }
+    expandDisplayWindow()
   }
 
   func performSearch(query: String) {
     if query.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
       filteredItems = allItems
+      searchTokens = []
     } else {
+      searchTokens = SearchService.tokens(for: query)
       filteredItems = SearchService.shared.search(query: query, items: allItems, mode: searchMode)
     }
     recomputeDisplayItems()
@@ -127,6 +172,38 @@ final class AppState: ObservableObject {
 
   func refreshSearch() {
     performSearch(query: searchText)
+  }
+
+  // MARK: - Search index warm-up
+
+  private var searchWarmUpTask: Task<Void, Never>?
+
+  /// Idle-time pass that builds each record's folded search strings in small
+  /// chunks (see `HistoryItem.warmUpSearchIndex`). Without it, the first
+  /// keystroke after launch folds every pending record in one go and the panel
+  /// hitches. Debounced by cancelling the previous pass, so bursts of
+  /// clipboard activity restart the walk instead of stacking (walking an
+  /// already-warm record is nearly free).
+  private func scheduleSearchWarmUp() {
+    searchWarmUpTask?.cancel()
+    searchWarmUpTask = Task { [weak self] in
+      // Let launch / data-change rendering finish first.
+      try? await Task.sleep(nanoseconds: 400_000_000)
+      guard let self, !Task.isCancelled else { return }
+
+      var processed = 0
+      for item in self.allItems {
+        if Task.isCancelled { return }
+        item.warmUpSearchIndex()
+        processed += 1
+        if processed % 20 == 0 {
+          // Yield and pause briefly so a large history never monopolizes the
+          // main actor while the panel is open.
+          await Task.yield()
+          try? await Task.sleep(nanoseconds: 4_000_000)
+        }
+      }
+    }
   }
 
   // MARK: - Selection
@@ -137,6 +214,11 @@ final class AppState: ObservableObject {
   }
 
   func moveSelection(by delta: Int) {
+    // Let keyboard navigation walk past the end of the lazily loaded window.
+    if delta > 0, let selectedIndex, selectedIndex >= displayItems.count - 1 {
+      expandDisplayWindow()
+    }
+
     let items = displayItems
     guard !items.isEmpty else {
       selectedItemID = nil
