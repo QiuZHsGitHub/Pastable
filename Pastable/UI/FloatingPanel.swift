@@ -97,24 +97,22 @@ final class FloatingPanel: NSPanel {
     positionAtBottom(animated: false)
   }
 
-  /// 将窗口定位到鼠标所在屏幕的可用区域底部，全宽，高度跟随内容。
-  /// 面板层级高于 Dock，自动隐藏的 Dock 会在面板后面滑出；不使用预留
-  /// Dock 高度的方案，避免 Dock 隐藏时面板悬空。
+  /// 将窗口定位到鼠标所在屏幕的物理底部，全宽，高度跟随内容。
+  /// 使用 `screen.frame` 而不是 `visibleFrame`：后者会在当前显示程序坞的
+  /// 那块屏幕上预留程序坞高度，导致面板在扩展屏上被顶起（内置屏不显示
+  /// 程序坞时则正常）。面板层级高于 Dock，程序坞展示就展示，不为其预留
+  /// 空间，所有屏幕都贴物理底边。
   func positionAtBottom(animated: Bool = true) {
     let mouseLocation = NSEvent.mouseLocation
     let screen = NSScreen.screens.first(where: { $0.frame.contains(mouseLocation) }) ?? NSScreen.main
     guard let screen else { return }
 
-    let visible = screen.visibleFrame
-    let panelHeight = min(contentHeight, visible.height)
-    // Keep the panel flush with the bottom edge. The panel runs above the
-    // Dock's window level, so an auto-hidden Dock slides in behind it instead
-    // of covering the bottom row of cards. Reserving Dock height here would
-    // make the panel visibly “fly up” when the Dock is hidden.
+    let screenFrame = screen.frame
+    let panelHeight = min(contentHeight, screenFrame.height)
     let finalFrame = NSRect(
-      x: visible.origin.x,
-      y: visible.origin.y,
-      width: visible.width,
+      x: screenFrame.origin.x,
+      y: screenFrame.origin.y,
+      width: screenFrame.width,
       height: panelHeight
     )
 
