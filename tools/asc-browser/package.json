@@ -1,0 +1,9 @@
+{
+  "name": "asc-browser",
+  "private": true,
+  "type": "module",
+  "description": "App Store Connect automation: dedicated Chrome profile + CDP driver",
+  "dependencies": {
+    "playwright-core": "^1.64.1"
+  }
+}

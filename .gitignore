@@ -108,3 +108,10 @@ iOSInjectionProject/
 # Temporary files
 tmp/
 temp/
+
+# App Store Connect 自动化工具(依赖与本地截图/临时脚本)
+tools/asc-browser/node_modules/
+tools/asc-browser/build/
+
+# Local-only App Store notes (account/contact details)
+docs/appstore/*.local.md
