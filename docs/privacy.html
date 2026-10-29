@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>隐私政策 · Pastable</title>
+  <meta name="description" content="Pastable 隐私政策：本地优先的 macOS 剪贴板管理器，不收集、不传输、不出售任何个人信息。Privacy Policy for Pastable for macOS.">
+  <link rel="canonical" href="https://qiuzhsgithub.github.io/Pastable/privacy.html">
+  <meta name="theme-color" content="#f6f1e9">
+  <meta name="color-scheme" content="light">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="Pastable">
+  <meta property="og:title" content="隐私政策 · Pastable">
+  <meta property="og:description" content="本地优先，不收集数据。Pastable 的完整隐私政策（中文 / English）。">
+  <meta property="og:url" content="https://qiuzhsgithub.github.io/Pastable/privacy.html">
+  <meta property="og:image" content="https://qiuzhsgithub.github.io/Pastable/assets/site/og-cover.png">
+  <meta property="og:locale" content="zh_CN">
+  <meta property="og:locale:alternate" content="en_US">
+  <meta name="twitter:card" content="summary_large_image">
+  <link rel="icon" type="image/png" sizes="32x32" href="assets/site/icon-32.png">
+  <link rel="apple-touch-icon" href="assets/site/apple-touch-icon.png">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <a class="skip-link" href="#main">跳到主要内容</a>
+
+  <header class="site-header">
+    <div class="wrap nav">
+      <a class="brand" href="index.html" aria-label="Pastable 首页">
+        <img src="assets/site/icon-64.png" alt="" width="28" height="28">
+        <span>Pastable</span>
+      </a>
+      <nav class="nav-links" aria-label="主导航">
+        <a href="index.html#features">功能</a>
+        <a href="index.html#shortcuts">快捷键</a>
+        <a href="privacy.html" aria-current="page">隐私</a>
+        <a href="support.html">支持</a>
+      </nav>
+      <div class="nav-right">
+        <a class="nav-lang" href="#english" hreflang="en" lang="en">EN</a>
+        <a class="nav-badge" href="https://apps.apple.com/app/id6828470287" aria-label="在 Mac App Store 获取 Pastable">
+          <img src="assets/site/badge/appstore-zh-cn-black.svg" alt="下载 Mac 版 App Store" width="140" height="40">
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <main id="main">
+    <section class="page-hero">
+      <div class="wrap">
+        <p class="eyebrow">隐私</p>
+        <h1>隐私政策</h1>
+        <p class="page-lede">Pastable 是一款本地优先的剪贴板管理器。我们不收集、不传输、不出售任何个人信息。本页同时提供完整的中文与 English 版本。</p>
+        <div class="page-meta">
+          <span>最后更新：2026-10-29</span>
+          <span>适用版本：Pastable 1.2.0 for macOS</span>
+          <span>App Store 隐私标签：未收集数据</span>
+        </div>
+        <nav class="lang-nav" aria-label="语言 / Language">
+          <a href="#chinese">中文</a>
+          <a href="#english" hreflang="en" lang="en">English</a>
+        </nav>
+      </div>
+    </section>
+
+    <div class="wrap doc-layout">
+      <aside class="doc-toc" aria-label="本页目录">
+        <h2>目录</h2>
+        <ol>
+          <li><a href="#summary">摘要</a></li>
+          <li><a href="#collect">我们收集什么</a></li>
+          <li><a href="#storage">数据存在哪里</a></li>
+          <li><a href="#icloud">iCloud 同步</a></li>
+          <li><a href="#permissions">权限</a></li>
+          <li><a href="#deletion">删除数据</a></li>
+          <li><a href="#children">儿童隐私</a></li>
+          <li><a href="#changes">政策更新</a></li>
+          <li><a href="#contact">联系我们</a></li>
+          <li><a href="#english" hreflang="en" lang="en">English</a></li>
+        </ol>
+      </aside>
+
+      <article class="doc-content">
+        <div class="lang-block" id="chinese" lang="zh-CN">
+          <h2 id="summary">摘要</h2>
+          <div class="callout">
+            <p class="callout-title">一句话版本：你的剪贴板，只属于你。</p>
+            <p>Pastable 没有账号系统，不含统计分析、崩溃上报、广告或第三方追踪代码，也不会向开发者运营的服务器发起任何网络请求。剪贴板历史默认只保存在你的 Mac 上。</p>
+          </div>
+
+          <h2 id="collect">我们收集什么？</h2>
+          <p><strong>什么都不收集。</strong>具体来说，Pastable 不会收集、上传或出售：</p>
+          <ul>
+            <li>你的剪贴板内容（除非你主动开启 iCloud 同步，见下文）；</li>
+            <li>使用行为、功能点击或搜索记录；</li>
+            <li>设备标识符、广告标识符或位置信息；</li>
+            <li>通讯录、日历、照片或其他系统数据；</li>
+            <li>崩溃日志或诊断信息（应用未集成任何崩溃上报 SDK）。</li>
+          </ul>
+          <p>应用不需要注册或登录，也没有任何形式的内购或广告。</p>
+
+          <h2 id="storage">剪贴板历史存在哪里？</h2>
+          <p>默认保存在<strong>你的 Mac 本地</strong>，位于应用沙盒内的 SwiftData 数据库中。图片会在入库时预生成缩略图，以减少数据库体积，这些文件同样只存在于本机沙盒。</p>
+          <p>你可以随时在应用内清空历史、删除单条记录，或设置保留时长与容量上限。卸载应用会同时删除沙盒内的本地数据。</p>
+
+          <h2 id="icloud">iCloud 同步（可选，默认关闭）</h2>
+          <p>如果你主动开启「iCloud 同步」，剪贴板历史会通过 <strong>CloudKit 私有数据库</strong>同步到你<strong>自己的 iCloud 账户</strong>，用于在登录同一 Apple ID 的 Mac 之间保持一致。</p>
+          <ul>
+            <li>该数据只有你的 Apple ID 可以访问，<strong>开发者无法查看、无法获取、无法解密</strong>。</li>
+            <li>同步由 Apple 的 iCloud 服务承载，同时受 <a href="https://www.apple.com/legal/privacy/" rel="noopener">Apple 隐私政策</a>约束。</li>
+            <li>关闭同步后，应用不再向 CloudKit 写入新记录。已同步的数据由你的 Apple ID 管理；删除应用不会自动删除云端记录。</li>
+          </ul>
+
+          <h2 id="permissions">权限说明</h2>
+          <h3>辅助功能（Accessibility）</h3>
+          <p>仅在你使用「自动粘贴」时申请，用于向当前应用模拟一次 ⌘V。该权限通过系统标准接口（CGEvent / AXIsProcessTrusted）申请，不是私有 API。不授予该权限时，应用仍可正常复制到剪贴板，其余功能不受影响。</p>
+          <h3>用户选择的文件</h3>
+          <p>只有当你通过系统文件选择器主动选择文件时，应用才会读取对应文件，用于生成预览或复制。应用不会扫描你的磁盘。</p>
+
+          <h2 id="deletion">数据删除</h2>
+          <ul>
+            <li><strong>单条记录</strong>：在面板中悬停卡片后按 ⌘⌫，或使用卡片菜单删除。</li>
+            <li><strong>全部历史</strong>：在设置中手动清空，或设置自动清理规则。</li>
+            <li><strong>本地数据</strong>：从「应用程序」中删除 Pastable 即可移除沙盒内的数据库与缩略图。</li>
+            <li><strong>iCloud 数据</strong>：由你的 Apple ID 管理；关闭同步后可在系统设置的 iCloud 存储管理中查看是否有 Pastable 数据。开发者无法访问，也无法代为删除。</li>
+          </ul>
+
+          <h2 id="children">儿童隐私</h2>
+          <p>Pastable 不会收集任何人的个人信息，包括 13 岁以下儿童。应用不包含面向儿童的内容、社交功能或广告。</p>
+
+          <h2 id="changes">政策更新</h2>
+          <p>如果本政策发生实质性变化，我们会更新本页顶部的「最后更新」日期，并在应用更新说明中注明。继续使用应用即表示你接受更新后的政策。</p>
+
+          <h2 id="contact">联系我们</h2>
+          <p>如有任何隐私相关问题，请通过以下方式联系：</p>
+          <ul>
+            <li>GitHub Issues：<a href="https://github.com/QiuZHsGitHub/Pastable/issues" rel="noopener">github.com/QiuZHsGitHub/Pastable/issues</a></li>
+            <li>电子邮件：<a href="mailto:h593526370@gmail.com">h593526370@gmail.com</a></li>
+          </ul>
+        </div>
+
+        <div class="lang-block" lang="en">
+          <div class="doc-divider" id="english">Privacy Policy</div>
+
+          <h2 id="en-summary">Summary</h2>
+          <div class="callout">
+            <p class="callout-title">The short version: your clipboard belongs to you.</p>
+            <p>Pastable has no accounts, no analytics, no crash reporting, no ads and no third-party trackers. It does not make network requests to developer-operated servers. Clipboard history is stored on your Mac by default.</p>
+          </div>
+
+          <h2 id="en-collect">What do we collect?</h2>
+          <p><strong>Nothing.</strong> Pastable does not collect, upload or sell:</p>
+          <ul>
+            <li>your clipboard content (unless you opt into iCloud sync, described below);</li>
+            <li>usage data, feature interactions or search history;</li>
+            <li>device identifiers, advertising identifiers or location;</li>
+            <li>contacts, calendars, photos or other system data;</li>
+            <li>crash logs or diagnostics (no crash-reporting SDK is integrated).</li>
+          </ul>
+          <p>No registration or sign-in is required, and there are no in-app purchases or ads.</p>
+
+          <h2 id="en-storage">Where is clipboard history stored?</h2>
+          <p>By default it stays <strong>on your Mac</strong>, in a SwiftData database inside the app sandbox. Thumbnails are generated when images are captured to keep the database small; they live in the same local sandbox.</p>
+          <p>You can clear history, delete individual items, or set a retention window and capacity limit at any time. Deleting the app removes the local sandbox data.</p>
+
+          <h2 id="en-icloud">iCloud sync (optional, off by default)</h2>
+          <p>If you turn on <strong>iCloud Sync</strong>, clipboard history is synced through the <strong>CloudKit private database</strong> of <strong>your own iCloud account</strong>, so your Macs signed in with the same Apple ID stay in step.</p>
+          <ul>
+            <li>Only your Apple ID can access that data. <strong>The developer cannot view, retrieve or decrypt it.</strong></li>
+            <li>Sync runs on Apple's iCloud service and is also governed by the <a href="https://www.apple.com/legal/privacy/" rel="noopener">Apple Privacy Policy</a>.</li>
+            <li>When you turn sync off, no new records are written to CloudKit. Data already synced is managed by your Apple ID; deleting the app does not remove it.</li>
+          </ul>
+
+          <h2 id="en-permissions">Permissions</h2>
+          <h3>Accessibility</h3>
+          <p>Requested only for <strong>Auto Paste</strong>, to send a ⌘V keystroke to the frontmost app. It uses standard system APIs (CGEvent / AXIsProcessTrusted), not private APIs. Without it, the app still copies to the clipboard and everything else keeps working.</p>
+          <h3>User-selected files</h3>
+          <p>Files are read only when you pick them through the system file picker, to build a preview or copy them. The app does not scan your disk.</p>
+
+          <h2 id="en-deletion">Deleting your data</h2>
+          <ul>
+            <li><strong>Single item</strong>: hover a card and press ⌘⌫, or use its context menu.</li>
+            <li><strong>All history</strong>: clear it manually in Settings or configure automatic cleanup.</li>
+            <li><strong>Local data</strong>: remove Pastable from Applications; the sandbox database and thumbnails go with it.</li>
+            <li><strong>iCloud data</strong>: managed by your Apple ID. After turning sync off, check iCloud storage settings to see whether Pastable data is listed. The developer cannot access or delete it.</li>
+          </ul>
+
+          <h2 id="en-children">Children's privacy</h2>
+          <p>Pastable collects no personal information from anyone, including children under 13. The app contains no child-directed content, social features or advertising.</p>
+
+          <h2 id="en-changes">Changes to this policy</h2>
+          <p>If this policy changes materially, we will update the "last updated" date at the top of this page and note it in the app's release notes. Continued use of the app means you accept the revised policy.</p>
+
+          <h2 id="en-contact">Contact</h2>
+          <p>For any privacy question, please reach out:</p>
+          <ul>
+            <li>GitHub Issues: <a href="https://github.com/QiuZHsGitHub/Pastable/issues" rel="noopener">github.com/QiuZHsGitHub/Pastable/issues</a></li>
+            <li>Email: <a href="mailto:h593526370@gmail.com">h593526370@gmail.com</a></li>
+          </ul>
+          <p>Pastable is not affiliated with Apple Inc. Apple, Mac and Mac App Store are trademarks of Apple Inc.</p>
+        </div>
+      </article>
+    </div>
+  </main>
+
+  <footer class="site-footer">
+    <div class="wrap">
+      <div class="footer-grid">
+        <div class="footer-brand">
+          <a class="brand" href="index.html" aria-label="Pastable 首页">
+            <img src="assets/site/icon-64.png" alt="" width="28" height="28">
+            <span>Pastable</span>
+          </a>
+          <p>轻巧、快速的 macOS 剪贴板管理器。专注「随叫随到的浮层」与「更聪明的搜索」。</p>
+        </div>
+        <div class="footer-col">
+          <h4>产品</h4>
+          <ul>
+            <li><a href="index.html#features">功能</a></li>
+            <li><a href="index.html#shortcuts">快捷键</a></li>
+            <li><a href="index.html#pricing">定价</a></li>
+            <li><a href="en/index.html" hreflang="en" lang="en">English</a></li>
+          </ul>
+        </div>
+        <div class="footer-col">
+          <h4>资源</h4>
+          <ul>
+            <li><a href="privacy.html">隐私政策</a></li>
+            <li><a href="support.html">技术支持</a></li>
+            <li><a href="https://github.com/QiuZHsGitHub/Pastable/releases" rel="noopener">更新日志</a></li>
+            <li><a href="https://github.com/QiuZHsGitHub/Pastable" rel="noopener">源代码</a></li>
+          </ul>
+        </div>
+        <div class="footer-col">
+          <h4>联系</h4>
+          <ul>
+            <li><a href="https://github.com/QiuZHsGitHub/Pastable/issues" rel="noopener">GitHub Issues</a></li>
+            <li><a href="mailto:h593526370@gmail.com">邮件支持</a></li>
+            <li><a href="https://apps.apple.com/app/id6828470287">Mac App Store</a></li>
+          </ul>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <p class="legal">© <span data-year>2026</span> Qiu ZH · Pastable 与 Apple Inc. 无关联。Apple、Mac 与 Mac App Store 是 Apple Inc. 的商标。本页面由 GitHub Pages 托管。</p>
+        <p class="footer-lang"><span class="current">简体中文</span><span aria-hidden="true">/</span><a href="en/index.html" hreflang="en" lang="en">English</a></p>
+      </div>
+    </div>
+  </footer>
+
+  <script src="app.js" defer></script>
+</body>
+</html>

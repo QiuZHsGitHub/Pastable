@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://qiuzhsgithub.github.io/Pastable/sitemap.xml

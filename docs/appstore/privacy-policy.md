@@ -64,12 +64,12 @@ Privacy questions: <https://github.com/QiuZHsGitHub/Pastable/issues>
 
 ## 如何发布这个页面(给上架用)
 
-App Store Connect 的「隐私政策 URL」需要一个**公网可访问**的链接。最简单的方式是 GitHub Pages:
+App Store Connect 的「隐私政策 URL」已由 GitHub Pages 站点提供:
 
-1. 打开仓库 `QiuZHsGitHub/Pastable` → Settings → Pages
-2. Source 选 `Deploy from a branch`,分支 `main`,目录 `/docs`,保存
-3. 等 1–2 分钟,访问 `https://qiuzhsgithub.github.io/Pastable/appstore/privacy-policy.html`
-   (GitHub Pages 会自动把 Markdown 渲染为页面;若你的 Pages 版本不渲染 .md,把本文件复制为 `docs/appstore/privacy-policy.html`,用纯 HTML 也可以)
-4. 把最终可访问的 URL 填进 App Store Connect 的「隐私政策网址」
+- **公网地址**:<https://qiuzhsgithub.github.io/Pastable/privacy.html>
+- **英文锚点**:<https://qiuzhsgithub.github.io/Pastable/privacy.html#english>
+- **页面源码**:`docs/privacy.html`(中文与 English 同页)
+- **开启 Pages 的步骤**:[github-pages.md](github-pages.md)
 
-如果不想用 GitHub Pages,任何能公开访问的托管(个人网站、Notion 公开页、腾讯文档分享链接等)都可以,保证审核期间可打开即可。
+本 Markdown 保留为文案源。修改隐私政策时,请同步更新 `docs/privacy.html` 的中文与 English 两段,
+并更新页面顶部的「最后更新」日期与 `docs/sitemap.xml` 的 `lastmod`。
