@@ -1,0 +1,143 @@
+/* 
+  Localizable.strings
+  Pastable
+*/
+
+// Category
+"category.all" = "Все";
+"category.text" = "Текст";
+"category.code" = "Код";
+"category.links" = "Ссылки";
+"category.link" = "Ссылка";
+"category.image" = "Изображения";
+"category.file" = "Файлы";
+"category.color" = "Цвета";
+"category.others" = "Медиа";
+
+// Search
+"search.placeholder" = "Поиск";
+
+// Menu
+"menu.clear_history" = "Очистить историю";
+"menu.settings" = "Настройки";
+"menu.about" = "О программе Pastable";
+"menu.quit" = "Выйти";
+
+// Settings - General
+"settings.general.title" = "Основные";
+"settings.general.launch_at_login" = "Запускать при входе";
+"settings.general.check_updates" = "Проверить обновления";
+"settings.general.behavior" = "Поведение";
+"settings.general.auto_paste" = "Автовставка";
+"settings.general.remove_formatting" = "Удалять форматирование";
+"settings.general.play_sounds" = "Воспроизводить звуки";
+"settings.general.shortcuts" = "Сочетания клавиш";
+"settings.shortcuts.title" = "Сочетания клавиш";
+"settings.general.popup_window" = "Всплывающее окно";
+"settings.general.search_mode" = "Режим поиска";
+"settings.general.search_mode.exact" = "Точное совпадение";
+"settings.general.search_mode.fuzzy" = "Нечёткое совпадение";
+
+// Settings - Storage
+"settings.storage.title" = "Хранилище";
+"settings.storage.types" = "Типы";
+"settings.storage.save_text" = "Сохранять текст";
+"settings.storage.save_images" = "Сохранять изображения";
+"settings.storage.save_files" = "Сохранять файлы";
+"settings.storage.capacity" = "Ёмкость";
+"settings.storage.history_count" = "Максимум записей";
+"settings.storage.clear_all" = "Очистить всю историю";
+"settings.storage.retention" = "Хранение";
+"settings.storage.icloud" = "iCloud";
+"settings.storage.icloud_sync" = "Синхронизировать с iCloud";
+"settings.storage.icloud.footer" = "Использует вашу личную базу данных iCloud. Содержимое буфера обмена покидает этот Mac и учитывается в хранилище iCloud.";
+"settings.storage.icloud.enable_title" = "Включить синхронизацию с iCloud?";
+"settings.storage.icloud.enable_message" = "История буфера обмена, включая текст и изображения, будет храниться в вашей личной базе данных iCloud и синхронизироваться с Mac, на которых выполнен вход с тем же Apple ID. Изменение вступит в силу после перезапуска Pastable.";
+"settings.storage.icloud.disable_title" = "Выключить синхронизацию с iCloud?";
+"settings.storage.icloud.disable_message" = "История будет храниться только на этом Mac. Элементы, уже синхронизированные с iCloud, не удаляются автоматически. Изменение вступит в силу после перезапуска Pastable.";
+"settings.storage.icloud.restart_now" = "Перезапустить";
+"settings.storage.icloud.restart_later" = "Позже";
+"settings.storage.icloud.restart_pending" = "Перезапустите Pastable, чтобы применить изменение.";
+"settings.storage.icloud.local_only" = "История хранится только на этом Mac.";
+"settings.storage.icloud.start_failed" = "Синхронизация с iCloud недоступна. История по-прежнему хранится локально.";
+"settings.storage.icloud.checking" = "Проверка доступности iCloud…";
+"settings.storage.icloud.connected" = "iCloud подключён. Изменения синхронизируются автоматически.";
+"settings.storage.icloud.no_account" = "Вход в iCloud не выполнен. Войдите и перезапустите Pastable.";
+"settings.storage.icloud.restricted" = "iCloud ограничен на этом Mac.";
+"settings.storage.icloud.check_failed" = "Не удалось проверить состояние iCloud.";
+
+// Settings - Storage - Retention Options
+"24 hours" = "24 часа";
+"7 days" = "7 дней";
+"1 month" = "1 месяц";
+"3 months" = "3 месяца";
+"6 months" = "6 месяцев";
+"1 year" = "1 год";
+"Unlimited" = "Без ограничений";
+
+// Settings - About
+"settings.about.title" = "О программе Pastable";
+"settings.about.description" = "Менеджер буфера обмена для macOS";
+"settings.about.contact" = "Контакты";
+
+"settings.about.rate" = "Оценить в Mac App Store";
+"settings.about.copyright" = "Copyright © 2026 NullPointer";
+
+// Empty states
+"empty.no_history" = "История буфера обмена пока пуста";
+"empty.no_results" = "Ничего не найдено";
+"empty.no_category" = "В этой категории ничего нет";
+"empty.hint" = "Всё, что вы скопируете, появится здесь";
+"empty.category_hint" = "Попробуйте другую категорию";
+
+// Units
+"unit.chars_format" = "%d символов";
+"unit.files_format" = "%d файлов";
+"unit.one_file" = "1 файл";
+
+// Common
+"common.cancel" = "Отмена";
+"common.ok" = "ОК";
+
+// Clear history
+"clear_history.title" = "Очистить историю?";
+"clear_history.message" = "История буфера обмена будет удалена без возможности отмены.";
+"clear_history.confirm" = "Очистить историю";
+
+// Accessibility
+"accessibility.title" = "Требуется разрешение «Универсальный доступ»";
+"accessibility.message" = "Для автовставки нужен доступ в разделе «Универсальный доступ». Откройте «Системные настройки > Конфиденциальность и безопасность > Универсальный доступ» и включите Pastable. Копирование работает и без этого.";
+"accessibility.open_settings" = "Открыть Системные настройки";
+
+// Extra menu item
+"menu.open" = "Открыть Pastable";
+
+// Permissions
+"settings.general.permissions" = "Разрешения";
+"settings.general.accessibility.granted" = "Доступ «Универсальный доступ» предоставлен";
+"settings.general.accessibility.required" = "Доступ «Универсальный доступ» выключен";
+"settings.general.accessibility.hint" = "Нужен для автовставки; копирование работает и без него.";
+"settings.general.accessibility.recheck" = "Проверить снова";
+"settings.general.accessibility.restart_hint" = "Если переключатель уже включён, закройте и снова откройте Pastable. Отладочные сборки Xcode нужно заново добавлять в «Универсальный доступ» после каждой перекомпиляции.";
+"settings.general.login_item_error" = "Не удалось обновить объект входа";
+"settings.general.launch_at_login_approval" = "Объект входа зарегистрирован, но требует подтверждения в «Системные настройки > Основные > Объекты входа».";
+
+// Storage statistics
+"settings.storage.items" = "Записи истории";
+"settings.storage.database_size" = "Размер базы данных";
+
+// History maintenance
+"maintenance.title" = "Очистить историю буфера обмена?";
+"maintenance.message" = "В хранилище буфера обмена %ld записей, но лимит — %ld. Ещё %ld записей старше срока хранения. Очистка освободит место сразу.\n\nЕсли выбрать «Сохранить всё», лимит будет увеличен до %ld, а срок хранения отключён.";
+"maintenance.clean" = "Очистить";
+"maintenance.keep" = "Сохранить всё";
+"maintenance.later" = "Позже";
+"settings.storage.cleanup_now" = "Очистить сейчас";
+"settings.storage.cleanup_removed" = "Очищено записей: %ld.";
+"settings.storage.cleanup_nothing" = "Сейчас нечего очищать.";
+
+// Empty state hints and units
+"empty.search_hint" = "Попробуйте другое ключевое слово";
+"empty.shortcut.open" = "Открыть";
+"empty.shortcut.paste" = "Вставить";
+"empty.shortcut.quick" = "Быстрая вставка";

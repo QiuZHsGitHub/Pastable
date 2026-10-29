@@ -1,0 +1,143 @@
+/* 
+  Localizable.strings
+  Pastable
+*/
+
+// Category
+"category.all" = "Todo";
+"category.text" = "Texto";
+"category.code" = "Código";
+"category.links" = "Enlaces";
+"category.link" = "Enlace";
+"category.image" = "Imágenes";
+"category.file" = "Archivos";
+"category.color" = "Colores";
+"category.others" = "Multimedia";
+
+// Search
+"search.placeholder" = "Buscar";
+
+// Menu
+"menu.clear_history" = "Borrar historial";
+"menu.settings" = "Ajustes";
+"menu.about" = "Acerca de Pastable";
+"menu.quit" = "Salir";
+
+// Settings - General
+"settings.general.title" = "General";
+"settings.general.launch_at_login" = "Abrir al iniciar sesión";
+"settings.general.check_updates" = "Buscar actualizaciones";
+"settings.general.behavior" = "Comportamiento";
+"settings.general.auto_paste" = "Pegado automático";
+"settings.general.remove_formatting" = "Eliminar formato";
+"settings.general.play_sounds" = "Reproducir sonidos";
+"settings.general.shortcuts" = "Atajos";
+"settings.shortcuts.title" = "Atajos";
+"settings.general.popup_window" = "Ventana emergente";
+"settings.general.search_mode" = "Modo de búsqueda";
+"settings.general.search_mode.exact" = "Coincidencia exacta";
+"settings.general.search_mode.fuzzy" = "Coincidencia aproximada";
+
+// Settings - Storage
+"settings.storage.title" = "Almacenamiento";
+"settings.storage.types" = "Tipos";
+"settings.storage.save_text" = "Guardar texto";
+"settings.storage.save_images" = "Guardar imágenes";
+"settings.storage.save_files" = "Guardar archivos";
+"settings.storage.capacity" = "Capacidad";
+"settings.storage.history_count" = "Máximo de elementos";
+"settings.storage.clear_all" = "Borrar todo el historial";
+"settings.storage.retention" = "Conservación";
+"settings.storage.icloud" = "iCloud";
+"settings.storage.icloud_sync" = "Sincronizar con iCloud";
+"settings.storage.icloud.footer" = "Usa tu base de datos privada de iCloud. El contenido del portapapeles sale de este Mac y cuenta para tu almacenamiento de iCloud.";
+"settings.storage.icloud.enable_title" = "¿Activar la sincronización con iCloud?";
+"settings.storage.icloud.enable_message" = "El historial del portapapeles, incluidos texto e imágenes, se guardará en tu base de datos privada de iCloud y se sincronizará con los Mac que hayan iniciado sesión con el mismo Apple ID. El cambio se aplicará después de reiniciar Pastable.";
+"settings.storage.icloud.disable_title" = "¿Desactivar la sincronización con iCloud?";
+"settings.storage.icloud.disable_message" = "El historial se quedará solo en este Mac. Los elementos ya sincronizados con iCloud no se eliminan automáticamente. El cambio se aplicará después de reiniciar Pastable.";
+"settings.storage.icloud.restart_now" = "Reiniciar ahora";
+"settings.storage.icloud.restart_later" = "Más tarde";
+"settings.storage.icloud.restart_pending" = "Reinicia Pastable para aplicar este cambio.";
+"settings.storage.icloud.local_only" = "El historial se guarda solo en este Mac.";
+"settings.storage.icloud.start_failed" = "La sincronización con iCloud no está disponible. El historial se sigue guardando localmente.";
+"settings.storage.icloud.checking" = "Comprobando la disponibilidad de iCloud…";
+"settings.storage.icloud.connected" = "iCloud está conectado. Los cambios se sincronizan automáticamente.";
+"settings.storage.icloud.no_account" = "No has iniciado sesión en iCloud. Inicia sesión y reinicia Pastable.";
+"settings.storage.icloud.restricted" = "iCloud está restringido en este Mac.";
+"settings.storage.icloud.check_failed" = "No se pudo comprobar el estado de iCloud.";
+
+// Settings - Storage - Retention Options
+"24 hours" = "24 horas";
+"7 days" = "7 días";
+"1 month" = "1 mes";
+"3 months" = "3 meses";
+"6 months" = "6 meses";
+"1 year" = "1 año";
+"Unlimited" = "Ilimitado";
+
+// Settings - About
+"settings.about.title" = "Acerca de Pastable";
+"settings.about.description" = "Gestor de portapapeles para macOS";
+"settings.about.contact" = "Contacto";
+
+"settings.about.rate" = "Valorar en el Mac App Store";
+"settings.about.copyright" = "Copyright © 2026 NullPointer";
+
+// Empty states
+"empty.no_history" = "Aún no hay historial del portapapeles";
+"empty.no_results" = "No hay resultados coincidentes";
+"empty.no_category" = "No hay nada en esta categoría";
+"empty.hint" = "Todo lo que copies aparecerá aquí";
+"empty.category_hint" = "Prueba con otra categoría";
+
+// Units
+"unit.chars_format" = "%d caracteres";
+"unit.files_format" = "%d archivos";
+"unit.one_file" = "1 archivo";
+
+// Common
+"common.cancel" = "Cancelar";
+"common.ok" = "OK";
+
+// Clear history
+"clear_history.title" = "¿Borrar el historial?";
+"clear_history.message" = "Esto elimina todo el historial del portapapeles y no se puede deshacer.";
+"clear_history.confirm" = "Borrar historial";
+
+// Accessibility
+"accessibility.title" = "Se requiere permiso de Accesibilidad";
+"accessibility.message" = "El pegado automático necesita acceso a Accesibilidad. Abre Ajustes del Sistema > Privacidad y seguridad > Accesibilidad y activa Pastable. Copiar sigue funcionando sin este permiso.";
+"accessibility.open_settings" = "Abrir Ajustes del Sistema";
+
+// Extra menu item
+"menu.open" = "Abrir Pastable";
+
+// Permissions
+"settings.general.permissions" = "Permisos";
+"settings.general.accessibility.granted" = "Acceso a Accesibilidad concedido";
+"settings.general.accessibility.required" = "El acceso a Accesibilidad está desactivado";
+"settings.general.accessibility.hint" = "Necesario para el pegado automático; copiar sigue funcionando.";
+"settings.general.accessibility.recheck" = "Volver a comprobar";
+"settings.general.accessibility.restart_hint" = "Si la opción ya está activada, cierra y vuelve a abrir Pastable. Las compilaciones de depuración de Xcode deben volver a añadirse a Accesibilidad tras cada recompilación.";
+"settings.general.login_item_error" = "No se pudo actualizar el ítem de inicio";
+"settings.general.launch_at_login_approval" = "El ítem de inicio se registró, pero aún debe aprobarse en Ajustes del Sistema > General > Ítems de inicio.";
+
+// Storage statistics
+"settings.storage.items" = "Elementos del historial";
+"settings.storage.database_size" = "Tamaño de la base de datos";
+
+// History maintenance
+"maintenance.title" = "¿Limpiar el historial del portapapeles?";
+"maintenance.message" = "El almacén del portapapeles tiene %ld elementos, pero tu límite es %ld. Además, %ld elementos superan tu periodo de conservación. La limpieza libera espacio ahora.\n\nSi eliges «Conservar todo», el límite sube a %ld y se desactiva la conservación.";
+"maintenance.clean" = "Limpiar";
+"maintenance.keep" = "Conservar todo";
+"maintenance.later" = "Más tarde";
+"settings.storage.cleanup_now" = "Limpiar ahora";
+"settings.storage.cleanup_removed" = "Se limpiaron %ld elementos del historial.";
+"settings.storage.cleanup_nothing" = "No hay nada que limpiar ahora mismo.";
+
+// Empty state hints and units
+"empty.search_hint" = "Prueba con otra palabra clave";
+"empty.shortcut.open" = "Abrir";
+"empty.shortcut.paste" = "Pegar";
+"empty.shortcut.quick" = "Pegado rápido";

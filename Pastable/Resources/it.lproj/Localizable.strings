@@ -1,0 +1,143 @@
+/* 
+  Localizable.strings
+  Pastable
+*/
+
+// Category
+"category.all" = "Tutto";
+"category.text" = "Testo";
+"category.code" = "Codice";
+"category.links" = "Link";
+"category.link" = "Link";
+"category.image" = "Immagini";
+"category.file" = "File";
+"category.color" = "Colori";
+"category.others" = "Media";
+
+// Search
+"search.placeholder" = "Cerca";
+
+// Menu
+"menu.clear_history" = "Cancella cronologia";
+"menu.settings" = "Impostazioni";
+"menu.about" = "Informazioni su Pastable";
+"menu.quit" = "Esci";
+
+// Settings - General
+"settings.general.title" = "Generali";
+"settings.general.launch_at_login" = "Apri al login";
+"settings.general.check_updates" = "Controlla aggiornamenti";
+"settings.general.behavior" = "Comportamento";
+"settings.general.auto_paste" = "Incolla automaticamente";
+"settings.general.remove_formatting" = "Rimuovi formattazione";
+"settings.general.play_sounds" = "Riproduci suoni";
+"settings.general.shortcuts" = "Scorciatoie";
+"settings.shortcuts.title" = "Scorciatoie";
+"settings.general.popup_window" = "Finestra pop-up";
+"settings.general.search_mode" = "Modalità di ricerca";
+"settings.general.search_mode.exact" = "Corrispondenza esatta";
+"settings.general.search_mode.fuzzy" = "Corrispondenza approssimata";
+
+// Settings - Storage
+"settings.storage.title" = "Archiviazione";
+"settings.storage.types" = "Tipi";
+"settings.storage.save_text" = "Salva testo";
+"settings.storage.save_images" = "Salva immagini";
+"settings.storage.save_files" = "Salva file";
+"settings.storage.capacity" = "Capacità";
+"settings.storage.history_count" = "Numero massimo di elementi";
+"settings.storage.clear_all" = "Cancella tutta la cronologia";
+"settings.storage.retention" = "Conservazione";
+"settings.storage.icloud" = "iCloud";
+"settings.storage.icloud_sync" = "Sincronizza con iCloud";
+"settings.storage.icloud.footer" = "Usa il tuo database iCloud privato. Il contenuto degli appunti lascia questo Mac e viene conteggiato nello spazio iCloud.";
+"settings.storage.icloud.enable_title" = "Attivare la sincronizzazione iCloud?";
+"settings.storage.icloud.enable_message" = "La cronologia degli appunti, inclusi testo e immagini, sarà salvata nel tuo database iCloud privato e sincronizzata con i Mac che hanno effettuato l’accesso con lo stesso Apple ID. La modifica avrà effetto dopo il riavvio di Pastable.";
+"settings.storage.icloud.disable_title" = "Disattivare la sincronizzazione iCloud?";
+"settings.storage.icloud.disable_message" = "La cronologia rimarrà solo su questo Mac. Gli elementi già sincronizzati con iCloud non vengono eliminati automaticamente. La modifica avrà effetto dopo il riavvio di Pastable.";
+"settings.storage.icloud.restart_now" = "Riavvia ora";
+"settings.storage.icloud.restart_later" = "Più tardi";
+"settings.storage.icloud.restart_pending" = "Riavvia Pastable per applicare questa modifica.";
+"settings.storage.icloud.local_only" = "La cronologia è salvata solo su questo Mac.";
+"settings.storage.icloud.start_failed" = "La sincronizzazione iCloud non è disponibile. La cronologia resta salvata localmente.";
+"settings.storage.icloud.checking" = "Verifica della disponibilità di iCloud…";
+"settings.storage.icloud.connected" = "iCloud connesso. Le modifiche vengono sincronizzate automaticamente.";
+"settings.storage.icloud.no_account" = "Nessun accesso a iCloud. Accedi e riavvia Pastable.";
+"settings.storage.icloud.restricted" = "iCloud è limitato su questo Mac.";
+"settings.storage.icloud.check_failed" = "Impossibile verificare lo stato di iCloud.";
+
+// Settings - Storage - Retention Options
+"24 hours" = "24 ore";
+"7 days" = "7 giorni";
+"1 month" = "1 mese";
+"3 months" = "3 mesi";
+"6 months" = "6 mesi";
+"1 year" = "1 anno";
+"Unlimited" = "Illimitato";
+
+// Settings - About
+"settings.about.title" = "Informazioni su Pastable";
+"settings.about.description" = "Gestore degli appunti per macOS";
+"settings.about.contact" = "Contatti";
+
+"settings.about.rate" = "Valuta sul Mac App Store";
+"settings.about.copyright" = "Copyright © 2026 NullPointer";
+
+// Empty states
+"empty.no_history" = "Nessuna cronologia degli appunti";
+"empty.no_results" = "Nessun risultato";
+"empty.no_category" = "Niente in questa categoria";
+"empty.hint" = "Tutto ciò che copi apparirà qui";
+"empty.category_hint" = "Prova un’altra categoria";
+
+// Units
+"unit.chars_format" = "%d caratteri";
+"unit.files_format" = "%d file";
+"unit.one_file" = "1 file";
+
+// Common
+"common.cancel" = "Annulla";
+"common.ok" = "OK";
+
+// Clear history
+"clear_history.title" = "Cancellare la cronologia?";
+"clear_history.message" = "Rimuove tutta la cronologia degli appunti e non può essere annullato.";
+"clear_history.confirm" = "Cancella cronologia";
+
+// Accessibility
+"accessibility.title" = "Permesso Accessibilità richiesto";
+"accessibility.message" = "L’incolla automatico richiede l’accesso all’Accessibilità. Apri Impostazioni di Sistema > Privacy e sicurezza > Accessibilità e attiva Pastable. La copia funziona comunque.";
+"accessibility.open_settings" = "Apri Impostazioni di Sistema";
+
+// Extra menu item
+"menu.open" = "Apri Pastable";
+
+// Permissions
+"settings.general.permissions" = "Permessi";
+"settings.general.accessibility.granted" = "Accesso all’Accessibilità concesso";
+"settings.general.accessibility.required" = "L’accesso all’Accessibilità è disattivato";
+"settings.general.accessibility.hint" = "Necessario per l’incolla automatico; la copia funziona comunque.";
+"settings.general.accessibility.recheck" = "Controlla di nuovo";
+"settings.general.accessibility.restart_hint" = "Se l’opzione è già attiva, chiudi e riapri Pastable. Le build di debug di Xcode devono essere aggiunte di nuovo all’Accessibilità dopo ogni ricompilazione.";
+"settings.general.login_item_error" = "Impossibile aggiornare l’elemento di login";
+"settings.general.launch_at_login_approval" = "L’elemento di login è stato registrato ma deve ancora essere approvato in Impostazioni di Sistema > Generali > Elementi login.";
+
+// Storage statistics
+"settings.storage.items" = "Elementi della cronologia";
+"settings.storage.database_size" = "Dimensione database";
+
+// History maintenance
+"maintenance.title" = "Pulire la cronologia degli appunti?";
+"maintenance.message" = "L’archivio degli appunti contiene %ld elementi, ma il limite è %ld. Inoltre %ld elementi superano il periodo di conservazione. La pulizia libera subito spazio.\n\nScegliendo «Mantieni tutto» il limite sale a %ld e la conservazione viene disattivata.";
+"maintenance.clean" = "Pulisci";
+"maintenance.keep" = "Mantieni tutto";
+"maintenance.later" = "Più tardi";
+"settings.storage.cleanup_now" = "Pulisci ora";
+"settings.storage.cleanup_removed" = "Puliti %ld elementi della cronologia.";
+"settings.storage.cleanup_nothing" = "Non c’è nulla da pulire al momento.";
+
+// Empty state hints and units
+"empty.search_hint" = "Prova un’altra parola chiave";
+"empty.shortcut.open" = "Apri";
+"empty.shortcut.paste" = "Incolla";
+"empty.shortcut.quick" = "Incolla rapido";

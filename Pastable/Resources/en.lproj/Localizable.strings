@@ -80,6 +80,7 @@
 "settings.about.description" = "macOS Clipboard Manager";
 "settings.about.contact" = "Contact";
 
+"settings.about.rate" = "Rate on the Mac App Store";
 "settings.about.copyright" = "Copyright © 2026 NullPointer";
 
 // Empty states

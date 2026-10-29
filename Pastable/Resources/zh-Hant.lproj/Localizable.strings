@@ -8,6 +8,7 @@
 "category.text" = "文字";
 "category.code" = "程式碼";
 "category.links" = "連結";
+"category.link" = "連結";
 "category.others" = "媒體";
 
 // Search
@@ -76,6 +77,7 @@
 "settings.about.description" = "macOS 剪貼簿管理工具。";
 "settings.about.contact" = "聯絡信箱";
 
+"settings.about.rate" = "在 Mac App Store 評分";
 "settings.about.copyright" = "版權所有 © 2026 NullPointer";
 
 // Category (missing entries)

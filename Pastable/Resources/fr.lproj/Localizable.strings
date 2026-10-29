@@ -1,0 +1,143 @@
+/* 
+  Localizable.strings
+  Pastable
+*/
+
+// Category
+"category.all" = "Tout";
+"category.text" = "Texte";
+"category.code" = "Code";
+"category.links" = "Liens";
+"category.link" = "Lien";
+"category.image" = "Images";
+"category.file" = "Fichiers";
+"category.color" = "Couleurs";
+"category.others" = "Médias";
+
+// Search
+"search.placeholder" = "Rechercher";
+
+// Menu
+"menu.clear_history" = "Effacer l’historique";
+"menu.settings" = "Réglages";
+"menu.about" = "À propos de Pastable";
+"menu.quit" = "Quitter";
+
+// Settings - General
+"settings.general.title" = "Général";
+"settings.general.launch_at_login" = "Ouvrir à l’ouverture de session";
+"settings.general.check_updates" = "Rechercher les mises à jour";
+"settings.general.behavior" = "Comportement";
+"settings.general.auto_paste" = "Collage automatique";
+"settings.general.remove_formatting" = "Supprimer la mise en forme";
+"settings.general.play_sounds" = "Jouer les sons";
+"settings.general.shortcuts" = "Raccourcis";
+"settings.shortcuts.title" = "Raccourcis";
+"settings.general.popup_window" = "Fenêtre contextuelle";
+"settings.general.search_mode" = "Mode de recherche";
+"settings.general.search_mode.exact" = "Correspondance exacte";
+"settings.general.search_mode.fuzzy" = "Correspondance approximative";
+
+// Settings - Storage
+"settings.storage.title" = "Stockage";
+"settings.storage.types" = "Types";
+"settings.storage.save_text" = "Enregistrer le texte";
+"settings.storage.save_images" = "Enregistrer les images";
+"settings.storage.save_files" = "Enregistrer les fichiers";
+"settings.storage.capacity" = "Capacité";
+"settings.storage.history_count" = "Nombre maximal d’éléments";
+"settings.storage.clear_all" = "Effacer tout l’historique";
+"settings.storage.retention" = "Conservation";
+"settings.storage.icloud" = "iCloud";
+"settings.storage.icloud_sync" = "Synchroniser avec iCloud";
+"settings.storage.icloud.footer" = "Utilise votre base de données iCloud privée. Le contenu du presse-papiers quitte ce Mac et compte dans votre stockage iCloud.";
+"settings.storage.icloud.enable_title" = "Activer la synchronisation iCloud ?";
+"settings.storage.icloud.enable_message" = "L’historique du presse-papiers, textes et images compris, sera stocké dans votre base de données iCloud privée et synchronisé avec les Mac connectés au même identifiant Apple. La modification prendra effet après le redémarrage de Pastable.";
+"settings.storage.icloud.disable_title" = "Désactiver la synchronisation iCloud ?";
+"settings.storage.icloud.disable_message" = "L’historique restera uniquement sur ce Mac. Les éléments déjà synchronisés avec iCloud ne sont pas supprimés automatiquement. La modification prendra effet après le redémarrage de Pastable.";
+"settings.storage.icloud.restart_now" = "Redémarrer maintenant";
+"settings.storage.icloud.restart_later" = "Plus tard";
+"settings.storage.icloud.restart_pending" = "Redémarrez Pastable pour appliquer cette modification.";
+"settings.storage.icloud.local_only" = "L’historique est stocké uniquement sur ce Mac.";
+"settings.storage.icloud.start_failed" = "La synchronisation iCloud est indisponible. L’historique reste stocké localement.";
+"settings.storage.icloud.checking" = "Vérification de la disponibilité d’iCloud…";
+"settings.storage.icloud.connected" = "iCloud est connecté. Les modifications sont synchronisées automatiquement.";
+"settings.storage.icloud.no_account" = "Vous n’êtes pas connecté à iCloud. Connectez-vous, puis redémarrez Pastable.";
+"settings.storage.icloud.restricted" = "iCloud est restreint sur ce Mac.";
+"settings.storage.icloud.check_failed" = "Impossible de vérifier l’état d’iCloud.";
+
+// Settings - Storage - Retention Options
+"24 hours" = "24 heures";
+"7 days" = "7 jours";
+"1 month" = "1 mois";
+"3 months" = "3 mois";
+"6 months" = "6 mois";
+"1 year" = "1 an";
+"Unlimited" = "Illimité";
+
+// Settings - About
+"settings.about.title" = "À propos de Pastable";
+"settings.about.description" = "Gestionnaire de presse-papiers pour macOS";
+"settings.about.contact" = "Contact";
+
+"settings.about.rate" = "Noter sur le Mac App Store";
+"settings.about.copyright" = "Copyright © 2026 NullPointer";
+
+// Empty states
+"empty.no_history" = "Aucun historique du presse-papiers pour l’instant";
+"empty.no_results" = "Aucun résultat";
+"empty.no_category" = "Rien dans cette catégorie";
+"empty.hint" = "Tout ce que vous copiez apparaîtra ici";
+"empty.category_hint" = "Essayez une autre catégorie";
+
+// Units
+"unit.chars_format" = "%d caractères";
+"unit.files_format" = "%d fichiers";
+"unit.one_file" = "1 fichier";
+
+// Common
+"common.cancel" = "Annuler";
+"common.ok" = "OK";
+
+// Clear history
+"clear_history.title" = "Effacer l’historique ?";
+"clear_history.message" = "Cette action supprime tout l’historique du presse-papiers et est irréversible.";
+"clear_history.confirm" = "Effacer l’historique";
+
+// Accessibility
+"accessibility.title" = "Autorisation Accessibilité requise";
+"accessibility.message" = "Le collage automatique nécessite l’accès à l’accessibilité. Ouvrez Réglages Système > Confidentialité et sécurité > Accessibilité et activez Pastable. La copie fonctionne sans cette autorisation.";
+"accessibility.open_settings" = "Ouvrir les Réglages Système";
+
+// Extra menu item
+"menu.open" = "Ouvrir Pastable";
+
+// Permissions
+"settings.general.permissions" = "Autorisations";
+"settings.general.accessibility.granted" = "Accès à l’accessibilité accordé";
+"settings.general.accessibility.required" = "L’accès à l’accessibilité est désactivé";
+"settings.general.accessibility.hint" = "Nécessaire au collage automatique ; la copie fonctionne toujours.";
+"settings.general.accessibility.recheck" = "Vérifier à nouveau";
+"settings.general.accessibility.restart_hint" = "Si l’option est déjà activée, quittez puis rouvrez Pastable. Les versions de débogage Xcode doivent être rajoutées à l’accessibilité après chaque recompilation.";
+"settings.general.login_item_error" = "Impossible de mettre à jour l’élément d’ouverture";
+"settings.general.launch_at_login_approval" = "L’élément d’ouverture a été enregistré mais doit encore être autorisé dans Réglages Système > Général > Ouverture.";
+
+// Storage statistics
+"settings.storage.items" = "Éléments d’historique";
+"settings.storage.database_size" = "Taille de la base de données";
+
+// History maintenance
+"maintenance.title" = "Nettoyer l’historique du presse-papiers ?";
+"maintenance.message" = "Le stockage du presse-papiers contient %ld éléments, mais votre limite est de %ld. %ld éléments dépassent aussi votre délai de conservation. Le nettoyage libère de l’espace immédiatement.\n\n« Tout conserver » augmente la limite à %ld et désactive la conservation.";
+"maintenance.clean" = "Nettoyer";
+"maintenance.keep" = "Tout conserver";
+"maintenance.later" = "Plus tard";
+"settings.storage.cleanup_now" = "Nettoyer maintenant";
+"settings.storage.cleanup_removed" = "%ld éléments d’historique nettoyés.";
+"settings.storage.cleanup_nothing" = "Rien à nettoyer pour le moment.";
+
+// Empty state hints and units
+"empty.search_hint" = "Essayez un autre mot-clé";
+"empty.shortcut.open" = "Ouvrir";
+"empty.shortcut.paste" = "Coller";
+"empty.shortcut.quick" = "Collage rapide";

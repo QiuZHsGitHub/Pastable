@@ -1,0 +1,143 @@
+/* 
+  Localizable.strings
+  Pastable
+*/
+
+// Category
+"category.all" = "전체";
+"category.text" = "텍스트";
+"category.code" = "코드";
+"category.links" = "링크";
+"category.link" = "링크";
+"category.image" = "이미지";
+"category.file" = "파일";
+"category.color" = "색상";
+"category.others" = "미디어";
+
+// Search
+"search.placeholder" = "검색";
+
+// Menu
+"menu.clear_history" = "기록 지우기";
+"menu.settings" = "설정";
+"menu.about" = "Pastable 정보";
+"menu.quit" = "종료";
+
+// Settings - General
+"settings.general.title" = "일반";
+"settings.general.launch_at_login" = "로그인 시 실행";
+"settings.general.check_updates" = "업데이트 확인";
+"settings.general.behavior" = "동작";
+"settings.general.auto_paste" = "자동 붙여넣기";
+"settings.general.remove_formatting" = "서식 제거";
+"settings.general.play_sounds" = "사운드 재생";
+"settings.general.shortcuts" = "단축키";
+"settings.shortcuts.title" = "단축키";
+"settings.general.popup_window" = "팝업 윈도우";
+"settings.general.search_mode" = "검색 모드";
+"settings.general.search_mode.exact" = "정확 일치";
+"settings.general.search_mode.fuzzy" = "유사 일치";
+
+// Settings - Storage
+"settings.storage.title" = "저장 공간";
+"settings.storage.types" = "저장 유형";
+"settings.storage.save_text" = "텍스트 저장";
+"settings.storage.save_images" = "이미지 저장";
+"settings.storage.save_files" = "파일 저장";
+"settings.storage.capacity" = "용량";
+"settings.storage.history_count" = "최대 기록 개수";
+"settings.storage.clear_all" = "모든 기록 지우기";
+"settings.storage.retention" = "보관 기간";
+"settings.storage.icloud" = "iCloud";
+"settings.storage.icloud_sync" = "iCloud와 동기화";
+"settings.storage.icloud.footer" = "개인 iCloud 데이터베이스를 사용합니다. 클립보드 내용이 이 Mac을 떠나며 iCloud 저장 공간을 사용합니다.";
+"settings.storage.icloud.enable_title" = "iCloud 동기화를 켤까요?";
+"settings.storage.icloud.enable_message" = "텍스트와 이미지를 포함한 클립보드 기록이 개인 iCloud 데이터베이스에 저장되고, 동일한 Apple ID로 로그인한 Mac에 동기화됩니다. 변경 사항은 Pastable을 재시작한 후 적용됩니다.";
+"settings.storage.icloud.disable_title" = "iCloud 동기화를 끌까요?";
+"settings.storage.icloud.disable_message" = "기록은 이 Mac에만 보관됩니다. 이미 iCloud에 동기화된 항목은 자동으로 삭제되지 않습니다. 변경 사항은 Pastable을 재시작한 후 적용됩니다.";
+"settings.storage.icloud.restart_now" = "지금 재시작";
+"settings.storage.icloud.restart_later" = "나중에";
+"settings.storage.icloud.restart_pending" = "변경 사항을 적용하려면 Pastable을 재시작하세요.";
+"settings.storage.icloud.local_only" = "기록이 이 Mac에만 저장됩니다.";
+"settings.storage.icloud.start_failed" = "iCloud 동기화를 사용할 수 없습니다. 기록은 계속 로컬에 저장됩니다.";
+"settings.storage.icloud.checking" = "iCloud 사용 가능 여부 확인 중…";
+"settings.storage.icloud.connected" = "iCloud에 연결되었습니다. 변경 사항이 자동으로 동기화됩니다.";
+"settings.storage.icloud.no_account" = "iCloud에 로그인되어 있지 않습니다. 로그인한 후 Pastable을 재시작하세요.";
+"settings.storage.icloud.restricted" = "이 Mac에서는 iCloud가 제한되어 있습니다.";
+"settings.storage.icloud.check_failed" = "iCloud 상태를 확인할 수 없습니다.";
+
+// Settings - Storage - Retention Options
+"24 hours" = "24시간";
+"7 days" = "7일";
+"1 month" = "1개월";
+"3 months" = "3개월";
+"6 months" = "6개월";
+"1 year" = "1년";
+"Unlimited" = "무제한";
+
+// Settings - About
+"settings.about.title" = "Pastable 정보";
+"settings.about.description" = "macOS 클립보드 관리 앱";
+"settings.about.contact" = "문의";
+
+"settings.about.rate" = "Mac App Store에서 평가하기";
+"settings.about.copyright" = "Copyright © 2026 NullPointer";
+
+// Empty states
+"empty.no_history" = "클립보드 기록이 아직 없습니다";
+"empty.no_results" = "일치하는 결과가 없습니다";
+"empty.no_category" = "이 카테고리에 항목이 없습니다";
+"empty.hint" = "복사한 내용이 여기에 표시됩니다";
+"empty.category_hint" = "다른 카테고리를 선택해 보세요";
+
+// Units
+"unit.chars_format" = "%d자";
+"unit.files_format" = "%d개 파일";
+"unit.one_file" = "파일 1개";
+
+// Common
+"common.cancel" = "취소";
+"common.ok" = "확인";
+
+// Clear history
+"clear_history.title" = "기록을 지울까요?";
+"clear_history.message" = "클립보드 기록이 모두 삭제되며 되돌릴 수 없습니다.";
+"clear_history.confirm" = "기록 지우기";
+
+// Accessibility
+"accessibility.title" = "손쉬운 사용 권한 필요";
+"accessibility.message" = "자동 붙여넣기에는 손쉬운 사용 권한이 필요합니다. ‘시스템 설정 > 개인정보 보호 및 보안 > 손쉬운 사용’을 열고 Pastable을 켜세요. 권한이 없어도 복사는 계속 작동합니다.";
+"accessibility.open_settings" = "시스템 설정 열기";
+
+// Extra menu item
+"menu.open" = "Pastable 열기";
+
+// Permissions
+"settings.general.permissions" = "권한";
+"settings.general.accessibility.granted" = "손쉬운 사용 권한이 허용됨";
+"settings.general.accessibility.required" = "손쉬운 사용 권한이 꺼져 있음";
+"settings.general.accessibility.hint" = "자동 붙여넣기에 필요합니다. 복사는 계속 작동합니다.";
+"settings.general.accessibility.recheck" = "다시 확인";
+"settings.general.accessibility.restart_hint" = "이미 켜져 있다면 Pastable을 종료한 후 다시 여세요. Xcode 디버그 빌드는 다시 컴파일할 때마다 손쉬운 사용에 다시 추가해야 합니다.";
+"settings.general.login_item_error" = "로그인 항목을 업데이트할 수 없습니다";
+"settings.general.launch_at_login_approval" = "로그인 항목이 등록되었지만 ‘시스템 설정 > 일반 > 로그인 항목’에서 승인이 필요합니다.";
+
+// Storage statistics
+"settings.storage.items" = "기록 항목";
+"settings.storage.database_size" = "데이터베이스 크기";
+
+// History maintenance
+"maintenance.title" = "클립보드 기록을 정리할까요?";
+"maintenance.message" = "클립보드 저장소에 %ld개 항목이 있지만 한도는 %ld개입니다. 또한 %ld개 항목이 보관 기간을 넘겼습니다. 정리하면 지금 공간을 확보할 수 있습니다.\n\n‘모두 보관’을 선택하면 한도가 %ld개로 늘어나고 보관 기간이 꺼집니다.";
+"maintenance.clean" = "정리";
+"maintenance.keep" = "모두 보관";
+"maintenance.later" = "나중에";
+"settings.storage.cleanup_now" = "지금 정리";
+"settings.storage.cleanup_removed" = "%ld개 기록을 정리했습니다.";
+"settings.storage.cleanup_nothing" = "지금 정리할 항목이 없습니다.";
+
+// Empty state hints and units
+"empty.search_hint" = "다른 검색어를 입력해 보세요";
+"empty.shortcut.open" = "열기";
+"empty.shortcut.paste" = "붙여넣기";
+"empty.shortcut.quick" = "빠른 붙여넣기";

@@ -1,0 +1,143 @@
+/* 
+  Localizable.strings
+  Pastable
+*/
+
+// Category
+"category.all" = "Tudo";
+"category.text" = "Texto";
+"category.code" = "Código";
+"category.links" = "Links";
+"category.link" = "Link";
+"category.image" = "Imagens";
+"category.file" = "Arquivos";
+"category.color" = "Cores";
+"category.others" = "Mídia";
+
+// Search
+"search.placeholder" = "Buscar";
+
+// Menu
+"menu.clear_history" = "Limpar histórico";
+"menu.settings" = "Ajustes";
+"menu.about" = "Sobre o Pastable";
+"menu.quit" = "Sair";
+
+// Settings - General
+"settings.general.title" = "Geral";
+"settings.general.launch_at_login" = "Abrir ao iniciar sessão";
+"settings.general.check_updates" = "Verificar atualizações";
+"settings.general.behavior" = "Comportamento";
+"settings.general.auto_paste" = "Colar automaticamente";
+"settings.general.remove_formatting" = "Remover formatação";
+"settings.general.play_sounds" = "Reproduzir sons";
+"settings.general.shortcuts" = "Atalhos";
+"settings.shortcuts.title" = "Atalhos";
+"settings.general.popup_window" = "Janela pop-up";
+"settings.general.search_mode" = "Modo de busca";
+"settings.general.search_mode.exact" = "Coincidência exata";
+"settings.general.search_mode.fuzzy" = "Coincidência aproximada";
+
+// Settings - Storage
+"settings.storage.title" = "Armazenamento";
+"settings.storage.types" = "Tipos";
+"settings.storage.save_text" = "Salvar texto";
+"settings.storage.save_images" = "Salvar imagens";
+"settings.storage.save_files" = "Salvar arquivos";
+"settings.storage.capacity" = "Capacidade";
+"settings.storage.history_count" = "Máximo de itens";
+"settings.storage.clear_all" = "Limpar todo o histórico";
+"settings.storage.retention" = "Retenção";
+"settings.storage.icloud" = "iCloud";
+"settings.storage.icloud_sync" = "Sincronizar com o iCloud";
+"settings.storage.icloud.footer" = "Usa seu banco de dados privado do iCloud. O conteúdo da área de transferência sai deste Mac e conta para seu armazenamento do iCloud.";
+"settings.storage.icloud.enable_title" = "Ativar a sincronização com o iCloud?";
+"settings.storage.icloud.enable_message" = "O histórico da área de transferência, incluindo texto e imagens, será armazenado no seu banco de dados privado do iCloud e sincronizado com os Macs conectados com o mesmo Apple ID. A alteração entra em vigor após reiniciar o Pastable.";
+"settings.storage.icloud.disable_title" = "Desativar a sincronização com o iCloud?";
+"settings.storage.icloud.disable_message" = "O histórico ficará apenas neste Mac. Os itens já sincronizados com o iCloud não são excluídos automaticamente. A alteração entra em vigor após reiniciar o Pastable.";
+"settings.storage.icloud.restart_now" = "Reiniciar agora";
+"settings.storage.icloud.restart_later" = "Depois";
+"settings.storage.icloud.restart_pending" = "Reinicie o Pastable para aplicar esta alteração.";
+"settings.storage.icloud.local_only" = "O histórico é armazenado apenas neste Mac.";
+"settings.storage.icloud.start_failed" = "A sincronização com o iCloud não está disponível. O histórico continua armazenado localmente.";
+"settings.storage.icloud.checking" = "Verificando a disponibilidade do iCloud…";
+"settings.storage.icloud.connected" = "iCloud conectado. As alterações são sincronizadas automaticamente.";
+"settings.storage.icloud.no_account" = "Você não está conectado ao iCloud. Conecte-se e reinicie o Pastable.";
+"settings.storage.icloud.restricted" = "O iCloud está restrito neste Mac.";
+"settings.storage.icloud.check_failed" = "Não foi possível verificar o status do iCloud.";
+
+// Settings - Storage - Retention Options
+"24 hours" = "24 horas";
+"7 days" = "7 dias";
+"1 month" = "1 mês";
+"3 months" = "3 meses";
+"6 months" = "6 meses";
+"1 year" = "1 ano";
+"Unlimited" = "Ilimitado";
+
+// Settings - About
+"settings.about.title" = "Sobre o Pastable";
+"settings.about.description" = "Gerenciador de área de transferência para macOS";
+"settings.about.contact" = "Contato";
+
+"settings.about.rate" = "Avaliar na Mac App Store";
+"settings.about.copyright" = "Copyright © 2026 NullPointer";
+
+// Empty states
+"empty.no_history" = "Ainda não há histórico da área de transferência";
+"empty.no_results" = "Nenhum resultado encontrado";
+"empty.no_category" = "Nada nesta categoria";
+"empty.hint" = "Tudo o que você copiar aparecerá aqui";
+"empty.category_hint" = "Tente outra categoria";
+
+// Units
+"unit.chars_format" = "%d caracteres";
+"unit.files_format" = "%d arquivos";
+"unit.one_file" = "1 arquivo";
+
+// Common
+"common.cancel" = "Cancelar";
+"common.ok" = "OK";
+
+// Clear history
+"clear_history.title" = "Limpar histórico?";
+"clear_history.message" = "Isso remove todo o histórico da área de transferência e não pode ser desfeito.";
+"clear_history.confirm" = "Limpar histórico";
+
+// Accessibility
+"accessibility.title" = "Permissão de Acessibilidade necessária";
+"accessibility.message" = "Colar automaticamente requer acesso à Acessibilidade. Abra Ajustes do Sistema > Privacidade e Segurança > Acessibilidade e ative o Pastable. Copiar continua funcionando sem isso.";
+"accessibility.open_settings" = "Abrir Ajustes do Sistema";
+
+// Extra menu item
+"menu.open" = "Abrir o Pastable";
+
+// Permissions
+"settings.general.permissions" = "Permissões";
+"settings.general.accessibility.granted" = "Acesso à Acessibilidade concedido";
+"settings.general.accessibility.required" = "O acesso à Acessibilidade está desativado";
+"settings.general.accessibility.hint" = "Necessário para colar automaticamente; copiar continua funcionando.";
+"settings.general.accessibility.recheck" = "Verificar novamente";
+"settings.general.accessibility.restart_hint" = "Se a opção já estiver ativada, encerre e reabra o Pastable. Versões de depuração do Xcode precisam ser adicionadas novamente à Acessibilidade após cada recompilação.";
+"settings.general.login_item_error" = "Não foi possível atualizar o item de início";
+"settings.general.launch_at_login_approval" = "O item de início foi registrado, mas ainda precisa ser aprovado em Ajustes do Sistema > Geral > Itens de Início.";
+
+// Storage statistics
+"settings.storage.items" = "Itens do histórico";
+"settings.storage.database_size" = "Tamanho do banco de dados";
+
+// History maintenance
+"maintenance.title" = "Limpar o histórico da área de transferência?";
+"maintenance.message" = "O armazenamento da área de transferência tem %ld itens, mas seu limite é %ld. Além disso, %ld itens estão além do período de retenção. A limpeza libera espaço agora.\n\nEscolher “Manter tudo” eleva o limite para %ld e desativa a retenção.";
+"maintenance.clean" = "Limpar";
+"maintenance.keep" = "Manter tudo";
+"maintenance.later" = "Depois";
+"settings.storage.cleanup_now" = "Limpar agora";
+"settings.storage.cleanup_removed" = "%ld itens do histórico foram limpos.";
+"settings.storage.cleanup_nothing" = "Nada para limpar no momento.";
+
+// Empty state hints and units
+"empty.search_hint" = "Tente outra palavra-chave";
+"empty.shortcut.open" = "Abrir";
+"empty.shortcut.paste" = "Colar";
+"empty.shortcut.quick" = "Colar rápido";

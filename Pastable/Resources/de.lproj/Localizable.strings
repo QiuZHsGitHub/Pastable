@@ -1,0 +1,143 @@
+/* 
+  Localizable.strings
+  Pastable
+*/
+
+// Category
+"category.all" = "Alle";
+"category.text" = "Text";
+"category.code" = "Code";
+"category.links" = "Links";
+"category.link" = "Link";
+"category.image" = "Bilder";
+"category.file" = "Dateien";
+"category.color" = "Farben";
+"category.others" = "Medien";
+
+// Search
+"search.placeholder" = "Suchen";
+
+// Menu
+"menu.clear_history" = "Verlauf löschen";
+"menu.settings" = "Einstellungen";
+"menu.about" = "Über Pastable";
+"menu.quit" = "Beenden";
+
+// Settings - General
+"settings.general.title" = "Allgemein";
+"settings.general.launch_at_login" = "Bei Anmeldung öffnen";
+"settings.general.check_updates" = "Nach Updates suchen";
+"settings.general.behavior" = "Verhalten";
+"settings.general.auto_paste" = "Automatisch einsetzen";
+"settings.general.remove_formatting" = "Formatierung entfernen";
+"settings.general.play_sounds" = "Töne abspielen";
+"settings.general.shortcuts" = "Tastenkürzel";
+"settings.shortcuts.title" = "Tastenkürzel";
+"settings.general.popup_window" = "Pop-up-Fenster";
+"settings.general.search_mode" = "Suchmodus";
+"settings.general.search_mode.exact" = "Exakte Übereinstimmung";
+"settings.general.search_mode.fuzzy" = "Ungefähre Übereinstimmung";
+
+// Settings - Storage
+"settings.storage.title" = "Speicher";
+"settings.storage.types" = "Typen";
+"settings.storage.save_text" = "Text speichern";
+"settings.storage.save_images" = "Bilder speichern";
+"settings.storage.save_files" = "Dateien speichern";
+"settings.storage.capacity" = "Kapazität";
+"settings.storage.history_count" = "Max. Verlaufsanzahl";
+"settings.storage.clear_all" = "Gesamten Verlauf löschen";
+"settings.storage.retention" = "Aufbewahrung";
+"settings.storage.icloud" = "iCloud";
+"settings.storage.icloud_sync" = "Mit iCloud synchronisieren";
+"settings.storage.icloud.footer" = "Verwendet deine private iCloud-Datenbank. Zwischenablageinhalte verlassen diesen Mac und zählen zu deinem iCloud-Speicher.";
+"settings.storage.icloud.enable_title" = "iCloud-Synchronisierung aktivieren?";
+"settings.storage.icloud.enable_message" = "Der Zwischenablageverlauf, einschließlich Text und Bildern, wird in deiner privaten iCloud-Datenbank gespeichert und mit Macs synchronisiert, die mit derselben Apple-ID angemeldet sind. Die Änderung wird nach dem Neustart von Pastable wirksam.";
+"settings.storage.icloud.disable_title" = "iCloud-Synchronisierung deaktivieren?";
+"settings.storage.icloud.disable_message" = "Der Verlauf verbleibt nur auf diesem Mac. Bereits mit iCloud synchronisierte Objekte werden nicht automatisch gelöscht. Die Änderung wird nach dem Neustart von Pastable wirksam.";
+"settings.storage.icloud.restart_now" = "Jetzt neu starten";
+"settings.storage.icloud.restart_later" = "Später";
+"settings.storage.icloud.restart_pending" = "Starte Pastable neu, um diese Änderung anzuwenden.";
+"settings.storage.icloud.local_only" = "Der Verlauf wird nur auf diesem Mac gespeichert.";
+"settings.storage.icloud.start_failed" = "iCloud-Synchronisierung ist nicht verfügbar. Der Verlauf wird weiterhin lokal gespeichert.";
+"settings.storage.icloud.checking" = "iCloud-Verfügbarkeit wird geprüft…";
+"settings.storage.icloud.connected" = "iCloud ist verbunden. Änderungen werden automatisch synchronisiert.";
+"settings.storage.icloud.no_account" = "Nicht bei iCloud angemeldet. Melde dich an und starte Pastable neu.";
+"settings.storage.icloud.restricted" = "iCloud ist auf diesem Mac eingeschränkt.";
+"settings.storage.icloud.check_failed" = "iCloud-Status konnte nicht geprüft werden.";
+
+// Settings - Storage - Retention Options
+"24 hours" = "24 Stunden";
+"7 days" = "7 Tage";
+"1 month" = "1 Monat";
+"3 months" = "3 Monate";
+"6 months" = "6 Monate";
+"1 year" = "1 Jahr";
+"Unlimited" = "Unbegrenzt";
+
+// Settings - About
+"settings.about.title" = "Über Pastable";
+"settings.about.description" = "Zwischenablagenverwaltung für macOS";
+"settings.about.contact" = "Kontakt";
+
+"settings.about.rate" = "Im Mac App Store bewerten";
+"settings.about.copyright" = "Copyright © 2026 NullPointer";
+
+// Empty states
+"empty.no_history" = "Noch kein Zwischenablageverlauf";
+"empty.no_results" = "Keine Treffer";
+"empty.no_category" = "In dieser Kategorie ist nichts vorhanden";
+"empty.hint" = "Alles, was du kopierst, erscheint hier";
+"empty.category_hint" = "Versuche eine andere Kategorie";
+
+// Units
+"unit.chars_format" = "%d Zeichen";
+"unit.files_format" = "%d Dateien";
+"unit.one_file" = "1 Datei";
+
+// Common
+"common.cancel" = "Abbrechen";
+"common.ok" = "OK";
+
+// Clear history
+"clear_history.title" = "Verlauf löschen?";
+"clear_history.message" = "Dadurch wird der gesamte Zwischenablageverlauf entfernt. Dies kann nicht rückgängig gemacht werden.";
+"clear_history.confirm" = "Verlauf löschen";
+
+// Accessibility
+"accessibility.title" = "Bedienungshilfen-Berechtigung erforderlich";
+"accessibility.message" = "Automatisches Einsetzen erfordert Zugriff auf die Bedienungshilfen. Öffne Systemeinstellungen > Datenschutz & Sicherheit > Bedienungshilfen und aktiviere Pastable. Das Kopieren funktioniert auch ohne.";
+"accessibility.open_settings" = "Systemeinstellungen öffnen";
+
+// Extra menu item
+"menu.open" = "Pastable öffnen";
+
+// Permissions
+"settings.general.permissions" = "Berechtigungen";
+"settings.general.accessibility.granted" = "Zugriff auf Bedienungshilfen gewährt";
+"settings.general.accessibility.required" = "Zugriff auf Bedienungshilfen ist deaktiviert";
+"settings.general.accessibility.hint" = "Erforderlich für automatisches Einsetzen; Kopieren funktioniert weiterhin.";
+"settings.general.accessibility.recheck" = "Erneut prüfen";
+"settings.general.accessibility.restart_hint" = "Wenn die Option bereits aktiviert ist, beende Pastable und öffne es erneut. Xcode-Debug-Builds müssen nach jeder Neukompilierung erneut zu den Bedienungshilfen hinzugefügt werden.";
+"settings.general.login_item_error" = "Anmeldeobjekt konnte nicht aktualisiert werden";
+"settings.general.launch_at_login_approval" = "Das Anmeldeobjekt wurde registriert, muss aber noch in Systemeinstellungen > Allgemein > Anmeldeobjekte genehmigt werden.";
+
+// Storage statistics
+"settings.storage.items" = "Verlaufseinträge";
+"settings.storage.database_size" = "Datenbankgröße";
+
+// History maintenance
+"maintenance.title" = "Zwischenablageverlauf bereinigen?";
+"maintenance.message" = "Der Zwischenablagespeicher enthält %ld Objekte, dein Limit liegt bei %ld. Außerdem sind %ld Objekte älter als dein Aufbewahrungszeitraum. Die Bereinigung schafft sofort Speicherplatz.\n\nMit „Alles behalten“ wird das Limit auf %ld erhöht und die Aufbewahrung deaktiviert.";
+"maintenance.clean" = "Bereinigen";
+"maintenance.keep" = "Alles behalten";
+"maintenance.later" = "Später";
+"settings.storage.cleanup_now" = "Jetzt bereinigen";
+"settings.storage.cleanup_removed" = "%ld Verlaufseinträge bereinigt.";
+"settings.storage.cleanup_nothing" = "Derzeit ist nichts zu bereinigen.";
+
+// Empty state hints and units
+"empty.search_hint" = "Versuche ein anderes Stichwort";
+"empty.shortcut.open" = "Öffnen";
+"empty.shortcut.paste" = "Einsetzen";
+"empty.shortcut.quick" = "Schnelles Einsetzen";
