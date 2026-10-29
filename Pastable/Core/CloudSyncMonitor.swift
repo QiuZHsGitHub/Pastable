@@ -99,16 +99,22 @@ enum AppRelauncher {
   /// because the SwiftData container (local vs. CloudKit) is chosen at launch.
   @MainActor
   static func relaunch() {
-    let process = Process()
-    process.executableURL = URL(fileURLWithPath: "/usr/bin/open")
-    process.arguments = ["-n", Bundle.main.bundlePath]
-    do {
-      try process.run()
+    // NSWorkspace instead of `/usr/bin/open`: App Sandbox (required for the
+    // Mac App Store) blocks spawning system binaries, while Launch Services
+    // relaunching our own bundle stays within the sandbox contract.
+    let configuration = NSWorkspace.OpenConfiguration()
+    configuration.createsNewApplicationInstance = true
+    NSWorkspace.shared.openApplication(
+      at: Bundle.main.bundleURL,
+      configuration: configuration
+    ) { _, error in
+      if let error {
+        AppLogger.Storage.error("Cannot relaunch Pastable", error: error)
+        return
+      }
       DispatchQueue.main.asyncAfter(deadline: .now() + 0.4) {
         NSApp.terminate(nil)
       }
-    } catch {
-      AppLogger.Storage.error("Cannot relaunch Pastable", error: error)
     }
   }
 }
