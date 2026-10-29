@@ -18,6 +18,9 @@ GitHub Pages 选「Deploy from a branch → main → `/docs`」即可发布。
 > 这些 URL 由「用户名 `qiuzhsgithub` + 仓库名 `Pastable`」决定。如果以后改仓库名或绑自定义域名，
 > 需要同步修改各页 `<link rel="canonical">`、`og:url`、`sitemap.xml`、`robots.txt` 与 `404.html` 里的绝对路径。
 
+> 旧文档里写的 `/appstore/privacy-policy.html` 已保留跳转页，会跳到 `/privacy.html`。
+> 如果 App Store Connect 已经填了旧地址，可以先继续用；建议最终改成上面的新地址。
+
 ## 二、首次开启（只需一次）
 
 1. 打开仓库 **Settings → Pages**。
