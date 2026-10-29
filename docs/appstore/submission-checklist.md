@@ -10,9 +10,9 @@
 | # | 材料 | 状态 | 说明 |
 |---|---|---|---|
 | 1 | **Paid Applications 协议** | ❌ 必须先办 | App Store Connect →「协议、税务和银行业务」→ 申请「付费应用」协议,填写税务表(中国个人/公司)和银行账户。**没签完协议无法设置价格、无法提交审核** |
-| 2 | **隐私政策 URL** | ❌ 待发布 | 文案见 [privacy-policy.md](privacy-policy.md),建议挂 GitHub Pages(见该文件末尾说明) |
+| 2 | **隐私政策 URL** | ✅ 已上线 | `https://qiuzhsgithub.github.io/Pastable/privacy.html`(中英同页) |
 | 3 | **App Store 截图** | ✅ 已生成 2 张 | `docs/appstore/screenshots/01-dark-2880x1800.png`、`02-light-2880x1800.png`(2880×1800,深/浅色面板);`screenshots/raw/` 里还有全屏备选。**请人眼确认效果后上传** |
-| 4 | **技术支持 URL** | ❌ 建议填 | 可用 `https://github.com/QiuZHsGitHub/Pastable/issues` |
+| 4 | **技术支持 URL** | ✅ 已上线 | `https://qiuzhsgithub.github.io/Pastable/support.html`(含 FAQ、权限、退款、中英);也可继续用 GitHub Issues |
 | 5 | **SKU** | ❌ 随手定 | 自定义即可,如 `PASTABLE-MAC-001` |
 | 6 | **审核联系人信息** | ❌ 表单里填 | 姓名/电话/邮箱,审核人员可能来电确认辅助功能用法 |
 
@@ -137,3 +137,45 @@ If you need any help, please contact us at the phone/email below.
 - [ ] 从 App Store 安装的包:iCloud 同步可用(容器 `iCloud.com.qzh.Pastable`)
 - [ ] 自动粘贴:辅助功能授权引导正常弹出
 - [ ] 从其他 App 复制的**文件缩略图**在沙盒下能正常生成(macOS 对剪贴板文件 URL 有临时授权,预期可用;若失败会退化为文件图标,不影响过审)
+
+## 六、App Store Connect 当前进度(2026-10-29)
+
+> 网页操作由 agent 通过独立配置 Chrome 完成,工具与用法见 [tools/asc-browser/README.md](../../tools/asc-browser/README.md)。
+
+### 已完成
+
+- **App 记录已建**:Pastable · macOS · `com.qzh.Pastable` · SKU `PASTABLE-MAC-001` · ASC App ID `6828470287`
+- **版本页 1.2.0**:描述、关键词、技术支持 URL、版权、审核备注、2 张截图(2880×1800 深/浅)已填;「需要登录」已取消;「自动发布」保留
+  - 技术支持 URL 可替换为站点版:`https://qiuzhsgithub.github.io/Pastable/support.html`
+- **App 信息**:副标题「轻巧快速的剪贴板管理器」、类别 工具/效率、内容版权「不包含第三方内容」
+- **年龄分级**:4+(172 个国家或地区)
+- **App 隐私**:「未收集数据」已发布
+- **审核联系人**:已在 App Store Connect 填写(不写入仓库)
+- **DSA 交易商信息**:已提交并通过,27 个国家或地区,状态「有效」
+- **付费 App 协议**:已签署(生效 2026-10-29),状态「正在处理」
+- **银行账户**:已添加,状态「正在处理」(约 24 小时)
+- **报税表**:U.S. W-8BEN 与 U.S. Certificate of Foreign Status 均于 2026-10-29 提交,状态「使用中」
+- **相关合规信息**:已提交,状态「有效」
+- **定价**:美国 $1.99 / 中国大陆 ¥12.00(已保存;等协议生效后对用户生效)
+
+### 待办(按依赖顺序)
+
+1. **[你]** Xcode Organizer 上传构建(版本 1.2.0 / build 4)
+2. **[我]** 构建上传后:在版本页选构建、填出口合规(仅 OS 内置加密)、做提交前核对
+3. **[已完成]** GitHub Pages 已启用(`main` / `/docs`)并上线;隐私政策与技术支持 URL 可填入 App Store Connect。
+4. **[等]** 银行账户与付费协议处理完成(约 24 小时)后,协议转「有效」,定价正式生效
+
+
+## 七、GitHub Pages 站点(2026-10-29 新增)
+
+官网与上架所需的隐私/支持页面已经生成在 `docs/`,纯静态、无统计、无第三方请求:
+
+| 用途 | URL |
+|---|---|
+| 官网(中文) | <https://qiuzhsgithub.github.io/Pastable/> |
+| 官网(English) | <https://qiuzhsgithub.github.io/Pastable/en/> |
+| 隐私政策 | <https://qiuzhsgithub.github.io/Pastable/privacy.html> |
+| 技术支持 | <https://qiuzhsgithub.github.io/Pastable/support.html> |
+
+**已上线**:仓库 Settings → Pages 当前为「Deploy from a branch」→ `main` / `/docs`。
+完整说明、日常更新对照表与检查清单见 [github-pages.md](github-pages.md)。
