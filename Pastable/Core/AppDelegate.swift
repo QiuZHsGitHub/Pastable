@@ -212,6 +212,11 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     AppState.shared.searchText = ""
     AppState.shared.resetSelection()
     AppState.shared.searchFocusRequest = .blur
+
+    // The review prompt is deliberately deferred until the first panel open
+    // *after* a successful paste. It is never shown during launch, and this
+    // call is a no-op once the user has been asked.
+    ReviewPrompt.shared.requestIfNeeded(from: panel.reviewController)
   }
 
   /// Resolve the app a paste should be delivered to *right now*.

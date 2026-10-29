@@ -19,6 +19,10 @@ struct AboutSettingsView: View {
     URL(string: "mailto:\(supportEmail)")
   }
 
+  private var reviewURL: URL? {
+    URL(string: "https://apps.apple.com/app/id6828470287?action=write-review")
+  }
+
   var body: some View {
     VStack(spacing: 16) {
       Image(nsImage: NSApp.applicationIconImage)
@@ -51,6 +55,13 @@ struct AboutSettingsView: View {
         }
       }
       
+      if let reviewURL {
+        Link(destination: reviewURL) {
+          Label("settings.about.rate", systemImage: "star")
+            .font(.system(size: 13, weight: .medium))
+        }
+      }
+
       Spacer()
       
       Text("settings.about.copyright")

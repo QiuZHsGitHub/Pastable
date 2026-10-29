@@ -8,6 +8,12 @@ final class FloatingPanel: NSPanel {
   private var contentHeight: CGFloat = 357
   private var isClosing = false
 
+  /// A tiny controller whose view lives in the panel. StoreKit 2 needs an
+  /// `NSViewController` that can host its review sheet; the shelf itself is
+  /// built with a plain `NSView`, so this gives the request a legitimate host
+  /// without changing the content hierarchy.
+  private(set) var reviewController: NSViewController?
+
   /// Used to avoid immediately re-opening the panel from the same status-item
   /// click that just closed it.
   private(set) var lastClosedAt: Date = .distantPast
@@ -72,6 +78,14 @@ final class FloatingPanel: NSPanel {
   func setContent<Content: View>(view: Content) {
     let hostingView = NSHostingView(rootView: view)
     self.contentView = hostingView
+
+    let reviewHost = NSViewController()
+    let reviewView = NSView(frame: NSRect(x: 0, y: 0, width: 1, height: 1))
+    reviewView.wantsLayer = true
+    reviewView.layer?.backgroundColor = NSColor.clear.cgColor
+    reviewHost.view = reviewView
+    hostingView.addSubview(reviewView)
+    reviewController = reviewHost
 
     // 获取内容的自然高度
     hostingView.layoutSubtreeIfNeeded()

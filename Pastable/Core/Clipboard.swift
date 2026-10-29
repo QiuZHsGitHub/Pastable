@@ -385,9 +385,10 @@ final class Clipboard {
     generation &+= 1
   }
 
-  func paste() {
-    guard Preferences.pasteAutomatically else { return }
-    guard ensureAccessibility() else { return }
+  @discardableResult
+  func paste() -> Bool {
+    guard Preferences.pasteAutomatically else { return false }
+    guard ensureAccessibility() else { return false }
 
     // Force QWERTY keycode for V (kVK_ANSI_V = 9).
     let vCode = CGKeyCode(9)
@@ -399,7 +400,7 @@ final class Clipboard {
 
     guard let keyDown = CGEvent(keyboardEventSource: source, virtualKey: vCode, keyDown: true),
           let keyUp = CGEvent(keyboardEventSource: source, virtualKey: vCode, keyDown: false) else {
-      return
+      return false
     }
 
     keyDown.flags = .maskCommand
@@ -408,6 +409,7 @@ final class Clipboard {
     keyUp.post(tap: .cgSessionEventTap)
 
     playSound()
+    return true
   }
 
   /// Post Cmd+V as soon as the pasteboard write is observable and the target
@@ -415,8 +417,9 @@ final class Clipboard {
   /// lands sooner on a fast machine and never fires while the target is still
   /// switching on a slow one. The timeout keeps the old "always pastes
   /// eventually" guarantee for unusually slow activations.
-  func paste(whenReadyFor target: NSRunningApplication?, timeout: TimeInterval = 0.4) async {
-    guard Preferences.pasteAutomatically else { return }
+  @discardableResult
+  func paste(whenReadyFor target: NSRunningApplication?, timeout: TimeInterval = 0.4) async -> Bool {
+    guard Preferences.pasteAutomatically else { return false }
 
     // One short beat so the write from `copy(_:)` is observable everywhere.
     try? await Task.sleep(nanoseconds: 16_000_000)
@@ -437,7 +440,7 @@ final class Clipboard {
       try? await Task.sleep(nanoseconds: 120_000_000)
     }
 
-    paste()
+    return paste()
   }
 
   /// Posting synthetic key events requires the Accessibility permission. Without

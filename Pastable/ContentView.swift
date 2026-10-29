@@ -122,7 +122,12 @@ struct ContentView: View {
     // of the old fixed 120ms delay).
     Clipboard.shared.copy(item)
     Task { @MainActor in
-      await Clipboard.shared.paste(whenReadyFor: target)
+      if await Clipboard.shared.paste(whenReadyFor: target) {
+        // The system review prompt is never shown at launch or on a plain
+        // copy. Only a paste that actually posted Cmd+V counts as the user
+        // having experienced the core loop.
+        ReviewPrompt.shared.recordSuccessfulPaste()
+      }
     }
   }
 
