@@ -65,6 +65,7 @@
 "settings.storage.icloud.no_account" = "No has iniciado sesión en iCloud. Inicia sesión y reinicia Pastable.";
 "settings.storage.icloud.restricted" = "iCloud está restringido en este Mac.";
 "settings.storage.icloud.check_failed" = "No se pudo comprobar el estado de iCloud.";
+"settings.storage.icloud.unavailable_direct" = "La sincronización con iCloud no está disponible en esta versión sin certificado. El historial permanece en este Mac.";
 
 // Settings - Storage - Retention Options
 "24 hours" = "24 horas";

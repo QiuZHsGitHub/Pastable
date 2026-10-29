@@ -16,6 +16,8 @@ final class CloudSyncMonitor: ObservableObject {
     case available
     case noAccount
     case restricted
+    /// This build is not entitled to CloudKit (certificate-free release).
+    case notEntitled
     case unavailable(String)
   }
 
@@ -48,6 +50,15 @@ final class CloudSyncMonitor: ObservableObject {
   }
 
   func refresh() async {
+    // `CKContainer(identifier:)` raises an Objective-C exception when the
+    // process is not entitled to the container, which would trap the app while
+    // Settings opens. The certificate-free release has no iCloud entitlement,
+    // so answer from the signature instead of asking CloudKit.
+    guard CloudEntitlements.isCloudKitAvailable else {
+      state = .notEntitled
+      return
+    }
+
     do {
       let container = CKContainer(identifier: Storage.iCloudContainerIdentifier)
       let status = try await container.accountStatus()

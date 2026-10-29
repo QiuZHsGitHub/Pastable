@@ -65,6 +65,7 @@
 "settings.storage.icloud.no_account" = "Nessun accesso a iCloud. Accedi e riavvia Pastable.";
 "settings.storage.icloud.restricted" = "iCloud è limitato su questo Mac.";
 "settings.storage.icloud.check_failed" = "Impossibile verificare lo stato di iCloud.";
+"settings.storage.icloud.unavailable_direct" = "La sincronizzazione iCloud non è disponibile in questa versione senza certificato. La cronologia resta su questo Mac.";
 
 // Settings - Storage - Retention Options
 "24 hours" = "24 ore";

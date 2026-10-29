@@ -65,6 +65,7 @@
 "settings.storage.icloud.no_account" = "Вход в iCloud не выполнен. Войдите и перезапустите Pastable.";
 "settings.storage.icloud.restricted" = "iCloud ограничен на этом Mac.";
 "settings.storage.icloud.check_failed" = "Не удалось проверить состояние iCloud.";
+"settings.storage.icloud.unavailable_direct" = "В этой сборке без сертификата синхронизация iCloud недоступна. История остаётся на этом Mac.";
 
 // Settings - Storage - Retention Options
 "24 hours" = "24 часа";

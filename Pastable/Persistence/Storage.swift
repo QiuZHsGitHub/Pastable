@@ -70,21 +70,34 @@ final class Storage {
     // CloudKit is opt-in. Existing local records are adopted by the CloudKit
     // store when it opens, so enabling sync does not require a separate import.
     if requested {
-      do {
-        self.container = try Self.makeContainer(
-          url: resolvedURL,
-          inMemory: false,
-          cloudSync: true
+      if CloudEntitlements.isCloudKitAvailable {
+        do {
+          self.container = try Self.makeContainer(
+            url: resolvedURL,
+            inMemory: false,
+            cloudSync: true
+          )
+          self.isCloudSyncActive = true
+          AppLogger.Storage.info("Opened SwiftData store with CloudKit sync")
+          return
+        } catch {
+          let message = error.localizedDescription
+          self.cloudSyncError = message
+          AppLogger.Storage.error(
+            "Cannot open iCloud store, falling back to local storage",
+            error: error
+          )
+        }
+      } else {
+        // Asking SwiftData for a CloudKit-backed store without the restricted
+        // iCloud entitlement does not fail cleanly — it aborts the process — so
+        // this build opens the local store and reports why in Settings.
+        self.cloudSyncError = NSLocalizedString(
+          "settings.storage.icloud.unavailable_direct",
+          comment: "iCloud sync is unavailable in the certificate-free build"
         )
-        self.isCloudSyncActive = true
-        AppLogger.Storage.info("Opened SwiftData store with CloudKit sync")
-        return
-      } catch {
-        let message = error.localizedDescription
-        self.cloudSyncError = message
-        AppLogger.Storage.error(
-          "Cannot open iCloud store, falling back to local storage",
-          error: error
+        AppLogger.Storage.info(
+          "iCloud sync requested but this build carries no iCloud entitlement; using local storage"
         )
       }
     }

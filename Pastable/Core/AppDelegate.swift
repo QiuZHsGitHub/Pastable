@@ -100,6 +100,25 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         self.openPanel()
       }
     }
+
+    // `--open-settings <general|storage|shortcuts|about>` lets the release
+    // smoke test drive Settings without accessibility scripting.
+    let arguments = ProcessInfo.processInfo.arguments
+    if let index = arguments.firstIndex(of: "--open-settings"),
+       arguments.indices.contains(index + 1) {
+      let tab: AppState.SettingsTab?
+      switch arguments[index + 1] {
+      case "general": tab = .general
+      case "storage": tab = .storage
+      case "shortcuts": tab = .shortcuts
+      case "about": tab = .about
+      default: tab = nil
+      }
+      Task { @MainActor in
+        try? await Task.sleep(nanoseconds: 600_000_000)
+        self.openSettingsWindow(tab: tab)
+      }
+    }
     #endif
 
   }

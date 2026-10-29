@@ -65,6 +65,7 @@
 "settings.storage.icloud.no_account" = "未登录 iCloud。请登录后重启 Pastable。";
 "settings.storage.icloud.restricted" = "此 Mac 上的 iCloud 受到限制。";
 "settings.storage.icloud.check_failed" = "无法检查 iCloud 状态。";
+"settings.storage.icloud.unavailable_direct" = "免证书版不支持 iCloud 同步，历史记录仅保存在这台 Mac 上。";
 
 // Settings - Storage - Retention Options
 "24 hours" = "24 小时";

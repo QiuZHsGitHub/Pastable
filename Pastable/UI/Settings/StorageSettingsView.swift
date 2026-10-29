@@ -37,6 +37,7 @@ struct StorageSettingsView: View {
 
       Section(header: Text("settings.storage.icloud").font(.subheadline)) {
         Toggle("settings.storage.icloud_sync", isOn: iCloudSyncBinding)
+          .disabled(!CloudEntitlements.isCloudKitAvailable)
 
         HStack(alignment: .firstTextBaseline, spacing: 6) {
           Image(systemName: syncStatus.symbol)
@@ -57,9 +58,11 @@ struct StorageSettingsView: View {
             .fixedSize(horizontal: false, vertical: true)
         }
 
-        Text("settings.storage.icloud.footer")
-          .font(.caption)
-          .foregroundStyle(.secondary)
+        if CloudEntitlements.isCloudKitAvailable {
+          Text("settings.storage.icloud.footer")
+            .font(.caption)
+            .foregroundStyle(.secondary)
+        }
       }
 
       Section(header: Text("settings.storage.capacity").font(.subheadline)) {
@@ -200,6 +203,7 @@ struct StorageSettingsView: View {
   }
 
   private var syncErrorMessage: String? {
+    guard CloudEntitlements.isCloudKitAvailable else { return nil }
     guard iCloudSyncEnabled,
           iCloudSyncEnabled == Storage.shared.iCloudSyncRequested else {
       return nil
@@ -214,6 +218,12 @@ struct StorageSettingsView: View {
   }
 
   private var syncStatus: (symbol: String, color: Color, text: LocalizedStringKey) {
+    // A build signed without an Apple certificate cannot use CloudKit at all,
+    // so say that instead of reporting a transient "start failed" state.
+    guard CloudEntitlements.isCloudKitAvailable else {
+      return ("icloud.slash", .secondary, "settings.storage.icloud.unavailable_direct")
+    }
+
     if iCloudSyncEnabled != Storage.shared.iCloudSyncRequested {
       return (
         "arrow.clockwise.circle",
@@ -243,6 +253,8 @@ struct StorageSettingsView: View {
       return ("person.crop.circle.badge.exclamationmark", .orange, "settings.storage.icloud.no_account")
     case .restricted:
       return ("lock.icloud", .orange, "settings.storage.icloud.restricted")
+    case .notEntitled:
+      return ("icloud.slash", .secondary, "settings.storage.icloud.unavailable_direct")
     case .unavailable:
       return ("exclamationmark.icloud", .orange, "settings.storage.icloud.start_failed")
     }

@@ -65,6 +65,7 @@
 "settings.storage.icloud.no_account" = "iCloud에 로그인되어 있지 않습니다. 로그인한 후 Pastable을 재시작하세요.";
 "settings.storage.icloud.restricted" = "이 Mac에서는 iCloud가 제한되어 있습니다.";
 "settings.storage.icloud.check_failed" = "iCloud 상태를 확인할 수 없습니다.";
+"settings.storage.icloud.unavailable_direct" = "인증서 없는 빌드에서는 iCloud 동기화를 사용할 수 없습니다. 기록은 이 Mac에만 저장됩니다.";
 
 // Settings - Storage - Retention Options
 "24 hours" = "24시간";

@@ -65,6 +65,7 @@
 "settings.storage.icloud.no_account" = "iCloud にサインインしていません。サインインしてから Pastable を再起動してください。";
 "settings.storage.icloud.restricted" = "この Mac では iCloud が制限されています。";
 "settings.storage.icloud.check_failed" = "iCloud の状態を確認できません。";
+"settings.storage.icloud.unavailable_direct" = "証明書なしのビルドでは iCloud 同期を利用できません。履歴はこの Mac にのみ保存されます。";
 
 // Settings - Storage - Retention Options
 "24 hours" = "24時間";
