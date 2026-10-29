@@ -65,6 +65,7 @@ python3 -m http.server 8000 --directory docs
 | 隐私政策正文 | `docs/privacy.html`（中文 + English 两份，注意同步修改） |
 | 支持 FAQ | `docs/support.html`（中文 + English 两份，注意同步修改） |
 | 截图与图标 | `docs/assets/site/`，由 `tools/site/build_assets.py` 生成 |
+| 首屏 15 秒演示 | `docs/assets/site/demo-{zh,en}.gif` + `-poster.webp`，由 `tools/marketing/` 生成 |
 | 社交预览图 | `docs/assets/site/og-cover.png`（中文）/ `og-cover-en.png`（英文），1200×630 |
 | 更新日期 | `sitemap.xml` 的 `lastmod`、隐私页「最后更新」、支持页「更新时间」 |
 
@@ -82,6 +83,15 @@ python3 tools/site/build_assets.py
 
 生成面板 WebP、各尺寸图标和 OG 封面。改完截图后重跑一次即可。
 
+### 重新生成首屏演示
+
+```bash
+node tools/marketing/render.mjs demo    # 逐帧 PNG，约 15 秒 @12fps
+python3 tools/marketing/make_gif.py     # demo-{zh,en}.gif + poster
+```
+
+首屏用 `<picture>` 在 `prefers-reduced-motion: reduce` 时自动换成静态 poster；GIF 约 1.7–1.8 MB，已加 `fetchpriority="high"`。
+
 ## 六、文件结构
 
 ```text
@@ -98,6 +108,8 @@ docs/
 ├── sitemap.xml
 └── assets/site/
     ├── panel-dark.webp / panel-light.webp
+    ├── demo-zh.gif / demo-en.gif
+    ├── demo-zh-poster.webp / demo-en-poster.webp
     ├── icon-32.png / icon-64.png / icon-192.png / icon-512.png
     ├── apple-touch-icon.png
     ├── og-cover.png / og-cover-en.png

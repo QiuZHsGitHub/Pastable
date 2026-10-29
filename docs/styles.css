@@ -1430,7 +1430,7 @@ kbd {
   }
 
   .hero h1 {
-    font-size: clamp(40px, 11.5vw, 58px);
+    font-size: clamp(32px, 10vw, 54px);
     line-height: 1.22;
   }
 
@@ -1614,7 +1614,7 @@ kbd {
 
 @media (max-width: 720px) {
   .lang-en .hero h1 {
-    font-size: clamp(38px, 10.5vw, 54px);
+    font-size: clamp(32px, 9.2vw, 52px);
   }
 }
 
@@ -1735,4 +1735,76 @@ section[id] {
 
 .doc-content a {
   overflow-wrap: anywhere;
+}
+
+/* ==========================================================================
+   Hero demo (15s GIF)
+   ========================================================================== */
+
+.demo-intro {
+  margin-top: 60px;
+  scroll-margin-top: 96px;
+}
+
+.demo-kicker {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0;
+  color: var(--ink-3);
+  font-size: 13px;
+  letter-spacing: 0.02em;
+}
+
+.demo-time {
+  display: inline-flex;
+  align-items: center;
+  height: 24px;
+  padding: 0 10px;
+  border: 1px solid rgba(200, 64, 46, 0.28);
+  border-radius: 999px;
+  background: rgba(200, 64, 46, 0.07);
+  color: var(--cinnabar);
+  font-family: var(--mono);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+}
+
+.hero-demo {
+  max-width: 980px;
+  margin: 18px auto 0;
+}
+
+.hero-demo picture {
+  display: block;
+  overflow: hidden;
+  border: 1px solid rgba(27, 24, 22, 0.14);
+  border-radius: 20px;
+  background: var(--dark);
+  box-shadow: 0 34px 80px -40px rgba(27, 24, 22, 0.55);
+}
+
+.hero-demo img {
+  filter: none;
+  aspect-ratio: 960 / 600;
+  object-fit: cover;
+}
+
+.hero-demo .hero-caption {
+  margin-top: 16px;
+}
+
+@media (max-width: 720px) {
+  .demo-intro {
+    margin-top: 46px;
+  }
+
+  .demo-kicker {
+    font-size: 12px;
+  }
+
+  .hero-demo picture {
+    border-radius: 14px;
+  }
 }

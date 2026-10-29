@@ -3,16 +3,16 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Pastable — 轻巧快速的 macOS 剪贴板管理器</title>
-  <meta name="description" content="Pastable 是 macOS 上轻巧、快速的剪贴板管理器：一个快捷键唤出底部浮层，搜索、分类、一键回贴，本地优先，无账号、无广告、无追踪。">
+  <title>Pastable — 呼出即贴，不打断手头工作的 macOS 剪贴板浮层</title>
+  <meta name="description" content="Pastable 是 macOS 的全屏底部剪贴板浮层：快捷键呼出，不抢键盘焦点，选中即贴；文本、代码、链接、图片自动分类，本地优先，无账号、无广告、无追踪。">
   <link rel="canonical" href="https://qiuzhsgithub.github.io/Pastable/">
   <meta name="theme-color" content="#f6f1e9">
   <meta name="color-scheme" content="light">
 
   <meta property="og:type" content="website">
   <meta property="og:site_name" content="Pastable">
-  <meta property="og:title" content="Pastable — 复制过的，随时召回来。">
-  <meta property="og:description" content="轻巧、快速的 macOS 剪贴板管理器。一个快捷键唤出底部浮层，搜索、分类、一键回贴。">
+  <meta property="og:title" content="Pastable — 呼出即贴，不打断手头工作。">
+  <meta property="og:description" content="全屏宽的底部剪贴板浮层。打开时不抢键盘焦点，输入继续留在当前文档；选中即贴，工作流不断。">
   <meta property="og:url" content="https://qiuzhsgithub.github.io/Pastable/">
   <meta property="og:image" content="https://qiuzhsgithub.github.io/Pastable/assets/site/og-cover.png">
   <meta property="og:image:width" content="1200">
@@ -21,8 +21,8 @@
   <meta property="og:locale" content="zh_CN">
   <meta property="og:locale:alternate" content="en_US">
   <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:title" content="Pastable — 复制过的，随时召回来。">
-  <meta name="twitter:description" content="轻巧、快速的 macOS 剪贴板管理器。">
+  <meta name="twitter:title" content="Pastable — 呼出即贴，不打断手头工作。">
+  <meta name="twitter:description" content="全屏宽的底部剪贴板浮层，不抢键盘焦点，选中即贴。">
   <meta name="twitter:image" content="https://qiuzhsgithub.github.io/Pastable/assets/site/og-cover.png">
 
   <link rel="icon" type="image/png" sizes="32x32" href="assets/site/icon-32.png">
@@ -40,7 +40,7 @@
     "applicationCategory": "UtilitiesApplication",
     "operatingSystem": "macOS 15.5 or later",
     "softwareVersion": "1.2.0",
-    "description": "轻巧、快速的 macOS 剪贴板管理器，底部浮层、模糊搜索、一键回贴、本地优先。",
+    "description": "macOS 全屏底部剪贴板浮层：呼出即贴，不抢键盘焦点；文本、代码、链接、图片自动分类，本地优先。",
     "url": "https://qiuzhsgithub.github.io/Pastable/",
     "downloadUrl": "https://apps.apple.com/app/id6828470287",
     "image": "https://qiuzhsgithub.github.io/Pastable/assets/site/icon-512.png",
@@ -82,15 +82,15 @@
   <main id="main">
     <section class="hero">
       <div class="wrap">
-        <p class="hero-eyebrow"><span class="dot" aria-hidden="true"></span>macOS 剪贴板管理器 · 版本 1.2.0</p>
-        <h1>复制过的，<br><em>随时召回来。</em></h1>
-        <p class="lede">Pastable 把最近复制的一切收在屏幕底部的一层浮层里。一个快捷键，搜到它，贴回去——不打断你手上的事。</p>
+        <p class="hero-eyebrow"><span class="dot" aria-hidden="true"></span>macOS 剪贴板浮层 · 呼出即贴，不抢焦点</p>
+        <h1>呼出即贴，<br><em>不打断手头工作。</em></h1>
+        <p class="lede">全屏宽的底部浮层，覆盖在任意 App 之上。打开时不抢键盘焦点，输入继续留给你正在写的那一页；选中即贴，工作流不断。</p>
 
         <div class="hero-actions">
           <a class="appstore-badge" href="https://apps.apple.com/app/id6828470287">
             <img src="assets/site/badge/appstore-zh-cn-black.svg" alt="在 Mac App Store 下载 Pastable" width="168" height="48">
           </a>
-          <a class="btn" href="#features">看看它能做什么
+          <a class="btn" href="#demo">看 15 秒演示
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
           </a>
         </div>
@@ -101,9 +101,15 @@
           <li>无账号 · 无广告 · 无追踪</li>
         </ul>
 
-        <figure class="hero-figure">
-          <img src="assets/site/panel-dark.webp" alt="Pastable 深色主题的底部浮层，展示图片、链接、文本与代码卡片" width="2400" height="572" fetchpriority="high">
-          <figcaption class="hero-caption">「朱砂」主题 · 自动跟随系统浅色 / 深色</figcaption>
+        <div class="demo-intro" id="demo">
+          <p class="demo-kicker"><span class="demo-time">15 秒</span> 呼出 → 选中 → 回贴，键盘焦点不离开文档</p>
+        </div>
+        <figure class="hero-figure hero-demo">
+          <picture>
+            <source media="(prefers-reduced-motion: reduce)" srcset="assets/site/demo-zh-poster.webp">
+            <img src="assets/site/demo-zh.gif" alt="15 秒演示：在文档中按快捷键呼出 Pastable 底部浮层，键盘焦点留在文档；选中卡片后按 Enter 贴回。" width="960" height="600" fetchpriority="high" decoding="async">
+          </picture>
+          <figcaption class="hero-caption">交互示意 · 面板不抢键盘焦点，输入仍归当前 App</figcaption>
         </figure>
       </div>
     </section>
@@ -112,8 +118,8 @@
       <div class="wrap">
         <header class="section-head reveal">
           <p class="eyebrow">功能</p>
-          <h2>少一步，快一秒。</h2>
-          <p class="section-sub">把「复制 → 切换 → 找 → 粘贴」压缩成一次呼出。剩下的，交给已经记住的内容。</p>
+          <h2>它只是出现，<br>不接管键盘。</h2>
+          <p class="section-sub">面板打开时，键盘焦点仍留在你的文档里。呼出、选中、回贴，三步都在同一口气里完成。</p>
         </header>
 
         <div class="feature-grid reveal">
@@ -316,7 +322,7 @@
             <img src="assets/site/icon-64.png" alt="" width="28" height="28">
             <span>Pastable</span>
           </a>
-          <p>轻巧、快速的 macOS 剪贴板管理器。专注「随叫随到的浮层」与「更聪明的搜索」。</p>
+          <p>呼出即贴，不打断手头工作的 macOS 剪贴板浮层。全屏宽、底部贴边、不抢键盘焦点。</p>
         </div>
 
         <div class="footer-col">

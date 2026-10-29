@@ -83,7 +83,7 @@ def _og_shell() -> Image.Image:
     icon = Image.open(OUT / "icon-512.png").convert("RGBA").resize((96, 96), Image.LANCZOS)
     img.paste(icon, (80, 74), icon)
     d.text((196, 84), "Pastable", font=font(HELVETICA, 46, index=1), fill=INK)
-    d.text((198, 140), "macOS CLIPBOARD MANAGER", font=font(HELVETICA, 15, 0), fill=(142, 134, 125))
+    d.text((198, 140), "CLIPBOARD SHELF FOR MACOS", font=font(HELVETICA, 15, 0), fill=(142, 134, 125))
     d.line((80, 536, W - 80, 536), fill=(216, 205, 192), width=1)
     d.text((80, 558), "PASTABLE  ·  FOR macOS 15.5+", font=font(HELVETICA, 14, 0), fill=(142, 134, 125))
     d.text((W - 80, 552), "Mac App Store", font=font(HELVETICA, 20, 0), fill=CINNABAR, anchor="ra")
@@ -94,11 +94,11 @@ def build_og() -> None:
     """Chinese and English social cards."""
     zh = _og_shell()
     d = ImageDraw.Draw(zh)
-    d.text((80, 236), "复制过的，", font=font(SONGTI, 78, index=0), fill=INK)
-    d.text((80, 340), "随时召回来。", font=font(SONGTI, 78, index=0), fill=CINNABAR)
+    d.text((80, 236), "呼出即贴，", font=font(SONGTI, 78, index=0), fill=INK)
+    d.text((80, 340), "不打断手头工作。", font=font(SONGTI, 72, index=0), fill=CINNABAR)
     d.text(
-        (84, 462),
-        "轻巧、快速的剪贴板管理器  ·  本地优先，无账号，无追踪",
+        (84, 452),
+        "全屏底部浮层  ·  不抢键盘焦点  ·  本地优先",
         font=font(SONGTI, 25, 0),
         fill=MUTED,
     )
@@ -107,17 +107,17 @@ def build_og() -> None:
 
     en = _og_shell()
     d = ImageDraw.Draw(en)
-    d.text((80, 228), "Everything you copied,", font=font(GEORGIA, 58, index=0), fill=INK)
-    d.text((80, 312), "one shortcut away.", font=font(GEORGIA, 70, index=0), fill=CINNABAR)
+    d.text((80, 226), "Paste without", font=font(GEORGIA, 66, index=0), fill=INK)
+    d.text((80, 306), "breaking your flow.", font=font(GEORGIA, 66, index=0), fill=CINNABAR)
     d.text(
-        (84, 432),
-        "A lightweight, fast clipboard manager for macOS.",
+        (84, 426),
+        "A full-width clipboard shelf for macOS.",
         font=font(GEORGIA, 28, 0),
         fill=INK_2,
     )
     d.text(
-        (84, 476),
-        "Local-first  ·  No account  ·  No tracking",
+        (84, 472),
+        "Focus stays in your document  ·  Local-first",
         font=font(HELVETICA, 20, 0),
         fill=MUTED,
     )
