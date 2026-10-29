@@ -67,6 +67,8 @@ struct SearchBar: View {
       
       // 6. 更多按钮
       Button(action: {
+        // Opening the menu counts as clicking elsewhere: release the keyboard.
+        isTextFieldFocused = false
         showMoreMenu.toggle()
       }) {
         Image(systemName: "ellipsis")

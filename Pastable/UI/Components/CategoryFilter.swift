@@ -30,6 +30,8 @@ struct CategoryFilter: View {
 
     Button(action: {
       selectedCategory = category
+      // Clicking a filter is "clicking elsewhere": release the search field.
+      AppState.shared.searchFocusRequest = .blur
     }) {
       HStack(spacing: 6) {
         Circle()

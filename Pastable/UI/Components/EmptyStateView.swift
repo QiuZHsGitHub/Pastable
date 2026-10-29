@@ -45,6 +45,11 @@ struct EmptyStateView: View {
     }
     .frame(maxWidth: .infinity)
     .frame(height: 273)
+    // Clicking the empty state releases the search field without closing.
+    .contentShape(Rectangle())
+    .onTapGesture {
+      AppState.shared.searchFocusRequest = .blur
+    }
   }
 
   private var iconName: String {

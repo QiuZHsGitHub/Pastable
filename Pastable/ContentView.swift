@@ -50,6 +50,14 @@ struct ContentView: View {
         startPoint: .top,
         endPoint: .bottom
       )
+      // Clicks on any empty part of the shelf release the search field's
+      // keyboard focus without closing the panel. Interactive children (cards,
+      // chips, the text field) handle their own clicks first, so this only
+      // fires on blanks.
+      .contentShape(Rectangle())
+      .onTapGesture {
+        appState.searchFocusRequest = .blur
+      }
     )
     .clipShape(TopRoundedRectangle(radius: 24))
     .overlay(
