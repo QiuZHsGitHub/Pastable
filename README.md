@@ -94,7 +94,13 @@ cd Pastable
 ## 下载安装
 
 - 最新版本：<https://github.com/QiuZHsGitHub/Pastable/releases/latest>
-- 进入 Release 页面后下载 `.dmg` 安装包即可
+- 进入 Release 页面后下载 `.dmg`，打开后把 **Pastable** 拖进「应用程序」即可（要求 macOS 15.5+）
+- 安装包为 **免证书（ad-hoc）签名、未公证**。首次打开如果提示「无法验证开发者」：
+
+  1. 打开「系统设置 → 隐私与安全性」，在底部点「仍要打开」并输入密码；或
+  2. 终端执行 `xattr -dr com.apple.quarantine /Applications/Pastable.app` 后再打开
+
+- 免证书版本不含 iCloud 受限授权，因此 **iCloud 同步不可用**（本地历史与其它功能不受影响）
 
 ## 使用方式
 

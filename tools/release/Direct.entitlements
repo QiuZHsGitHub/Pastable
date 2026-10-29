@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<!--
+	  Entitlements for the certificate-free (ad-hoc signed) GitHub Releases build.
+
+	  Do NOT add restricted entitlements here: iCloud/CloudKit, App Groups and
+	  keychain sharing require an Apple-issued provisioning profile, so an
+	  ad-hoc signature carrying them is rejected at launch. The app falls back
+	  to its local store when CloudKit is unavailable (see Storage.swift).
+
+	  The App Sandbox stays off on purpose: the Mac App Store build creates a
+	  container, and switching a direct-download install into a container would
+	  hide the existing history under ~/Library/Application Support/Pastable.
+	-->
+	<key>com.apple.security.app-sandbox</key>
+	<false/>
+</dict>
+</plist>

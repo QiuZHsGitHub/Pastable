@@ -94,7 +94,13 @@ Follow `./DEPENDENCIES.md` to add Swift Package dependencies in Xcode.
 ## Download
 
 - Latest release: <https://github.com/QiuZHsGitHub/Pastable/releases/latest>
-- Download the `.dmg` package from the release assets
+- Download the `.dmg`, open it and drag **Pastable** into **Applications** (requires macOS 15.5+)
+- The package is **ad-hoc signed without a certificate and not notarized**. If macOS says the developer cannot be verified on first launch:
+
+  1. Open **System Settings → Privacy & Security** and click **Open Anyway** at the bottom; or
+  2. Run `xattr -dr com.apple.quarantine /Applications/Pastable.app` in Terminal, then open the app
+
+- The certificate-free build cannot carry the restricted iCloud entitlement, so **iCloud sync is unavailable** in this build. Local history and every other feature still work.
 
 ## Usage
 
