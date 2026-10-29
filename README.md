@@ -104,8 +104,8 @@ cd Pastable
 - **选择卡片**：搜索框为空时用 `←` / `→` 选择
 - **数字快贴**：`Cmd + 1…9` 或 `Fn + 1…9` 直接粘贴第 N 项
 - **删除卡片**：悬停在卡片上（或先选中）后按 `Cmd + Delete`
-- **关闭面板**：`Esc`、再次按全局快捷键，或点击桌面空白处
-- **切换窗口不打断**：切换到其他窗口 / App / 桌面空间时，面板会保持在原处，不会自动关闭
+- **关闭面板**：`Esc`、再次按全局快捷键，或点击面板外任意位置
+- **切 Space 不消失**：切换桌面空间 / 进入全屏不会让面板自动关闭（点击面板外仍会收起）
 
 ## 设置项
 
@@ -123,7 +123,7 @@ cd Pastable
 ## 开发与测试
 
 ```bash
-swift test    # 59 个逻辑测试，使用内存数据库
+swift test    # 58 个逻辑测试，使用内存数据库
 xcodebuild -project Pastable.xcodeproj -scheme Pastable \
   -configuration Debug -destination 'platform=macOS' \
   -derivedDataPath /tmp/PastableDerived CODE_SIGNING_ALLOWED=NO build

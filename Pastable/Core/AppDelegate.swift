@@ -456,13 +456,13 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     }
   }
 
-  /// Dismiss only on a click that hits the desktop / empty background. A click
-  /// that lands on any window — ours, another app's, the menu bar or the Dock —
-  /// means the user is still working, and the shelf must stay open.
+  /// Any click outside the shelf dismisses it — another app's window, the menu
+  /// bar, the Dock or the desktop. Clicks on Pastable's own UI (the status
+  /// item, the Settings window, the panel's popover/menu) are part of the app
+  /// and must not close it.
   @MainActor private func handleOutsideClick(at point: NSPoint) {
     guard panel.isVisible, !panel.frame.contains(point) else { return }
     if isPointOnOwnWindow(point) { return }
-    if isPointOnAnyWindow(point) { return }
     panel.close()
   }
 
@@ -471,23 +471,20 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
       return true
     }
 
-    for window in NSApp.windows where window.isVisible {
+    // `isOnActiveSpace` matters: windows belonging to another Space share the
+    // same screen coordinates and would otherwise swallow the click.
+    for window in NSApp.windows where window.isVisible && window.isOnActiveSpace {
       if window.frame.contains(point) {
         return true
       }
     }
-    return false
+
+    return isPointOnOwnWindowAccordingToWindowServer(point)
   }
 
-  /// Hit-test the on-screen window list.
-  ///
-  /// `NSEvent` monitors only tell us where the click was, not which window the
-  /// system will deliver it to, so ask WindowServer. Our own popovers and
-  /// status menus are included too (they are not always part of
-  /// `NSApp.windows`). Desktop elements (the wallpaper and desktop icons) live
-  /// on negative window layers and are skipped on purpose: clicking them is
-  /// the documented way to dismiss.
-  private func isPointOnAnyWindow(_ point: NSPoint) -> Bool {
+  /// `NSApp.windows` does not always contain the private windows AppKit uses
+  /// for popovers and menus, so also ask WindowServer for the windows we own.
+  private func isPointOnOwnWindowAccordingToWindowServer(_ point: NSPoint) -> Bool {
     guard let mainScreen = NSScreen.screens.first,
           let windows = CGWindowListCopyWindowInfo([.optionOnScreenOnly], kCGNullWindowID) as? [[String: Any]] else {
       return false
@@ -497,16 +494,15 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     // list uses a top-left origin anchored at the main screen. Mirror across
     // the main screen's top edge; this is valid for every attached display.
     let cgPoint = CGPoint(x: point.x, y: mainScreen.frame.maxY - point.y)
-    return Self.isPoint(cgPoint, coveredBy: windows)
+    return Self.isPoint(cgPoint, coveredBy: windows, ownedBy: Int(ProcessInfo.processInfo.processIdentifier))
   }
 
-  /// Pure hit-test over WindowServer window dictionaries (`CGWindowListCopyWindowInfo`).
-  /// Desktop elements (wallpaper, desktop icons) sit on negative layers and are
-  /// ignored, so they count as empty space to click and dismiss with. Fully
-  /// transparent windows do not swallow clicks either.
-  static func isPoint(_ point: CGPoint, coveredBy windows: [[String: Any]]) -> Bool {
+  /// Pure hit-test over WindowServer window dictionaries
+  /// (`CGWindowListCopyWindowInfo`): does a visible window of `processID`
+  /// cover the point? Fully transparent windows are ignored.
+  static func isPoint(_ point: CGPoint, coveredBy windows: [[String: Any]], ownedBy processID: Int) -> Bool {
     for window in windows {
-      guard let layer = window[kCGWindowLayer as String] as? Int, layer >= 0 else { continue }
+      guard let owner = window[kCGWindowOwnerPID as String] as? Int, owner == processID else { continue }
       guard let alpha = window[kCGWindowAlpha as String] as? Double, alpha > 0.01 else { continue }
       guard let boundsInfo = window[kCGWindowBounds as String] as? [String: Any],
             let bounds = CGRect(dictionaryRepresentation: boundsInfo as CFDictionary) else { continue }
