@@ -89,7 +89,8 @@ Light 页面包含 `L00 · Cover`、`L01 · Panel`、`L02 · Empty`、`L03 · Ca
 
 - **来源图标 / 图片内容**：Figma 用 `w` 小图标与示意截图；App 显示真实 App 图标和真实剪贴板图片。
 - **设置窗口**：Figma 是 500×380 的视觉规格；App 使用原生 macOS 标题栏与 TabView。
-- 除此之外，面板尺寸、卡片尺寸、分类 Tab、搜索框、页脚、选中态、空状态与 Token 均按同一套数值实现。
+- **搜索框宽度**：App 固定 400pt（`HeaderView.searchBarWidth`），Figma 插件（`SEARCH_W`）已同步为 400pt。仓库里的 `figma-panel-*.png` 是收窄前的导出（800pt），在 Figma 里重跑插件并重新导出后即与 App 一致。
+- 除此之外，面板尺寸、卡片尺寸、分类 Tab、页脚、选中态、空状态与 Token 均按同一套数值实现。
 
 ## 说明
 

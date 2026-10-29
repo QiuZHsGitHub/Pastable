@@ -7,6 +7,9 @@ const TOKENS = /*__TOKENS__*/;
 const PAGE_NAME = 'Pastable / UI 2026 · 中国潮色';
 const W = 1512;
 const H = 325;
+// Search field width. Matches `HeaderView.searchBarWidth` in the app: a compact
+// search box instead of a bar stretching across the whole panel.
+const SEARCH_W = 400;
 
 const CAT = TOKENS.global.color.category;
 const ACCENT_SCALE = TOKENS.global.color.accent;
@@ -466,7 +469,7 @@ function addPanel(mode, x, y) {
   tabRow.primaryAxisSizingMode = 'AUTO';
   tabRow.counterAxisSizingMode = 'AUTO';
 
-  const search = makeFrame(header, 'Search', W - 48 - 800, 0, 800, 36, {
+  const search = makeFrame(header, 'Search', W - 48 - SEARCH_W, 0, SEARCH_W, 36, {
     fill: solid(hexOf(t.control.search.background)),
     radius: 10,
     stroke: hexOf(t.accent.base)
@@ -480,7 +483,7 @@ function addPanel(mode, x, y) {
     lineHeight: 16
   });
   makeRect(search, 'Caret', 68, 11, 1, 15, solid(hexOf(t.accent.base)));
-  addText(search, '⌘⇧F', 682, 12, {
+  addText(search, '⌘⇧F', SEARCH_W - 118, 12, {
     font: FONT.mono,
     size: 10,
     color: hexOf(t.text.tertiary),
@@ -488,8 +491,8 @@ function addPanel(mode, x, y) {
     align: 'RIGHT',
     lineHeight: 12
   });
-  makeRect(search, 'Divider', 749, 9, 1, 18, solid(hexOf(t.control.search.divider)));
-  addText(search, '⋯', 758, 8, {
+  makeRect(search, 'Divider', SEARCH_W - 51, 9, 1, 18, solid(hexOf(t.control.search.divider)));
+  addText(search, '⋯', SEARCH_W - 42, 8, {
     size: 14,
     color: hexOf(t.text.secondary),
     width: 32,

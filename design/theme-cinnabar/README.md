@@ -19,6 +19,11 @@
 
 ![Figma Cover](preview/figma-cover.png)
 
+> 2026-10：搜索框由 800pt 收窄到 400pt（插件里的 `SEARCH_W`，与 App 的
+> `HeaderView.searchBarWidth` 一致）。仓库内的 `preview/panel-*.png`、`compare.png`
+> 已重新生成；Figma 云文件需要重跑一次本地插件才会更新，`preview/figma-panel-*.png`
+> 也仍是收窄前的导出。
+
 ## 交付物
 
 | 文件 | 用途 |
