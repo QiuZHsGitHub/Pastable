@@ -104,7 +104,8 @@ Follow `./DEPENDENCIES.md` to add Swift Package dependencies in Xcode.
 - **Select a card**: `←` / `→` while the search field is empty
 - **Number shortcuts**: `Cmd + 1…9` or `Fn + 1…9` to paste the Nth item
 - **Delete card**: hover it (or select it) and press `Cmd + Delete`
-- **Close panel**: `Esc` or the global shortcut again
+- **Close panel**: `Esc`, the global shortcut again, or a click on the desktop
+- **Switching windows won't dismiss it**: the shelf stays in place when you switch to another window, app or Space
 
 ## Settings
 
@@ -122,7 +123,7 @@ Follow `./DEPENDENCIES.md` to add Swift Package dependencies in Xcode.
 ## Development & Tests
 
 ```bash
-swift test    # 52 logic tests using an in-memory store
+swift test    # 59 logic tests using an in-memory store
 xcodebuild -project Pastable.xcodeproj -scheme Pastable \
   -configuration Debug -destination 'platform=macOS' \
   -derivedDataPath /tmp/PastableDerived CODE_SIGNING_ALLOWED=NO build

@@ -93,10 +93,12 @@ struct ContentView: View {
     let delegate = appState.appDelegate
     appState.selectedItemID = item.persistentModelID
 
-    // 1. Close the panel and give focus back to the app the user came from.
-    // Without this, Cmd+V can be delivered to Pastable instead of the target app.
+    // 1. Close the panel and resolve the app to paste into. The shelf stays
+    // open while the user switches windows, so the target is whichever app is
+    // in front now — not necessarily the one that was frontmost when the panel
+    // appeared. Without this, Cmd+V can be delivered to Pastable itself.
     delegate?.closePanel()
-    let target = delegate?.restorePreviousApplication()
+    let target = delegate?.pasteTargetApplication()
 
     // 2. Move the item to the front of the history.
     item.lastCopiedAt = Date()

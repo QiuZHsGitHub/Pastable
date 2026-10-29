@@ -7,6 +7,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
   var statusItem: NSStatusItem!
   private var outsideClickMonitor: Any?
   private var outsideClickGlobalMonitor: Any?
+  private var panelClickMonitor: Any?
   private var previousApplication: NSRunningApplication?
 
   func applicationWillFinishLaunching(_ notification: Notification) {
@@ -66,17 +67,11 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     // Close panel when clicking outside
     setupOutsideClickMonitors()
 
-    // Close the panel when the whole app loses focus (Cmd+Tab, etc.).
-    NotificationCenter.default.addObserver(
-      forName: NSApplication.didResignActiveNotification,
-      object: nil,
-      queue: .main
-    ) { [weak self] _ in
-      Task { @MainActor in
-        guard let self, self.panel.isVisible else { return }
-        self.panel.close()
-      }
-    }
+    // Follow the user across Spaces / fullscreen transitions. The shelf is
+    // explicit-dismiss only: switching window, app or Space must never close
+    // it (that used to make it "flash shut" whenever Cmd+Tab or a Space swipe
+    // changed the frontmost app).
+    observeWorkspaceChanges()
 
     // Status Bar Item
     statusItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.variableLength)
@@ -174,8 +169,9 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
       return
     }
 
-    // A click on the status item closes the panel through `resignKey()` before
-    // the button action fires. Ignore that same click so it does not reopen.
+    // The panel used to close itself from `resignKey()` before this button
+    // action fired. Ignore a toggle that lands within the same click so it
+    // cannot immediately reopen the panel it just closed.
     if Date().timeIntervalSince(panel.lastClosedAt) < 0.25 {
       return
     }
@@ -191,8 +187,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
   }
 
   @MainActor func openPanel() {
-    if let frontmost = NSWorkspace.shared.frontmostApplication,
-       frontmost.processIdentifier != ProcessInfo.processInfo.processIdentifier {
+    if let frontmost = NSWorkspace.shared.frontmostApplication, Self.isPasteTarget(frontmost) {
       previousApplication = frontmost
     }
 
@@ -202,8 +197,6 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     // 重新定位到底部
     panel.positionAtBottom()
 
-    // Avoid immediate close on first show due to transient focus loss
-    panel.suppressResignKey(duration: 0.4)
     panel.orderFrontRegardless()
     panel.makeKey()
     panel.makeFirstResponder(nil)
@@ -221,21 +214,51 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     AppState.shared.searchFocusRequest = .blur
   }
 
-  /// Return keyboard focus to the app the panel was opened over. Called before
-  /// synthesizing Cmd+V; otherwise the paste can be delivered to Pastable.
-  /// Returns the app that was activated so `Clipboard.paste(whenReadyFor:)` can
-  /// wait for it to actually take focus before posting the keystroke.
+  /// Resolve the app a paste should be delivered to *right now*.
+  ///
+  /// The shelf stays open while the user switches to another window or app, so
+  /// the app the panel was originally opened over may no longer be the one in
+  /// front. Prefer whichever app is frontmost at paste time; only when Pastable
+  /// itself (or a system UI agent such as Control Center) is active, fall back
+  /// to — and re-activate — the last real app.
+  /// Returns the app that must take focus before Cmd+V is posted.
+  @MainActor func pasteTargetApplication() -> NSRunningApplication? {
+    let frontmost = NSWorkspace.shared.frontmostApplication
+    if let frontmost, Self.isPasteTarget(frontmost) {
+      previousApplication = frontmost
+      // The click that started this paste may have activated Pastable a beat
+      // earlier (see the panel click monitor). Re-assert the target so the
+      // synthesized Cmd+V cannot land on Pastable as it closes.
+      frontmost.activate(options: [])
+      return frontmost
+    }
+    return restorePreviousApplication()
+  }
+
+  /// Apps that can actually receive a synthesized Cmd+V. Menu-bar agents,
+  /// Control Center, the Dock and similar system UI take focus while the shelf
+  /// stays open but must never become the paste destination.
+  private static func isPasteTarget(_ app: NSRunningApplication) -> Bool {
+    guard !app.isTerminated,
+          app.processIdentifier != ProcessInfo.processInfo.processIdentifier else { return false }
+    return app.activationPolicy == .regular
+  }
+
+  /// Return keyboard focus to the last app that was in front of the shelf
+  /// (recorded on open, then kept current by the activation observer). Called
+  /// before synthesizing Cmd+V; otherwise the paste can be delivered to
+  /// Pastable. Returns the app that was activated so
+  /// `Clipboard.paste(whenReadyFor:)` can wait for it to actually take focus
+  /// before posting the keystroke.
   @MainActor @discardableResult
   func restorePreviousApplication() -> NSRunningApplication? {
-    guard let previousApplication,
-          previousApplication.processIdentifier != ProcessInfo.processInfo.processIdentifier else {
-      return nil
-    }
+    guard let previousApplication else { return nil }
+    self.previousApplication = nil
+
+    guard Self.isPasteTarget(previousApplication) else { return nil }
 
     previousApplication.activate(options: [])
-    let restored = previousApplication
-    self.previousApplication = nil
-    return restored
+    return previousApplication
   }
 
   // MARK: - Status item
@@ -334,40 +357,160 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     }
   }
 
+  // MARK: - Workspace changes
+
+  /// Keeps the shelf alive (and on the right Space) while the user moves
+  /// between apps, windows and Spaces.
+  ///
+  /// The panel deliberately does not dismiss on focus loss: it is a
+  /// non-activating shelf, and switching Space, entering fullscreen or using
+  /// Cmd+Tab all take focus away for a moment. Closing on those events made it
+  /// look like it "flashed shut" whenever another window became active.
+  private func observeWorkspaceChanges() {
+    let workspaceCenter = NSWorkspace.shared.notificationCenter
+
+    // Remember the most recently used app, so a card click pastes into
+    // whichever app the user is in *now* rather than the one the panel was
+    // opened over.
+    workspaceCenter.addObserver(
+      forName: NSWorkspace.didActivateApplicationNotification,
+      object: nil,
+      queue: .main
+    ) { [weak self] notification in
+      guard let app = notification.userInfo?[NSWorkspace.applicationUserInfoKey] as? NSRunningApplication,
+            Self.isPasteTarget(app) else { return }
+      Task { @MainActor in
+        guard let self, self.panel.isVisible else { return }
+        self.previousApplication = app
+      }
+    }
+
+    // `canJoinAllSpaces` normally moves the panel along, but during a
+    // Space/fullscreen transition AppKit can leave a non-activating panel
+    // behind or order it below the new Space's windows. Re-assert it once the
+    // animation has settled.
+    workspaceCenter.addObserver(
+      forName: NSWorkspace.activeSpaceDidChangeNotification,
+      object: nil,
+      queue: .main
+    ) { [weak self] _ in
+      Task { @MainActor in
+        guard let self, self.panel.isVisible else { return }
+        try? await Task.sleep(nanoseconds: 150_000_000)
+        guard self.panel.isVisible else { return }
+        self.panel.reassertOnActiveSpace()
+      }
+    }
+
+    // Display (dis)connection / resolution change: re-anchor to the physical
+    // bottom of the screen under the pointer.
+    NotificationCenter.default.addObserver(
+      forName: NSApplication.didChangeScreenParametersNotification,
+      object: nil,
+      queue: .main
+    ) { [weak self] _ in
+      Task { @MainActor in
+        guard let self, self.panel.isVisible else { return }
+        self.panel.positionAtBottom(animated: false)
+      }
+    }
+  }
+
   // MARK: - Outside clicks
 
   private func setupOutsideClickMonitors() {
     // Local monitor (clicks while app is active)
     outsideClickMonitor = NSEvent.addLocalMonitorForEvents(matching: [.leftMouseDown, .rightMouseDown]) { [weak self] event in
+      let location = NSEvent.mouseLocation
       Task { @MainActor in
-        self?.handleOutsideClick()
+        self?.handleOutsideClick(at: location)
       }
       return event
     }
 
     // Global monitor (clicks when app is inactive)
     outsideClickGlobalMonitor = NSEvent.addGlobalMonitorForEvents(matching: [.leftMouseDown, .rightMouseDown]) { [weak self] _ in
+      let location = NSEvent.mouseLocation
       Task { @MainActor in
-        self?.handleOutsideClick()
+        self?.handleOutsideClick(at: location)
       }
     }
-  }
 
-  @MainActor private func handleOutsideClick() {
-    guard panel.isVisible else { return }
-    let mouseLocation = NSEvent.mouseLocation
-    if !panel.frame.contains(mouseLocation) && !isPointInAnyAppWindow(mouseLocation) {
-      panel.close()
+    // The panel is non-activating so it never steals focus when it appears.
+    // But once it stays on screen while the user works elsewhere, clicking the
+    // shelf itself (search field, filters, background) must make Pastable
+    // active again — otherwise the caret would blink in the search field while
+    // every keystroke still went to the other app. Deferred until after the
+    // click is handled: a click on a card closes the panel, and that path must
+    // not bounce activation through Pastable on its way to the target app.
+    panelClickMonitor = NSEvent.addLocalMonitorForEvents(matching: [.leftMouseUp]) { [weak self] event in
+      MainActor.assumeIsolated {
+        guard let self, event.window === self.panel, self.panel.isVisible else { return }
+        Task { @MainActor in
+          guard self.panel.isVisible, !NSApp.isActive else { return }
+          NSApp.activate(ignoringOtherApps: true)
+          self.panel.makeKey()
+        }
+      }
+      return event
     }
   }
 
-  private func isPointInAnyAppWindow(_ point: NSPoint) -> Bool {
+  /// Dismiss only on a click that hits the desktop / empty background. A click
+  /// that lands on any window — ours, another app's, the menu bar or the Dock —
+  /// means the user is still working, and the shelf must stay open.
+  @MainActor private func handleOutsideClick(at point: NSPoint) {
+    guard panel.isVisible, !panel.frame.contains(point) else { return }
+    if isPointOnOwnWindow(point) { return }
+    if isPointOnAnyWindow(point) { return }
+    panel.close()
+  }
+
+  private func isPointOnOwnWindow(_ point: NSPoint) -> Bool {
     if let statusWindow = statusItem.button?.window, statusWindow.frame.contains(point) {
       return true
     }
 
     for window in NSApp.windows where window.isVisible {
       if window.frame.contains(point) {
+        return true
+      }
+    }
+    return false
+  }
+
+  /// Hit-test the on-screen window list.
+  ///
+  /// `NSEvent` monitors only tell us where the click was, not which window the
+  /// system will deliver it to, so ask WindowServer. Our own popovers and
+  /// status menus are included too (they are not always part of
+  /// `NSApp.windows`). Desktop elements (the wallpaper and desktop icons) live
+  /// on negative window layers and are skipped on purpose: clicking them is
+  /// the documented way to dismiss.
+  private func isPointOnAnyWindow(_ point: NSPoint) -> Bool {
+    guard let mainScreen = NSScreen.screens.first,
+          let windows = CGWindowListCopyWindowInfo([.optionOnScreenOnly], kCGNullWindowID) as? [[String: Any]] else {
+      return false
+    }
+
+    // NSEvent uses a bottom-left origin anchored at the main screen, the window
+    // list uses a top-left origin anchored at the main screen. Mirror across
+    // the main screen's top edge; this is valid for every attached display.
+    let cgPoint = CGPoint(x: point.x, y: mainScreen.frame.maxY - point.y)
+    return Self.isPoint(cgPoint, coveredBy: windows)
+  }
+
+  /// Pure hit-test over WindowServer window dictionaries (`CGWindowListCopyWindowInfo`).
+  /// Desktop elements (wallpaper, desktop icons) sit on negative layers and are
+  /// ignored, so they count as empty space to click and dismiss with. Fully
+  /// transparent windows do not swallow clicks either.
+  static func isPoint(_ point: CGPoint, coveredBy windows: [[String: Any]]) -> Bool {
+    for window in windows {
+      guard let layer = window[kCGWindowLayer as String] as? Int, layer >= 0 else { continue }
+      guard let alpha = window[kCGWindowAlpha as String] as? Double, alpha > 0.01 else { continue }
+      guard let boundsInfo = window[kCGWindowBounds as String] as? [String: Any],
+            let bounds = CGRect(dictionaryRepresentation: boundsInfo as CFDictionary) else { continue }
+      if bounds.contains(point) {
         return true
       }
     }

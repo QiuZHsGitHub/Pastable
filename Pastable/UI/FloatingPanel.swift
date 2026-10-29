@@ -6,11 +6,10 @@ final class FloatingPanel: NSPanel {
 
   /// 内容视图的自然高度
   private var contentHeight: CGFloat = 357
-  private var suppressResignKeyUntil: Date?
   private var isClosing = false
 
-  /// Used to avoid immediately re-opening the panel when a click on the status
-  /// item first causes `resignKey()` -> `close()` and then triggers the toggle action.
+  /// Used to avoid immediately re-opening the panel from the same status-item
+  /// click that just closed it.
   private(set) var lastClosedAt: Date = .distantPast
 
   init(contentRect: NSRect, backing: NSWindow.BackingStoreType, defer flag: Bool) {
@@ -33,34 +32,12 @@ final class FloatingPanel: NSPanel {
     self.hidesOnDeactivate = false
   }
 
-  // Close automatically when out of focus, e.g. outside click. The small delay
-  // lets a SwiftUI popover or the Settings window become key without tearing
-  // the panel (and the popover) down first.
-  override func resignKey() {
-    super.resignKey()
-
-    if isClosing { return }
-    if let until = suppressResignKeyUntil, Date() < until {
-      return
-    }
-
-    Task { @MainActor [weak self] in
-      try? await Task.sleep(nanoseconds: 90_000_000)
-      guard let self, self.isVisible, !self.isClosing else { return }
-
-      // If another Pastable window (popover/settings) took focus, keep the panel.
-      if NSApp.isActive {
-        let otherWindowIsFocused = NSApp.windows.contains { window in
-          window !== self &&
-            window.isVisible &&
-            (window.isKeyWindow || window.level.rawValue > self.level.rawValue)
-        }
-        if otherWindowIsFocused { return }
-      }
-
-      self.close()
-    }
-  }
+  // The panel is a shelf: it stays on screen while the user keeps working in
+  // other windows / apps / Spaces. Dismissal is explicit (Esc, the global
+  // shortcut, a paste, or a click on the desktop), so losing key focus — which
+  // happens on every Space change, Cmd+Tab or click into another app — must
+  // not tear it down. `NSApplication.didResignActiveNotification` is likewise
+  // not observed any more; see `AppDelegate`.
 
   override func close() {
     guard !isClosing else { return }
@@ -80,8 +57,13 @@ final class FloatingPanel: NSPanel {
     return true
   }
 
-  func suppressResignKey(duration: TimeInterval) {
-    suppressResignKeyUntil = Date().addingTimeInterval(duration)
+  /// Bring the shelf back to the front of the currently active Space without
+  /// activating the app or stealing keyboard focus. Called after a Space /
+  /// fullscreen transition, where AppKit can leave a non-activating panel
+  /// behind even though it joined all Spaces.
+  func reassertOnActiveSpace() {
+    guard isVisible, !isClosing else { return }
+    orderFrontRegardless()
   }
 
   func setContent<Content: View>(view: Content) {
