@@ -320,7 +320,11 @@ class HistoryItem {
   /// blank "0 字" card. Images/files are never considered empty: their hash
   /// prefix lets us distinguish them without loading the binary payload.
   var isEffectivelyEmpty: Bool {
-    if !previewableText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+    // Early-exit scan instead of `trimmingCharacters`, which allocates a full
+    // copy of the payload text just to test for emptiness (megabyte-scale clips
+    // used to pay that copy on every data refresh).
+    let text = previewableText
+    if text.unicodeScalars.contains(where: { !CharacterSet.whitespacesAndNewlines.contains($0) }) {
       return false
     }
 
@@ -378,6 +382,20 @@ class HistoryItem {
   func warmUpSearchIndex() {
     _ = normalizedSearchTitle
     _ = normalizedSearchBody
+  }
+
+  /// Pre-compute the classification the card body reads on its very first pass
+  /// (`isCode` / `isLink` run regex and data-detector heuristics; `fileURLs`
+  /// parses the stored representations). Driven from the same idle warm-up as
+  /// the search index, so scrolling into a fresh card is a set of cache reads
+  /// instead of scans on the main thread.
+  func warmUpDisplayCaches() {
+    _ = isImage
+    _ = fileURLs
+    _ = isImageFile
+    _ = isCode
+    _ = isLink
+    _ = hexColor
   }
   
   private func computePreviewText() -> String {
@@ -565,7 +583,10 @@ extension HistoryItem {
     // 0. Exclude non-text types
     if isImage || isFile { return false }
 
-    let text = previewableText
+    // The heuristics below only need a representative sample; capping keeps a
+    // multi-megabyte clip (logs, dumps) from turning classification into a
+    // multi-pass full-text scan on whatever thread first renders the card.
+    let text = String(previewableText.prefix(8_000))
     guard text.count > 10 else { return false }
     
     // Quick Check: Swift Documentation
@@ -654,26 +675,31 @@ extension HistoryItem {
   }
 
   private func computeIsLink() -> Bool {
-    let text = previewableText.trimmingCharacters(in: .whitespacesAndNewlines)
+    // Capped like `computeIsCode`: link detection is O(n) per candidate and the
+    // "the whole string is one URL" check is meaningless past a few kilobytes.
+    let text = String(previewableText.prefix(4_000)).trimmingCharacters(in: .whitespacesAndNewlines)
     guard !text.isEmpty else { return false }
     
     // Performance optimization: Check if it looks like a URL first
     guard text.contains(".") || text.contains(":") else { return false }
     
-    do {
-        let detector = try NSDataDetector(types: NSTextCheckingResult.CheckingType.link.rawValue)
-        let range = NSRange(location: 0, length: text.utf16.count)
-        let matches = detector.matches(in: text, options: [], range: range)
-        
-        // Return true if we found a link and it covers most of the string (e.g. not just "Go to google.com")
-        if let match = matches.first {
-            return match.range.length == range.length
-        }
-    } catch {
-        return false
+    // Shared detector: constructing an NSDataDetector is expensive and this
+    // runs once per record during warm-up over the whole history. (The detector
+    // itself is an NSRegularExpression subclass and is safe to share.)
+    guard let detector = Self.linkDetector else { return false }
+    let range = NSRange(location: 0, length: text.utf16.count)
+    let matches = detector.matches(in: text, options: [], range: range)
+
+    // Return true if we found a link and it covers most of the string (e.g. not just "Go to google.com")
+    if let match = matches.first {
+      return match.range.length == range.length
     }
     return false
   }
+
+  private static let linkDetector: NSDataDetector? = try? NSDataDetector(
+    types: NSTextCheckingResult.CheckingType.link.rawValue
+  )
   
   /// True for image content. Uses the type check (plus the Universal Clipboard
   /// handoff case) so classification never decodes the payload.
@@ -749,6 +775,10 @@ extension HistoryItem {
     let options: [CFString: Any] = [
       kCGImageSourceCreateThumbnailFromImageAlways: true,
       kCGImageSourceCreateThumbnailWithTransform: true,
+      // Decode at creation time (on the caller's background task) instead of
+      // lazily at first draw — the lazy decode lands on the main thread exactly
+      // when the card scrolls into view.
+      kCGImageSourceShouldCacheImmediately: true,
       kCGImageSourceThumbnailMaxPixelSize: maxPixelSize
     ]
     return CGImageSourceCreateThumbnailAtIndex(source, 0, options as CFDictionary)
@@ -758,7 +788,11 @@ extension HistoryItem {
       return cachedHexColorValue
     }
 
-    let text = previewableText.trimmingCharacters(in: .whitespacesAndNewlines)
+    // A hex color string is at most a handful of characters; anything longer
+    // cannot match the pattern, so skip the (copying) trim of huge payloads.
+    let text = previewableText.count > 64
+      ? ""
+      : previewableText.trimmingCharacters(in: .whitespacesAndNewlines)
     let isHex = Self.hexColorRegex?.firstMatch(
       in: text,
       options: [],

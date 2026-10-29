@@ -22,7 +22,13 @@ final class AppState: ObservableObject {
     didSet { recomputeDisplayItems() }
   }
   @Published var selectedItemID: PersistentIdentifier?
-  @Published var hoveredItemID: PersistentIdentifier?
+  /// Deliberately NOT `@Published`: hover is pure input state for the Cmd+Delete
+  /// shortcut and is only read from event handlers, never from `body`. Cards
+  /// slide under a stationary cursor while scrolling, and each crossing used to
+  /// publish here — invalidating ContentView/CardList and re-rendering every
+  /// visible card mid-scroll. Nothing renders from this value, so publishing
+  /// bought nothing but jank.
+  var hoveredItemID: PersistentIdentifier?
   /// Filtered + category-sorted view of the history. Recomputed on data or
   /// search changes only (not per render), because the category filter runs
   /// type classification over every record.
@@ -195,12 +201,18 @@ final class AppState: ObservableObject {
       for item in self.allItems {
         if Task.isCancelled { return }
         item.warmUpSearchIndex()
+        // Also pre-compute the render-path classification (link/code detection,
+        // file URLs) so a card's first body pass while scrolling is a handful of
+        // cache reads instead of regex / NSDataDetector scans on the main thread.
+        item.warmUpDisplayCaches()
         processed += 1
-        if processed % 20 == 0 {
+        if processed % 5 == 0 {
           // Yield and pause briefly so a large history never monopolizes the
-          // main actor while the panel is open.
+          // main actor while the panel is open. Small batches: classification
+          // heuristics on multi-thousand-character clips are millisecond-scale
+          // each, and a 20-item burst could drop frames while scrolling.
           await Task.yield()
-          try? await Task.sleep(nanoseconds: 4_000_000)
+          try? await Task.sleep(nanoseconds: 2_000_000)
         }
       }
     }

@@ -18,7 +18,36 @@ struct CardCell: View {
   @Environment(\.colorScheme) private var colorScheme
 
   private var theme: AppTheme { AppTheme.theme(for: colorScheme) }
-  
+
+  /// Primes the asynchronously loaded pieces from their process-wide caches so
+  /// a card that scrolls back into view paints immediately instead of flashing
+  /// a spinner while its background task re-runs (`LazyHStack` drops cell state
+  /// as soon as a card leaves the visible band). All lookups are cache-only —
+  /// no icon resolution or decoding on the main thread; misses stay `nil` and
+  /// fill in via `.task` exactly as before.
+  init(item: HistoryItem, isSelected: Bool = false, highlightTokens: [String] = [], onCopy: (() -> Void)? = nil) {
+    self.item = item
+    self.isSelected = isSelected
+    self.highlightTokens = highlightTokens
+    self.onCopy = onCopy
+
+    _itemThumbnail = State(initialValue: ImageCache.shared.cachedThumbnail(forKey: item.thumbnailCacheKey))
+    if let url = item.fileURLs.first {
+      _fileThumbnail = State(initialValue: ImageCache.shared.cachedThumbnail(forKey: url.absoluteString))
+      _fileIconImage = State(initialValue: ImageCache.shared.cachedFileIcon(forPath: url.path))
+    }
+    if let bundleId = item.application {
+      _appIconImage = State(initialValue: ImageCache.shared.cachedAppIcon(forBundleId: bundleId))
+    }
+    let cachedPreview = PreviewCache.shared.preview(forKey: item.attributedPreviewCacheKey)
+    if let cachedPreview {
+      _cachedAttributedText = State(initialValue: cachedPreview.text)
+    }
+    if let hex = cachedPreview?.backgroundHex ?? item.cachedRTFBackgroundHexColor {
+      _contentBackgroundColor = State(initialValue: Color(hex: hex))
+    }
+  }
+
   var body: some View {
     ZStack {
       // 自适应色 -> 深色两段渐变。比「纯色 + 黑遮罩」更有层次，也避免
@@ -73,15 +102,13 @@ struct CardCell: View {
     .task(id: CardCellTaskKey(itemID: item.persistentModelID, tokens: highlightTokens)) {
       let itemId = item.persistentModelID
 
-      if let cachedHex = item.cachedRTFBackgroundHexColor {
-        contentBackgroundColor = Color(hex: cachedHex)
-      }
-
       // Capture every model read up front — SwiftData objects must not be
       // touched from the detached task below — and fold all background work
       // (thumbnail lookup/decode, icons, RTF parse) into that single task so
       // the card updates its state once instead of up to five times, each of
-      // which used to trigger a separate re-render while scrolling.
+      // which used to trigger a separate re-render while scrolling. Note that
+      // this capture stays cheap: app-path resolution (LaunchServices) belongs
+      // to the detached load below, never to the main actor.
       let inputs = CardAssetsInputs(
         thumbnailKey: item.thumbnailCacheKey,
         previewKey: item.attributedPreviewCacheKey,
@@ -94,9 +121,6 @@ struct CardCell: View {
         isImageFile: item.isImageFile,
         isFile: item.isFile,
         appBundleId: item.application,
-        appPath: item.application.flatMap {
-          NSWorkspace.shared.urlForApplication(withBundleIdentifier: $0)?.path
-        },
         rtfData: item.rtfData,
         previewSource: item.previewableText,
         titleText: cardTitle,
@@ -112,29 +136,56 @@ struct CardCell: View {
 
       guard item.persistentModelID == itemId else { return }
 
-      if let thumbnail = assets.thumbnail { itemThumbnail = thumbnail }
-      if let fileThumbnail = assets.fileThumbnail { self.fileThumbnail = fileThumbnail }
-      if let appIcon = assets.appIcon { appIconImage = appIcon }
-      if let fileIcon = assets.fileIcon { fileIconImage = fileIcon }
+      // Compare before assigning: a card whose caches were primed at init time
+      // (or that re-runs this task on a search change) must not invalidate its
+      // body just to store the identical value again.
+      if let thumbnail = assets.thumbnail, itemThumbnail !== thumbnail {
+        itemThumbnail = thumbnail
+      }
+      if let fileThumbnail = assets.fileThumbnail, self.fileThumbnail !== fileThumbnail {
+        self.fileThumbnail = fileThumbnail
+      }
+      if let appIcon = assets.appIcon, appIconImage !== appIcon {
+        appIconImage = appIcon
+      }
+      if let fileIcon = assets.fileIcon, fileIconImage !== fileIcon {
+        fileIconImage = fileIcon
+      }
       if let preview = assets.attributedPreview {
-        cachedAttributedText = preview.text
+        if cachedAttributedText != preview.text {
+          cachedAttributedText = preview.text
+        }
         if let hex = preview.backgroundHex {
-          contentBackgroundColor = Color(hex: hex)
+          let color = Color(hex: hex)
+          if contentBackgroundColor != color {
+            contentBackgroundColor = color
+          }
         }
       }
       // Search feedback always overwrites (including with `nil` when the query
-      // changed) so the card falls back to its normal rendering.
-      searchPreview = assets.searchPreview
-      highlightedTitle = assets.searchTitle
-
-      // Persist artifacts generated on the fly, at most once per record.
-      if let generated = assets.generatedThumbnailData, item.thumbnailData == nil {
-        item.thumbnailData = generated
-        try? item.modelContext?.save()
+      // changed) so the card falls back to its normal rendering — but only on
+      // actual change.
+      if searchPreview != assets.searchPreview {
+        searchPreview = assets.searchPreview
       }
-      if item.cachedRTFBackgroundHexColor == nil, let hex = assets.generatedBackgroundHex {
-        item.cachedRTFBackgroundHexColor = hex
-        try? item.modelContext?.save()
+      if highlightedTitle != assets.searchTitle {
+        highlightedTitle = assets.searchTitle
+      }
+
+      // Persist artifacts generated on the fly, at most once per record. The
+      // writes are batched and deferred: a save per card re-fetches the shelf's
+      // `@Query` and re-renders the whole list, which used to stutter exactly
+      // while legacy cards were scrolling into view.
+      if assets.generatedThumbnailData != nil || assets.generatedBackgroundHex != nil {
+        DeferredModelWriter.shared.enqueue(context: item.modelContext) { [weak item] in
+          guard let item else { return }
+          if item.thumbnailData == nil, let generated = assets.generatedThumbnailData {
+            item.thumbnailData = generated
+          }
+          if item.cachedRTFBackgroundHexColor == nil, let hex = assets.generatedBackgroundHex {
+            item.cachedRTFBackgroundHexColor = hex
+          }
+        }
       }
     }
   }
@@ -395,7 +446,10 @@ struct CardCell: View {
     let title = item.title.trimmingCharacters(in: .whitespacesAndNewlines)
     guard !title.isEmpty else { return false }
 
-    let preview = item.previewableText.trimmingCharacters(in: .whitespacesAndNewlines)
+    // Only the visible head of the preview matters for the "title is just a
+    // copy of the body" check; never trim megabyte-sized payloads here — this
+    // runs on every body pass.
+    let preview = item.previewableText.prefix(2_000).trimmingCharacters(in: .whitespacesAndNewlines)
     return !preview.hasPrefix(title)
   }
 
@@ -450,7 +504,6 @@ private struct CardAssetsInputs: @unchecked Sendable {
   let isImageFile: Bool
   let isFile: Bool
   let appBundleId: String?
-  let appPath: String?
   let rtfData: Data?
   let previewSource: String
   let titleText: String
@@ -493,8 +546,9 @@ private struct CardAssets: @unchecked Sendable {
         } else {
           image = nil
         }
-        ImageCache.shared.storeThumbnail(image, forKey: inputs.thumbnailKey)
-        thumbnail = image
+        // Stores a fully decoded copy and returns it, so the card's first draw
+        // never pays the decode on the main thread.
+        thumbnail = ImageCache.shared.storeThumbnail(image, forKey: inputs.thumbnailKey)
       }
     }
 
@@ -507,10 +561,12 @@ private struct CardAssets: @unchecked Sendable {
     }
 
     // 2. App icon for the footer (the card background follows the category
-    // tint; app-icon average colors are intentionally not used for it).
+    // tint; app-icon average colors are intentionally not used for it). The
+    // cache resolves the app path internally — LaunchServices lookups can hit
+    // disk and must stay off the main actor.
     var appIcon: NSImage?
-    if let bundleId = inputs.appBundleId, let path = inputs.appPath {
-      appIcon = ImageCache.shared.appIcon(forBundleId: bundleId, path: path)
+    if let bundleId = inputs.appBundleId {
+      appIcon = ImageCache.shared.appIcon(forBundleId: bundleId)
     }
 
     // 3. Generic file icon.

@@ -47,6 +47,9 @@ final class FloatingPanel: NSPanel {
     isClosing = false
 
     AppState.shared.isPanelVisible = false
+    // Persist the deferred card artifacts (generated thumbnails etc.) while the
+    // shelf is idle instead of waiting out the debounce timer.
+    DeferredModelWriter.shared.flush()
   }
 
   override var canBecomeKey: Bool {
