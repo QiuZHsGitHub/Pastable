@@ -111,7 +111,7 @@
 ## Development
 
 ```bash
-swift test    # 237 logic / localization tests, using an in-memory store
+swift test    # 238 logic / localization tests, using an in-memory store
 ./tools/testing/run-tests.sh --smoke --e2e   # full regression + build + smoke + 112 end-to-end checks
 xcodebuild -project Pastable.xcodeproj -scheme Pastable \
   -configuration Debug -destination 'platform=macOS' \

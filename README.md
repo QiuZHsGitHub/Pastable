@@ -111,7 +111,7 @@
 ## 开发与测试
 
 ```bash
-swift test    # 237 个逻辑 / 本地化测试，使用内存数据库
+swift test    # 238 个逻辑 / 本地化测试，使用内存数据库
 ./tools/testing/run-tests.sh --smoke --e2e   # 全量回归 + 构建 + 启动冒烟 + 112 项端到端体验
 xcodebuild -project Pastable.xcodeproj -scheme Pastable \
   -configuration Debug -destination 'platform=macOS' \
