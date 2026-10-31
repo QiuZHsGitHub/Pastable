@@ -2,7 +2,6 @@ import SwiftUI
 import SwiftData
 
 struct ContentView: View {
-  @Environment(\.modelContext) private var modelContext
   @Query(sort: \HistoryItem.lastCopiedAt, order: .reverse) private var items: [HistoryItem]
   @ObservedObject var appState = AppState.shared
   @Environment(\.colorScheme) private var colorScheme
@@ -50,14 +49,10 @@ struct ContentView: View {
         startPoint: .top,
         endPoint: .bottom
       )
-      // Clicks on any empty part of the shelf release the search field's
-      // keyboard focus without closing the panel. Interactive children (cards,
-      // chips, the text field) handle their own clicks first, so this only
-      // fires on blanks.
-      .contentShape(Rectangle())
-      .onTapGesture {
-        appState.searchFocusRequest = .blur
-      }
+      // Do NOT put a panel-wide blur gesture here: it also fires for clicks
+      // that land on the search field, deactivating the app a beat before the
+      // field can focus. Blank header space and category clicks release focus
+      // explicitly instead.
     )
     .clipShape(TopRoundedRectangle(radius: 24))
     .overlay(
@@ -98,49 +93,13 @@ struct ContentView: View {
   // MARK: - Actions
 
   private func performPaste(item: HistoryItem) {
-    let delegate = appState.appDelegate
-    appState.selectedItemID = item.persistentModelID
-
-    // 1. Close the panel and resolve the app to paste into. The shelf stays
-    // open while the user switches windows, so the target is whichever app is
-    // in front now — not necessarily the one that was frontmost when the panel
-    // appeared. Without this, Cmd+V can be delivered to Pastable itself.
-    delegate?.closePanel()
-    let target = delegate?.pasteTargetApplication()
-
-    // 2. Move the item to the front of the history.
-    item.lastCopiedAt = Date()
-    item.numberOfCopies += 1
-    do {
-      try modelContext.save()
-    } catch {
-      AppLogger.Storage.error("Failed to save paste timestamp", error: error)
-    }
-
-    // 3. Copy, then fire Cmd+V as soon as the pasteboard write is observable
-    // and the target app has keyboard focus (with a timeout fallback instead
-    // of the old fixed 120ms delay).
-    Clipboard.shared.copy(item)
-    Task { @MainActor in
-      if await Clipboard.shared.paste(whenReadyFor: target) {
-        // The system review prompt is never shown at launch or on a plain
-        // copy. Only a paste that actually posted Cmd+V counts as the user
-        // having experienced the core loop.
-        ReviewPrompt.shared.recordSuccessfulPaste()
-      }
-    }
+    // The delegate owns the one true paste pipeline so the local keyboard
+    // monitor and the global key tap cannot drift apart.
+    appState.appDelegate?.paste(item: item)
   }
 
   private func delete(item: HistoryItem) {
-    modelContext.delete(item)
-    do {
-      try modelContext.save()
-    } catch {
-      AppLogger.Storage.error("Failed to delete item", error: error)
-    }
-    if appState.selectedItemID == item.persistentModelID {
-      appState.resetSelection()
-    }
+    appState.appDelegate?.delete(item: item)
   }
 
   private func clearHistory() {
@@ -162,7 +121,10 @@ struct ContentView: View {
   }
 
   private func handleKeyDown(_ event: NSEvent) -> NSEvent? {
-    guard appState.isPanelVisible else { return event }
+    // Only the shelf itself owns these shortcuts. A Settings window or an
+    // open popover keeps its normal arrow/Return handling.
+    guard appState.isPanelVisible,
+          NSApp.keyWindow === appState.appDelegate?.panel else { return event }
 
     let flags = event.modifierFlags.intersection(.deviceIndependentFlagsMask)
 

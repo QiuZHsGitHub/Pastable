@@ -17,7 +17,15 @@ final class AppState: ObservableObject {
   @Published private(set) var searchTokens: [String] = []
   @Published var settingsTab: SettingsTab = .general
   @Published var shouldScrollToTop: Bool = false
-  @Published var searchFocusRequest: SearchFocusRequest = .none
+  @Published var searchFocusRequest: SearchFocusRequest = .none {
+    didSet {
+      // `.focus` is driven by AppDelegate after activation has settled; only
+      // `.blur` needs an immediate hand-back.
+      if searchFocusRequest == .blur {
+        appDelegate?.releasePanelFocus()
+      }
+    }
+  }
   @Published var selectedCategory: String = "All" {
     didSet { recomputeDisplayItems() }
   }

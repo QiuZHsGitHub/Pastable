@@ -18,6 +18,22 @@ final class FloatingPanel: NSPanel {
   /// click that just closed it.
   private(set) var lastClosedAt: Date = .distantPast
 
+  /// Called for every close path (Esc, outside click, paste, hotkey) so the
+  /// global key tap can be torn down exactly once.
+  var onClose: (() -> Void)?
+
+  /// Called before the first click in the type-to-search row is dispatched.
+  /// The panel is not key, so this is where the app activates itself just in
+  /// time for the search field (or a category tab) to receive the click.
+  var onHeaderMouseDown: (() -> Void)?
+
+  /// Called for the first click in the search row while the panel is not yet
+  /// active. The click is swallowed and focus is handed over asynchronously,
+  /// which avoids AppKit deactivating the app mid-click.
+  var onSearchMouseDown: (() -> Void)?
+
+  private var swallowNextMouseUp = false
+
   init(contentRect: NSRect, backing: NSWindow.BackingStoreType, defer flag: Bool) {
     super.init(contentRect: contentRect, styleMask: [.nonactivatingPanel, .borderless, .fullSizeContentView], backing: backing, defer: flag)
 
@@ -45,6 +61,35 @@ final class FloatingPanel: NSPanel {
   // not tear it down. `NSApplication.didResignActiveNotification` is likewise
   // not observed any more; see `AppDelegate`.
 
+  override func sendEvent(_ event: NSEvent) {
+    if event.type == .leftMouseDown {
+      swallowNextMouseUp = false
+    }
+    if event.type == .leftMouseUp, swallowNextMouseUp {
+      swallowNextMouseUp = false
+      return
+    }
+
+    if event.type == .leftMouseDown, isVisible {
+      let localPoint = event.locationInWindow
+      let panelHeight = contentView?.bounds.height ?? frame.height
+      if localPoint.y >= panelHeight - 72 {
+        let searchMinX = frame.width - 440
+        let searchMaxX = frame.width - 74
+        let inSearchRow = localPoint.x >= searchMinX && localPoint.x <= searchMaxX
+        if inSearchRow, !NSApp.isActive || !isKeyWindow {
+          // Swallow the first click: AppKit would otherwise deactivate us a
+          // beat later, before the text field can become first responder.
+          swallowNextMouseUp = true
+          onSearchMouseDown?()
+          return
+        }
+        onHeaderMouseDown?()
+      }
+    }
+    super.sendEvent(event)
+  }
+
   override func close() {
     guard !isClosing else { return }
     isClosing = true
@@ -53,6 +98,7 @@ final class FloatingPanel: NSPanel {
     isClosing = false
 
     AppState.shared.isPanelVisible = false
+    onClose?()
     // Persist the deferred card artifacts (generated thumbnails etc.) while the
     // shelf is idle instead of waiting out the debounce timer.
     DeferredModelWriter.shared.flush()
@@ -76,7 +122,9 @@ final class FloatingPanel: NSPanel {
   }
 
   func setContent<Content: View>(view: Content) {
-    let hostingView = NSHostingView(rootView: view)
+    // The shelf is a non-activating HUD. `acceptsFirstMouse` makes the first
+    // click on a card act immediately instead of merely making the window key.
+    let hostingView = ShelfHostingView(rootView: view)
     self.contentView = hostingView
 
     let reviewHost = NSViewController()
@@ -121,6 +169,12 @@ final class FloatingPanel: NSPanel {
       self.setFrame(finalFrame, display: true)
     }
   }
+}
+
+/// Hosting view that lets the first click reach the SwiftUI controls while the
+/// panel is not the key window.
+private final class ShelfHostingView<Content: View>: NSHostingView<Content> {
+  override func acceptsFirstMouse(for event: NSEvent?) -> Bool { true }
 }
 
 // MARK: - Preview

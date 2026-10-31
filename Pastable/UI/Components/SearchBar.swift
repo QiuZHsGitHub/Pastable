@@ -69,7 +69,12 @@ struct SearchBar: View {
       Button(action: {
         // Opening the menu counts as clicking elsewhere: release the keyboard.
         isTextFieldFocused = false
-        showMoreMenu.toggle()
+        if showMoreMenu {
+          showMoreMenu = false
+          AppState.shared.searchFocusRequest = .blur
+        } else {
+          showMoreMenu = true
+        }
       }) {
         Image(systemName: "ellipsis")
           .font(.system(size: 14, weight: .medium))

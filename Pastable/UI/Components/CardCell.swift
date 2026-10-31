@@ -454,17 +454,20 @@ struct CardCell: View {
   }
 
   private var cardTitle: String {
-    // 1. If it's a file, always show the filename (ignoring potentially stale item.title)
+    // Prefer the title captured with the record. For a multi-file copy this is
+    // the first file in copy order and stays stable across relaunches; deriving
+    // it again from `fileURLs.first` re-reads a SwiftData to-many relationship
+    // whose order is not guaranteed.
+    let storedTitle = item.title.trimmingCharacters(in: .whitespacesAndNewlines)
+    if !storedTitle.isEmpty {
+      return storedTitle
+    }
+
+    // Legacy rows without a persisted title fall back to the file name.
     if item.isFile, let fileURL = item.fileURLs.first {
       return fileURL.lastPathComponent.removingPercentEncoding ?? fileURL.lastPathComponent
     }
-    
-    // 2. Use stored title if available
-    if !item.title.isEmpty {
-      return item.title
-    }
-    
-    // 3. Fallback
+
     return String(item.previewableText.prefix(50))
   }
   
