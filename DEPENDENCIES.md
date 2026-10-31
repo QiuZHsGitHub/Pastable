@@ -16,8 +16,11 @@ xcodebuild -project Pastable.xcodeproj -scheme Pastable -resolvePackageDependenc
 ## 命令与测试
 
 ```bash
-# 逻辑层单元测试（39 个用例，使用内存 SwiftData，不会碰真实数据库）
+# 逻辑层单元测试（237 个用例，使用内存 SwiftData，不会碰真实数据库）
 swift test
+
+# 全量回归 + Xcode 构建 + 启动冒烟 + 112 项端到端体验（详见 docs/testing/自动化测试方案.md）
+./tools/testing/run-tests.sh --smoke --e2e
 
 # 构建 macOS App
 xcodebuild -project Pastable.xcodeproj -scheme Pastable \

@@ -52,8 +52,8 @@
 
 ### 开发者：GitHub 源码 / Release（免费）
 
-- **源码**：clone 后自行用 Xcode 编译，见下方「开发与测试」。
-- **Release DMG**：免证书（ad-hoc）签名、未公证；首次打开需在「系统设置 → 隐私与安全性」点「仍要打开」。**不含 iCloud 同步**。
+- **源码**：<https://github.com/QiuZHsGitHub/Pastable>，clone 后自行用 Xcode 编译，见下方「开发与测试」。
+- **Release DMG**：<https://github.com/QiuZHsGitHub/Pastable/releases/latest>，免证书（ad-hoc）签名、未公证；首次打开需在「系统设置 → 隐私与安全性」点「仍要打开」。**不含 iCloud 同步**。
 - 这一渠道面向想审计、修改或二次构建代码的人。它不是 App Store 版的免费替代品：普通用户从 App Store 安装，才能获得自动更新与 iCloud 同步，也不用处理未公证应用的首次启动提示。
 
 > 两边的定位：**App Store = 普通用户的完整版**；**GitHub = 开发者构建**。README 顶部只放 App Store 徽章，源码入口放在这里，避免把付费用户引到需要自己编译的页面。
@@ -72,7 +72,8 @@
 
 ## 功能亮点
 
-- **不抢键盘焦点**：面板打开时，键盘焦点仍留在当前 App。你可以在文档里继续打字，再选一张卡片回贴——这是「不打断」真正的含义。
+- **不抢键盘焦点**：面板打开时，键盘焦点仍留在当前 App。你可以在文档里继续打字，再按方向键选一张卡片回贴——这是「不打断」真正的含义。
+- **键盘导航**：方向键 / Enter / Esc / ⌘1–9 / ⌘⌫ 在面板打开时直接生效。实现上只在面板可见时启用全局键盘监听，仅消费上述导航键，其余按键原样透传、不记录。依赖「辅助功能」与「输入监控」权限；未授权输入监控时，鼠标操作与文档键入仍然正常。
 - **全屏底部浮层**：全局快捷键（默认 `Cmd + Shift + V`）在任意 App 上方唤出全屏宽、贴屏幕底部的浮层，即用即走。
 - **Dock 层级**：面板打开时保持在 Dock 之上，卡片不会被 Dock 盖住，也不会悬空。
 - **一键回贴**：点击卡片或按 `Enter`，内容写回剪贴板并自动粘贴到当前 App；关闭面板后光标仍在原处。
@@ -110,13 +111,16 @@
 ## 开发与测试
 
 ```bash
-swift test    # 66 个逻辑 / 本地化测试，使用内存数据库
+swift test    # 237 个逻辑 / 本地化测试，使用内存数据库
+./tools/testing/run-tests.sh --smoke --e2e   # 全量回归 + 构建 + 启动冒烟 + 112 项端到端体验
 xcodebuild -project Pastable.xcodeproj -scheme Pastable \
   -configuration Debug -destination 'platform=macOS' \
   -derivedDataPath /tmp/PastableDerived CODE_SIGNING_ALLOWED=NO build
 ```
 
 调试时可用 `PASTABLE_STORAGE_DIR=/tmp/PastableTest` 把数据库重定向到临时目录。
+
+端到端体验测试会真实打开面板与设置窗口，需要终端具备「辅助功能」与「屏幕录制」权限；它使用独立 bundle id 与临时数据库，结束后恢复系统剪贴板。维护说明见 [`docs/testing/自动化测试方案.md`](docs/testing/自动化测试方案.md)。
 
 首次编译前请按 [`DEPENDENCIES.md`](./DEPENDENCIES.md) 在 Xcode 中添加 Swift Package 依赖，然后打开 `Pastable.xcodeproj` 运行。
 
@@ -125,7 +129,7 @@ xcodebuild -project Pastable.xcodeproj -scheme Pastable \
 ```bash
 node tools/marketing/render.mjs shots   # 2880×1800 App Store 截图
 node tools/marketing/render.mjs demo    # 15 秒演示的逐帧 PNG
-python3 tools/marketing/make_gif.py     # 合成 docs/assets/site/demo-{zh,en}.gif
+python3 tools/marketing/make_gif.py     # 合成 docs/assets/site/demo-{zh,en}.gif（需要 Pillow）
 ```
 
 ## 设计与主题

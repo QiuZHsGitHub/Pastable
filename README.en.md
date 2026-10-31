@@ -52,8 +52,8 @@
 
 ### Developers: source / GitHub Releases (free)
 
-- **Source:** clone and build with Xcode; see Development below.
-- **Release DMG:** ad-hoc signed and not notarized. On first launch, allow it in **System Settings → Privacy & Security → Open Anyway**. **iCloud sync is not available** in this build.
+- **Source:** <https://github.com/QiuZHsGitHub/Pastable>; clone and build with Xcode, see Development below.
+- **Release DMG:** <https://github.com/QiuZHsGitHub/Pastable/releases/latest>, ad-hoc signed and not notarized. On first launch, allow it in **System Settings → Privacy & Security → Open Anyway**. **iCloud sync is not available** in this build.
 - This channel is for people who want to audit, modify, or rebuild the code. It is not a free substitute for the App Store version: the App Store build is the one that gets automatic updates, iCloud sync, and a normal first-launch experience.
 
 > Positioning: **App Store = the complete build for normal users**; **GitHub = developer builds**. The badge at the top of this README points to the App Store on purpose; the source/release route lives here, where developers can find it.
@@ -73,6 +73,7 @@
 ## Highlights
 
 - **Keyboard focus stays put**: opening the shelf does not take focus from the current app. Keep typing in your document, then choose a card to paste back — that is what "without breaking your flow" actually means.
+- **Keyboard navigation**: arrows / Enter / Esc / ⌘1–9 / ⌘⌫ work while the shelf is open. The keyboard monitor only runs while the shelf is visible, consumes only those navigation keys, and passes every other key through without recording it. This needs both Accessibility and Input Monitoring. Without Input Monitoring, mouse interaction and document typing still work normally.
 - **Full-width bottom shelf**: the global shortcut (default `Cmd + Shift + V`) opens a full-width shelf flush with the bottom of the screen, over any app.
 - **Dock layering**: the shelf stays above the Dock, so cards are never covered and the panel does not float awkwardly.
 - **One-click paste**: click a card or press `Enter`; the content is written back to the clipboard and pasted into the current app, with the caret still in place.
@@ -110,13 +111,16 @@
 ## Development
 
 ```bash
-swift test    # 66 logic / localization tests, using an in-memory store
+swift test    # 237 logic / localization tests, using an in-memory store
+./tools/testing/run-tests.sh --smoke --e2e   # full regression + build + smoke + 112 end-to-end checks
 xcodebuild -project Pastable.xcodeproj -scheme Pastable \
   -configuration Debug -destination 'platform=macOS' \
   -derivedDataPath /tmp/PastableDerived CODE_SIGNING_ALLOWED=NO build
 ```
 
 Use `PASTABLE_STORAGE_DIR=/tmp/PastableTest` to redirect the database while debugging.
+
+The end-to-end run opens the real panel and Settings window and needs Accessibility and Screen Recording permission. It uses an isolated bundle id and a temporary store, and restores the system clipboard afterwards. See [`docs/testing/自动化测试方案.md`](docs/testing/自动化测试方案.md).
 
 Follow [`DEPENDENCIES.md`](./DEPENDENCIES.md) to add the Swift Package dependency in Xcode, then open `Pastable.xcodeproj`.
 
@@ -125,7 +129,7 @@ Follow [`DEPENDENCIES.md`](./DEPENDENCIES.md) to add the Swift Package dependenc
 ```bash
 node tools/marketing/render.mjs shots   # 2880×1800 App Store screenshots
 node tools/marketing/render.mjs demo    # PNG frames for the 15s demo
-python3 tools/marketing/make_gif.py     # writes docs/assets/site/demo-{zh,en}.gif
+python3 tools/marketing/make_gif.py     # writes docs/assets/site/demo-{zh,en}.gif (needs Pillow)
 ```
 
 ## Design & Theme
