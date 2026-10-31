@@ -108,6 +108,7 @@ docs/
 ├── sitemap.xml
 └── assets/site/
     ├── panel-dark.webp / panel-light.webp
+    ├── panel-en-dark.webp / panel-en-light.webp
     ├── demo-zh.gif / demo-en.gif
     ├── demo-zh-poster.webp / demo-en-poster.webp
     ├── icon-32.png / icon-64.png / icon-192.png / icon-512.png

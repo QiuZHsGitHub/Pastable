@@ -78,7 +78,7 @@
 
 // Settings - About
 "settings.about.title" = "Pastable について";
-"settings.about.description" = "macOS クリップボードマネージャ";
+"settings.about.description" = "macOS の全幅クリップボードシェルフ。貼り付けても作業を中断しません。";
 "settings.about.contact" = "お問い合わせ";
 
 "settings.about.rate" = "Mac App Store で評価する";

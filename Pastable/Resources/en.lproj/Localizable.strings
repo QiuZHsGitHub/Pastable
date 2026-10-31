@@ -78,7 +78,7 @@
 
 // Settings - About
 "settings.about.title" = "About";
-"settings.about.description" = "macOS Clipboard Manager";
+"settings.about.description" = "A full-width clipboard shelf for macOS. Paste without breaking your flow.";
 "settings.about.contact" = "Contact";
 
 "settings.about.rate" = "Rate on the Mac App Store";

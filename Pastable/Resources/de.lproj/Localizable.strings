@@ -78,7 +78,7 @@
 
 // Settings - About
 "settings.about.title" = "Über Pastable";
-"settings.about.description" = "Zwischenablagenverwaltung für macOS";
+"settings.about.description" = "Ein bildschirmbreites Zwischenablage-Regal für macOS. Einfügen, ohne den Arbeitsfluss zu unterbrechen.";
 "settings.about.contact" = "Kontakt";
 
 "settings.about.rate" = "Im Mac App Store bewerten";

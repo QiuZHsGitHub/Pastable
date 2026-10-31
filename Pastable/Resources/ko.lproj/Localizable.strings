@@ -78,7 +78,7 @@
 
 // Settings - About
 "settings.about.title" = "Pastable 정보";
-"settings.about.description" = "macOS 클립보드 관리 앱";
+"settings.about.description" = "macOS용 전체 너비 클립보드 선반. 붙여넣어도 작업 흐름을 끊지 않습니다.";
 "settings.about.contact" = "문의";
 
 "settings.about.rate" = "Mac App Store에서 평가하기";

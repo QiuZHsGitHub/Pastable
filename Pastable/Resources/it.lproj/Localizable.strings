@@ -78,7 +78,7 @@
 
 // Settings - About
 "settings.about.title" = "Informazioni su Pastable";
-"settings.about.description" = "Gestore degli appunti per macOS";
+"settings.about.description" = "Un ripiano degli appunti a tutta larghezza per macOS. Incolla senza interrompere il lavoro.";
 "settings.about.contact" = "Contatti";
 
 "settings.about.rate" = "Valuta sul Mac App Store";

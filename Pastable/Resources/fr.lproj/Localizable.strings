@@ -78,7 +78,7 @@
 
 // Settings - About
 "settings.about.title" = "À propos de Pastable";
-"settings.about.description" = "Gestionnaire de presse-papiers pour macOS";
+"settings.about.description" = "Une étagère de presse-papiers pleine largeur pour macOS. Collez sans interrompre votre travail.";
 "settings.about.contact" = "Contact";
 
 "settings.about.rate" = "Noter sur le Mac App Store";

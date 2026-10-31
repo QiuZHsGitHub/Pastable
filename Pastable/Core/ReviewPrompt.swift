@@ -12,10 +12,11 @@ import StoreKit
 /// - **Presented on a later panel open.** After a paste the shelf is closed and
 ///   the target app has focus, so the system prompt is deferred until the next
 ///   time the panel is visible and Pastable can legitimately host it.
-/// - **At most three attempts a year.** StoreKit already rate-limits the system
-///   prompt; the extra thresholds (1 / 20 / 80 successful pastes, 90 days
-///   apart) keep us well inside that budget and give early users another chance
-///   after they have lived with the app for a while.
+/// - **At most three attempts in total.** The thresholds (1 / 20 / 80
+///   successful pastes) are each used once and are at least 90 days apart.
+///   StoreKit separately limits the system prompt to three appearances per
+///   year, so this stays inside Apple's budget while giving early users another
+///   chance after they have lived with the app for a while.
 @MainActor
 final class ReviewPrompt {
   static let shared = ReviewPrompt()
@@ -57,7 +58,7 @@ final class ReviewPrompt {
     isPresenting = true
     Task { @MainActor [weak self] in
       guard let self else { return }
-      try? await Task.sleep(nanoseconds: 900_000_000)
+      try? await Task.sleep(nanoseconds: 350_000_000)
       self.isPresenting = false
 
       // The user may have dismissed the shelf in the meantime. Leave the
@@ -77,9 +78,9 @@ enum ReviewPromptPolicy {
   /// Moments at which a request may be made. Each threshold is used once.
   static let thresholds = [1, 20, 80]
 
-  /// StoreKit shows the prompt at most three times per year. Keeping 90 days
-  /// between our own attempts means the three thresholds last a full year and
-  /// leave room for Apple's own throttling.
+  /// StoreKit shows the prompt at most three times per year. Spacing our own
+  /// attempts by 90 days lets the three thresholds cover most of a year while
+  /// leaving the final say to Apple's throttling.
   static let minimumInterval: TimeInterval = 90 * 24 * 60 * 60
 
   static func stageToRequest(

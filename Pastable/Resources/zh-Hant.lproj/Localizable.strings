@@ -75,7 +75,7 @@
 
 // Settings - About
 "settings.about.title" = "關於";
-"settings.about.description" = "macOS 剪貼簿管理工具。";
+"settings.about.description" = "呼出即貼，不打斷手頭工作的 macOS 剪貼簿浮層。";
 "settings.about.contact" = "聯絡信箱";
 
 "settings.about.rate" = "在 Mac App Store 評分";

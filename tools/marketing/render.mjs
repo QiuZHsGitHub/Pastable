@@ -11,9 +11,20 @@
  * Outputs:
  *   docs/appstore/screenshots/01-hero-2880x1800.png
  *   docs/appstore/screenshots/02-collection-2880x1800.png
+ *   docs/appstore/screenshots/01-hero-en-2880x1800.png
+ *   docs/appstore/screenshots/02-collection-en-2880x1800.png
+ *   docs/appstore/screenshots/01-hero-hant-2880x1800.png
+ *   docs/appstore/screenshots/02-collection-hant-2880x1800.png
+ *   docs/appstore/screenshots/01-hero-ja-2880x1800.png
+ *   docs/appstore/screenshots/02-collection-ja-2880x1800.png
  *   .build/marketing/frames/*.png   (intermediate GIF frames)
  */
-import { chromium } from '../asc-browser/node_modules/playwright-core/index.mjs';
+let chromium;
+try {
+  ({ chromium } = await import('playwright-core'));
+} catch {
+  ({ chromium } = await import('../asc-browser/node_modules/playwright-core/index.mjs'));
+}
 import { mkdirSync, writeFileSync, rmSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
@@ -22,7 +33,7 @@ const HERE = dirname(fileURLToPath(import.meta.url));
 const ROOT = resolve(HERE, '../..');
 const OUT = join(ROOT, 'docs/appstore/screenshots');
 const FRAMES = join(ROOT, '.build/marketing/frames');
-const CHROME = '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome';
+const CHROME = process.env.CHROME_PATH || '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome';
 
 const shot = async (browser, file, output, width = 1440, height = 900) => {
   const page = await browser.newPage({
@@ -41,6 +52,12 @@ const shots = async (browser) => {
   mkdirSync(OUT, { recursive: true });
   await shot(browser, 'shot-hero.html', join(OUT, '01-hero-2880x1800.png'));
   await shot(browser, 'shot-collection.html', join(OUT, '02-collection-2880x1800.png'));
+  await shot(browser, 'shot-hero-en.html', join(OUT, '01-hero-en-2880x1800.png'));
+  await shot(browser, 'shot-collection-en.html', join(OUT, '02-collection-en-2880x1800.png'));
+  await shot(browser, 'shot-hero-hant.html', join(OUT, '01-hero-hant-2880x1800.png'));
+  await shot(browser, 'shot-collection-hant.html', join(OUT, '02-collection-hant-2880x1800.png'));
+  await shot(browser, 'shot-hero-ja.html', join(OUT, '01-hero-ja-2880x1800.png'));
+  await shot(browser, 'shot-collection-ja.html', join(OUT, '02-collection-ja-2880x1800.png'));
 };
 
 /* --------------------------------------------------------------------------
@@ -55,7 +72,7 @@ const demoScript = (lang) => `(() => {
     saved: 'Saved',
     title: 'Launch plan',
     summary: 'Cut the clipboard round-trip down to one summon. Press the shortcut and the last thing you copied appears at the bottom of the screen.',
-    typed: 'Note: run the 3-second test once more before shipping.',
+    typed: 'Note: run the 3-second test.',
     pasted: 'Paste without breaking your flow.',
     week: 'This week',
     li1: 'Homepage: paste without breaking flow',
@@ -68,7 +85,23 @@ const demoScript = (lang) => `(() => {
     document.querySelector('#doc-week').textContent = copy.week;
     document.querySelector('#doc-li-1').textContent = copy.li1;
     document.querySelector('#doc-li-2').textContent = copy.li2;
+    document.querySelector('#callout-text').textContent = 'Keyboard focus stays here';
     document.querySelector('.pasted').textContent = copy.pasted;
+
+    const panelImage = document.querySelector('#demo-panel-img');
+    if (panelImage) panelImage.src = '../../docs/appstore/screenshots/raw/panel-en-dark.png';
+    const ring = document.querySelector('.selection');
+    if (ring) {
+      ring.style.left = '56.5%';
+      ring.style.top = '20.9%';
+      ring.style.width = '16.9%';
+      ring.style.height = '73.8%';
+    }
+    const focusCallout = document.querySelector('.callout');
+    if (focusCallout) {
+      focusCallout.style.left = '530px';
+      focusCallout.style.top = '360px';
+    }
   }
   const typedText = copy ? copy.typed : '备注：发布前再跑一遍 3 秒测试。';
   const captions = lang === 'zh' ? [
@@ -151,7 +184,11 @@ const demo = async (browser) => {
     await page.evaluate(() => document.fonts.ready);
     await page.waitForTimeout(300);
     await page.evaluate(demoScript(lang));
-    await page.waitForTimeout(200);
+    await page.evaluate(async () => {
+      const image = document.querySelector('#demo-panel-img');
+      if (image) await image.decode().catch(() => {});
+    });
+    await page.waitForTimeout(250);
     const fps = 12;
     const total = 15;
     const count = fps * total;

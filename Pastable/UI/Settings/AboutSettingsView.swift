@@ -24,7 +24,7 @@ struct AboutSettingsView: View {
   }
 
   var body: some View {
-    VStack(spacing: 16) {
+    VStack(spacing: 14) {
       Image(nsImage: NSApp.applicationIconImage)
         .resizable()
         .frame(width: 80, height: 80)
@@ -39,8 +39,10 @@ struct AboutSettingsView: View {
       }
       
       Text("settings.about.description")
+        .font(.system(size: 12.5))
         .multilineTextAlignment(.center)
         .foregroundStyle(.secondary)
+        .fixedSize(horizontal: false, vertical: true)
 
       if let supportURL {
         VStack(spacing: 6) {

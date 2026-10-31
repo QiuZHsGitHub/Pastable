@@ -3,10 +3,12 @@
 
 Sources:
   docs/appstore/screenshots/raw/panel-{dark,light}.png
+  docs/appstore/screenshots/raw/panel-en-{dark,light}.png
   Pastable/Assets.xcassets/AppIcon.appiconset/icon_1024x1024.png
 
 Outputs:
   docs/assets/site/panel-{dark,light}.webp
+  docs/assets/site/panel-en-{dark,light}.webp
   docs/assets/site/icon-*.png, apple-touch-icon.png
   docs/assets/site/og-cover.png
 """
@@ -44,7 +46,7 @@ def font(path: str, size: int, index: int = 0) -> ImageFont.FreeTypeFont:
 
 
 def build_panels() -> None:
-    for name in ("panel-dark", "panel-light"):
+    for name in ("panel-dark", "panel-light", "panel-en-dark", "panel-en-light"):
         src = ROOT / "docs" / "appstore" / "screenshots" / "raw" / f"{name}.png"
         im = Image.open(src).convert("RGBA")
         width = 2400

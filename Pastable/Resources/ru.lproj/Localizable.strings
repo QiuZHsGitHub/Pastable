@@ -78,7 +78,7 @@
 
 // Settings - About
 "settings.about.title" = "О программе Pastable";
-"settings.about.description" = "Менеджер буфера обмена для macOS";
+"settings.about.description" = "Полноширинная полка буфера обмена для macOS. Вставляйте, не прерывая работу.";
 "settings.about.contact" = "Контакты";
 
 "settings.about.rate" = "Оценить в Mac App Store";

@@ -78,7 +78,7 @@
 
 // Settings - About
 "settings.about.title" = "Acerca de Pastable";
-"settings.about.description" = "Gestor de portapapeles para macOS";
+"settings.about.description" = "Un estante de portapapeles de ancho completo para macOS. Pega sin interrumpir tu trabajo.";
 "settings.about.contact" = "Contacto";
 
 "settings.about.rate" = "Valorar en el Mac App Store";

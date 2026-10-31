@@ -78,7 +78,7 @@
 
 // Settings - About
 "settings.about.title" = "Sobre o Pastable";
-"settings.about.description" = "Gerenciador de área de transferência para macOS";
+"settings.about.description" = "Uma prateleira de área de transferência de largura total para macOS. Cole sem interromper seu trabalho.";
 "settings.about.contact" = "Contato";
 
 "settings.about.rate" = "Avaliar na Mac App Store";
