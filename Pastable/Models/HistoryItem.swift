@@ -157,6 +157,8 @@ class HistoryItem {
   @Transient private var textRecognitionScheduled = false
   @Transient private var cachedNormalizedTitle: String?
   @Transient private var cachedNormalizedBody: String?
+  @Transient private var didWarmSearchIndex = false
+  @Transient private var didWarmDisplayCaches = false
   @Transient private var fallbackTextLength = -1
   @Transient private var fallbackFileCount = -1
   @Transient private var fallbackTotalSize = -1
@@ -373,15 +375,21 @@ class HistoryItem {
   func invalidateSearchCache() {
     cachedNormalizedTitle = nil
     cachedNormalizedBody = nil
+    didWarmSearchIndex = false
+    didWarmDisplayCaches = false
     fallbackTextLength = -1
   }
 
   /// Build the folded search strings ahead of time (driven by AppState's idle
   /// warm-up pass) so the first keystroke after launch does not have to fold
   /// every pending record in one go.
-  func warmUpSearchIndex() {
+  @discardableResult
+  func warmUpSearchIndex() -> Bool {
+    guard !didWarmSearchIndex else { return false }
     _ = normalizedSearchTitle
     _ = normalizedSearchBody
+    didWarmSearchIndex = true
+    return true
   }
 
   /// Pre-compute the classification the card body reads on its very first pass
@@ -389,13 +397,17 @@ class HistoryItem {
   /// parses the stored representations). Driven from the same idle warm-up as
   /// the search index, so scrolling into a fresh card is a set of cache reads
   /// instead of scans on the main thread.
-  func warmUpDisplayCaches() {
+  @discardableResult
+  func warmUpDisplayCaches() -> Bool {
+    guard !didWarmDisplayCaches else { return false }
     _ = isImage
     _ = fileURLs
     _ = isImageFile
     _ = isCode
     _ = isLink
     _ = hexColor
+    didWarmDisplayCaches = true
+    return true
   }
   
   private func computePreviewText() -> String {

@@ -99,9 +99,13 @@ final class FloatingPanel: NSPanel {
 
     AppState.shared.isPanelVisible = false
     onClose?()
-    // Persist the deferred card artifacts (generated thumbnails etc.) while the
-    // shelf is idle instead of waiting out the debounce timer.
-    DeferredModelWriter.shared.flush()
+    // Persist deferred card artifacts a beat later. Flushing synchronously here
+    // forces a SwiftData save before a paste can even copy the item, which is
+    // very noticeable on a multi-GB history.
+    Task { @MainActor in
+      try? await Task.sleep(nanoseconds: 600_000_000)
+      DeferredModelWriter.shared.flush()
+    }
   }
 
   override var canBecomeKey: Bool {

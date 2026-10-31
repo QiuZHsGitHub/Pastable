@@ -293,6 +293,20 @@ final class HistoryItemDisplayTests: XCTestCase {
     XCTAssertEqual(item.normalizedSearchTitle, "new content")
   }
 
+  func testWarmUpIsIdempotentUntilTheCacheIsInvalidated() {
+    let item = textItem("hello")
+
+    XCTAssertTrue(item.warmUpSearchIndex())
+    XCTAssertFalse(item.warmUpSearchIndex())
+    XCTAssertTrue(item.warmUpDisplayCaches())
+    XCTAssertFalse(item.warmUpDisplayCaches())
+
+    item.invalidateSearchCache()
+
+    XCTAssertTrue(item.warmUpSearchIndex())
+    XCTAssertTrue(item.warmUpDisplayCaches())
+  }
+
   func testWarmUpHelpersDoNotChangeClassification() {
     let code = textItem("func f() { return 1 }")
     let before = code.isCode

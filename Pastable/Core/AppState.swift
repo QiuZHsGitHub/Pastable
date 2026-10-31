@@ -76,6 +76,7 @@ final class AppState: ObservableObject {
 
   private var allItems: [HistoryItem] = []
   private var cancellables = Set<AnyCancellable>()
+  private var lastWarmUpItemCount = -1
 
   @AppStorage(Preferences.Key.searchMode)
   private var searchMode: SearchService.SearchMode = .fuzzy
@@ -128,7 +129,12 @@ final class AppState: ObservableObject {
     }
 
     performSearch(query: searchText)
-    scheduleSearchWarmUp()
+    // A paste only reorders existing records; walking 15k+ records again here
+    // makes the shelf hitch after every copy. Warm only on a size change.
+    if visible.count != lastWarmUpItemCount {
+      lastWarmUpItemCount = visible.count
+      scheduleSearchWarmUp()
+    }
   }
 
   // MARK: - Filtering
@@ -206,24 +212,32 @@ final class AppState: ObservableObject {
       guard let self, !Task.isCancelled else { return }
 
       var processed = 0
+      var didWork = false
       for item in self.allItems {
         if Task.isCancelled { return }
-        item.warmUpSearchIndex()
+        if item.warmUpSearchIndex() { didWork = true }
         // Also pre-compute the render-path classification (link/code detection,
         // file URLs) so a card's first body pass while scrolling is a handful of
         // cache reads instead of regex / NSDataDetector scans on the main thread.
-        item.warmUpDisplayCaches()
+        if item.warmUpDisplayCaches() { didWork = true }
         processed += 1
-        if processed % 5 == 0 {
-          // Yield and pause briefly so a large history never monopolizes the
-          // main actor while the panel is open. Small batches: classification
-          // heuristics on multi-thousand-character clips are millisecond-scale
-          // each, and a 20-item burst could drop frames while scrolling.
+        if didWork, processed % 20 == 0 {
+          // Yield and pause only after real work. Once a large history is warm
+          // this loop becomes a cheap pass instead of scheduling thousands of
+          // 2 ms wake-ups (which made every copy feel like a post-paste hitch).
+          didWork = false
           await Task.yield()
-          try? await Task.sleep(nanoseconds: 2_000_000)
+          try? await Task.sleep(nanoseconds: 1_000_000)
         }
       }
     }
+  }
+
+  /// Drop background index work before a user-initiated paste. A warm-up over
+  /// 15k records can otherwise compete with the main-actor paste pipeline.
+  func cancelIdleWork() {
+    searchWarmUpTask?.cancel()
+    searchWarmUpTask = nil
   }
 
   // MARK: - Selection

@@ -39,7 +39,10 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
   }
 
   func applicationWillTerminate(_ notification: Notification) {
-    MainActor.assumeIsolated { stopGlobalKeyMonitor() }
+    MainActor.assumeIsolated {
+      stopGlobalKeyMonitor()
+      DeferredModelWriter.shared.flush()
+    }
   }
 
   func applicationDidFinishLaunching(_ notification: Notification) {
@@ -71,7 +74,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     // The key-event tap lives only while the shelf is on screen, no matter
     // which code path closes the panel (Esc, outside click, paste, hotkey).
     panel.onClose = { [weak self] in
-      MainActor.assumeIsolated { self?.stopGlobalKeyMonitor() }
+      MainActor.assumeIsolated { self?.scheduleGlobalKeyMonitorStop() }
     }
     panel.onHeaderMouseDown = { [weak self] in
       MainActor.assumeIsolated { self?.activatePanelForInteraction() }
@@ -372,7 +375,6 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
   }
 
   @MainActor func closePanel(restorePrevious: Bool = false) {
-    stopGlobalKeyMonitor()
     panel.close()
     if restorePrevious {
       restorePreviousApplication()
@@ -498,6 +500,18 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     CGEvent.tapEnable(tap: tap, enable: true)
   }
 
+  /// Tear the tap down off the user's critical path. Closing the shelf used to
+  /// do this synchronously (and, for Return/Cmd+1, from inside the tap callback
+  /// itself), which added visible latency before a paste could be posted.
+  @MainActor private func scheduleGlobalKeyMonitorStop() {
+    guard globalKeyMonitor != nil else { return }
+    Task { @MainActor [weak self] in
+      try? await Task.sleep(nanoseconds: 1_000_000_000)
+      guard let self, !self.panel.isVisible else { return }
+      self.stopGlobalKeyMonitor()
+    }
+  }
+
   @MainActor private func stopGlobalKeyMonitor() {
     if let source = globalKeyRunLoopSource {
       CFRunLoopRemoveSource(CFRunLoopGetMain(), source, .commonModes)
@@ -527,6 +541,34 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     guard type == .keyDown else { return Unmanaged.passUnretained(event) }
     let consumed = MainActor.assumeIsolated { delegate.handleGlobalKey(event) }
     return consumed ? nil : Unmanaged.passUnretained(event)
+  }
+
+  /// Whether this key could possibly be consumed by the shelf. Kept static and
+  /// free of main-actor state so the event tap can reject ordinary typing
+  /// without ever blocking on the UI thread.
+  private static func isPotentialShelfKey(_ event: CGEvent) -> Bool {
+    let keyCode = UInt16(event.getIntegerValueField(.keyboardEventKeycode))
+    let flags = NSEvent.ModifierFlags(rawValue: UInt(event.flags.rawValue))
+      .intersection(.deviceIndependentFlagsMask)
+
+    switch keyCode {
+    case 53, 36, 76, 123, 124: // Esc, Return, keypad Enter, Left, Right
+      return true
+    case 51: // Delete only matters with Cmd (delete a card)
+      return flags.contains(.command)
+    case 3: // Cmd+Shift+F
+      return flags.contains(.command) && flags.contains(.shift)
+    case 18, 19, 20, 21, 23, 22, 26, 28, 25: // Cmd+1...9
+      return flags.contains(.command)
+    case 122, 120, 99, 118, 96, 97, 98, 100, 101: // Fn+1...9
+      return flags.contains(.function)
+    default:
+      // Non-US layouts can report different key codes for the number row.
+      guard flags.contains(.command) || flags.contains(.function) else { return false }
+      guard let characters = NSEvent(cgEvent: event)?.charactersIgnoringModifiers,
+            let number = Int(characters) else { return false }
+      return (1...9).contains(number)
+    }
   }
 
   @MainActor private func handleGlobalKey(_ event: CGEvent) -> Bool {
@@ -626,20 +668,28 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
   /// the synthesized ⌘V lands in whatever app is in front at that moment.
   @MainActor func paste(item: HistoryItem) {
     AppState.shared.selectedItemID = item.persistentModelID
+    // Stop background index work before touching the pasteboard/target.
+    AppState.shared.cancelIdleWork()
+
+    // Close first (now cheap: tap teardown and deferred writes are async), then
+    // copy and post Cmd+V immediately. Persisting lastCopiedAt/numberOfCopies is
+    // deferred: on a 15k-item store that save triggers a full @Query refresh and
+    // used to delay the actual paste by hundreds of milliseconds.
     closePanel()
     let target = pasteTargetApplication()
-
-    item.lastCopiedAt = Date()
-    item.numberOfCopies += 1
-    do {
-      try Storage.shared.context.save()
-    } catch {
-      AppLogger.Storage.error("Failed to save paste timestamp", error: error)
-    }
-
     Clipboard.shared.copy(item)
+
     Task { @MainActor in
-      if await Clipboard.shared.paste(whenReadyFor: target) {
+      let pasted = await Clipboard.shared.paste(whenReadyFor: target)
+      DeferredModelWriter.shared.enqueue(context: Storage.shared.context) {
+        item.lastCopiedAt = Date()
+        item.numberOfCopies += 1
+      }
+      // The text has already been posted at this point; persist usage stats now
+      // so history reordering is correct on the next shelf open. This save is no
+      // longer on the critical path to the paste.
+      DeferredModelWriter.shared.flush()
+      if pasted {
         ReviewPrompt.shared.recordSuccessfulPaste()
       }
     }
